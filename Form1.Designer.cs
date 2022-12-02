@@ -55,6 +55,12 @@
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.groupBox11 = new System.Windows.Forms.GroupBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.label43 = new System.Windows.Forms.Label();
+            this.tboxDasmArgForce = new System.Windows.Forms.TextBox();
+            this.label42 = new System.Windows.Forms.Label();
+            this.tboxDasmArgIgnore = new System.Windows.Forms.TextBox();
             this.nudVIDNumber = new System.Windows.Forms.NumericUpDown();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
             this.cmboxRomType = new System.Windows.Forms.ComboBox();
@@ -106,9 +112,32 @@
             this.tboxR5 = new System.Windows.Forms.TextBox();
             this.tboxR4 = new System.Windows.Forms.TextBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.lblRamWatchBinary = new System.Windows.Forms.Label();
+            this.lblRamWatch = new System.Windows.Forms.Label();
+            this.tboxRamWatch = new System.Windows.Forms.TextBox();
+            this.lblDPContsBinary = new System.Windows.Forms.Label();
+            this.lblXram2Binary = new System.Windows.Forms.Label();
+            this.lblXram1Binary = new System.Windows.Forms.Label();
+            this.lblRomRam = new System.Windows.Forms.Label();
+            this.lblDPContents = new System.Windows.Forms.Label();
+            this.tboxDPconts = new System.Windows.Forms.TextBox();
+            this.lblLA12 = new System.Windows.Forms.Label();
+            this.tboxLA1_2 = new System.Windows.Forms.TextBox();
+            this.lblLA11 = new System.Windows.Forms.Label();
+            this.tboxLA1_1 = new System.Windows.Forms.TextBox();
+            this.label44 = new System.Windows.Forms.Label();
+            this.tboxStackPointer = new System.Windows.Forms.TextBox();
+            this.tboxStack5 = new System.Windows.Forms.TextBox();
+            this.tboxStack4 = new System.Windows.Forms.TextBox();
+            this.tboxStack3 = new System.Windows.Forms.TextBox();
+            this.tboxStack2 = new System.Windows.Forms.TextBox();
+            this.label41 = new System.Windows.Forms.Label();
+            this.tboxPSWL5 = new System.Windows.Forms.TextBox();
+            this.label40 = new System.Windows.Forms.Label();
+            this.tboxPSWL4 = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
             this.label24 = new System.Windows.Forms.Label();
-            this.tboxSSP = new System.Windows.Forms.TextBox();
+            this.tboxStack1 = new System.Windows.Forms.TextBox();
             this.tboxPSWL = new System.Windows.Forms.TextBox();
             this.label23 = new System.Windows.Forms.Label();
             this.tboxPSWH = new System.Windows.Forms.TextBox();
@@ -129,6 +158,10 @@
             this.tboxZF = new System.Windows.Forms.TextBox();
             this.tboxCF = new System.Windows.Forms.TextBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.cboxLockRamWatch = new System.Windows.Forms.CheckBox();
+            this.label45 = new System.Windows.Forms.Label();
+            this.nudRAMWatch = new System.Windows.Forms.NumericUpDown();
+            this.btnFindAddress = new System.Windows.Forms.Button();
             this.cboxLiveEngine = new System.Windows.Forms.CheckBox();
             this.nudBPAddress = new System.Windows.Forms.NumericUpDown();
             this.cboxLockBP = new System.Windows.Forms.CheckBox();
@@ -158,6 +191,7 @@
             this.cboxOstrichComPortNumber = new System.Windows.Forms.ComboBox();
             this.rtboxASMFile = new System.Windows.Forms.RichTextBox();
             this.groupBox12 = new System.Windows.Forms.GroupBox();
+            this.progressBar3 = new System.Windows.Forms.ProgressBar();
             this.btnSaveRenamedASM = new System.Windows.Forms.Button();
             this.btnRestore = new System.Windows.Forms.Button();
             this.btnOpenXMLFile = new System.Windows.Forms.Button();
@@ -170,9 +204,12 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.toolTip2 = new System.Windows.Forms.ToolTip(this.components);
             this.toolTip3 = new System.Windows.Forms.ToolTip(this.components);
+            this.toolTip4 = new System.Windows.Forms.ToolTip(this.components);
+            this.toolTip5 = new System.Windows.Forms.ToolTip(this.components);
             this.groupBox1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.groupBox11.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudVIDNumber)).BeginInit();
             this.groupBox9.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudROMCodeAddress)).BeginInit();
@@ -185,6 +222,7 @@
             this.groupBox5.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudRAMWatch)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudBPAddress)).BeginInit();
             this.groupBox8.SuspendLayout();
             this.groupBox7.SuspendLayout();
@@ -211,14 +249,14 @@
             this.groupBox1.Controls.Add(this.cBoxCOMPORT);
             this.groupBox1.Location = new System.Drawing.Point(3, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(200, 272);
+            this.groupBox1.Size = new System.Drawing.Size(200, 263);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "COM PORT SETTINGS";
             // 
             // tboxHexToSend
             // 
-            this.tboxHexToSend.Location = new System.Drawing.Point(12, 222);
+            this.tboxHexToSend.Location = new System.Drawing.Point(12, 215);
             this.tboxHexToSend.Name = "tboxHexToSend";
             this.tboxHexToSend.Size = new System.Drawing.Size(165, 20);
             this.tboxHexToSend.TabIndex = 26;
@@ -227,7 +265,7 @@
             // 
             // btnSendByte
             // 
-            this.btnSendByte.Location = new System.Drawing.Point(114, 245);
+            this.btnSendByte.Location = new System.Drawing.Point(114, 238);
             this.btnSendByte.Name = "btnSendByte";
             this.btnSendByte.Size = new System.Drawing.Size(63, 23);
             this.btnSendByte.TabIndex = 25;
@@ -237,7 +275,7 @@
             // 
             // btnCloseCOMPort
             // 
-            this.btnCloseCOMPort.Location = new System.Drawing.Point(102, 197);
+            this.btnCloseCOMPort.Location = new System.Drawing.Point(102, 190);
             this.btnCloseCOMPort.Name = "btnCloseCOMPort";
             this.btnCloseCOMPort.Size = new System.Drawing.Size(75, 21);
             this.btnCloseCOMPort.TabIndex = 13;
@@ -247,7 +285,7 @@
             // 
             // btnOpenCOMPort
             // 
-            this.btnOpenCOMPort.Location = new System.Drawing.Point(12, 197);
+            this.btnOpenCOMPort.Location = new System.Drawing.Point(12, 190);
             this.btnOpenCOMPort.Name = "btnOpenCOMPort";
             this.btnOpenCOMPort.Size = new System.Drawing.Size(75, 21);
             this.btnOpenCOMPort.TabIndex = 12;
@@ -269,7 +307,7 @@
             // 
             this.progressBar1.Location = new System.Drawing.Point(5, 176);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(187, 16);
+            this.progressBar1.Size = new System.Drawing.Size(187, 10);
             this.progressBar1.TabIndex = 2;
             // 
             // label5
@@ -367,8 +405,7 @@
             this.CBoxBaudRate.Name = "CBoxBaudRate";
             this.CBoxBaudRate.Size = new System.Drawing.Size(99, 21);
             this.CBoxBaudRate.TabIndex = 1;
-            this.CBoxBaudRate.Text = "38400";
-            this.CBoxBaudRate.SelectedIndexChanged += new System.EventHandler(this.CBoxBaudRate_SelectedIndexChanged);
+            this.CBoxBaudRate.Text = "39063";
             // 
             // cBoxCOMPORT
             // 
@@ -377,13 +414,14 @@
             this.cBoxCOMPORT.Name = "cBoxCOMPORT";
             this.cBoxCOMPORT.Size = new System.Drawing.Size(99, 21);
             this.cBoxCOMPORT.TabIndex = 0;
-            this.cBoxCOMPORT.Text = "COM3";
+            this.cBoxCOMPORT.Text = "COM8";
             this.cBoxCOMPORT.DropDown += new System.EventHandler(this.cBoxCOMPORT_DropDown);
             // 
             // serialPort1
             // 
             this.serialPort1.BaudRate = 38400;
-            this.serialPort1.ReceivedBytesThreshold = 27;
+            this.serialPort1.ReadBufferSize = 200;
+            this.serialPort1.ReceivedBytesThreshold = 28;
             this.serialPort1.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(this.serialPort1_DataReceived);
             // 
             // menuStrip1
@@ -394,7 +432,7 @@
             this.aboutToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1402, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1334, 24);
             this.menuStrip1.TabIndex = 6;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -436,6 +474,7 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.groupBox11);
             this.panel1.Controls.Add(this.nudVIDNumber);
             this.panel1.Controls.Add(this.groupBox9);
             this.panel1.Controls.Add(this.groupBox6);
@@ -446,13 +485,68 @@
             this.panel1.Controls.Add(this.groupBox12);
             this.panel1.Location = new System.Drawing.Point(0, 24);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1224, 741);
+            this.panel1.Size = new System.Drawing.Size(1322, 787);
             this.panel1.TabIndex = 8;
+            // 
+            // groupBox11
+            // 
+            this.groupBox11.Controls.Add(this.button1);
+            this.groupBox11.Controls.Add(this.label43);
+            this.groupBox11.Controls.Add(this.tboxDasmArgForce);
+            this.groupBox11.Controls.Add(this.label42);
+            this.groupBox11.Controls.Add(this.tboxDasmArgIgnore);
+            this.groupBox11.Location = new System.Drawing.Point(3, 733);
+            this.groupBox11.Name = "groupBox11";
+            this.groupBox11.Size = new System.Drawing.Size(923, 36);
+            this.groupBox11.TabIndex = 41;
+            this.groupBox11.TabStop = false;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(753, 12);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(161, 23);
+            this.button1.TabIndex = 39;
+            this.button1.Text = "Refresh Dasm with Args";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // label43
+            // 
+            this.label43.AutoSize = true;
+            this.label43.Location = new System.Drawing.Point(353, 15);
+            this.label43.Name = "label43";
+            this.label43.Size = new System.Drawing.Size(116, 13);
+            this.label43.TabIndex = 39;
+            this.label43.Text = "Force Dasm Addresses";
+            // 
+            // tboxDasmArgForce
+            // 
+            this.tboxDasmArgForce.Location = new System.Drawing.Point(475, 12);
+            this.tboxDasmArgForce.Name = "tboxDasmArgForce";
+            this.tboxDasmArgForce.Size = new System.Drawing.Size(201, 20);
+            this.tboxDasmArgForce.TabIndex = 40;
+            // 
+            // label42
+            // 
+            this.label42.AutoSize = true;
+            this.label42.Location = new System.Drawing.Point(15, 15);
+            this.label42.Name = "label42";
+            this.label42.Size = new System.Drawing.Size(119, 13);
+            this.label42.TabIndex = 36;
+            this.label42.Text = "Ignore Dasm Addresses";
+            // 
+            // tboxDasmArgIgnore
+            // 
+            this.tboxDasmArgIgnore.Location = new System.Drawing.Point(138, 12);
+            this.tboxDasmArgIgnore.Name = "tboxDasmArgIgnore";
+            this.tboxDasmArgIgnore.Size = new System.Drawing.Size(201, 20);
+            this.tboxDasmArgIgnore.TabIndex = 38;
             // 
             // nudVIDNumber
             // 
             this.nudVIDNumber.Hexadecimal = true;
-            this.nudVIDNumber.Location = new System.Drawing.Point(170, 386);
+            this.nudVIDNumber.Location = new System.Drawing.Point(170, 366);
             this.nudVIDNumber.Maximum = new decimal(new int[] {
             1,
             0,
@@ -468,9 +562,9 @@
             this.groupBox9.Controls.Add(this.label6);
             this.groupBox9.Controls.Add(this.nudROMCodeAddress);
             this.groupBox9.Controls.Add(this.cboxAddCodeToRom);
-            this.groupBox9.Location = new System.Drawing.Point(10, 412);
+            this.groupBox9.Location = new System.Drawing.Point(3, 403);
             this.groupBox9.Name = "groupBox9";
-            this.groupBox9.Size = new System.Drawing.Size(192, 110);
+            this.groupBox9.Size = new System.Drawing.Size(199, 110);
             this.groupBox9.TabIndex = 34;
             this.groupBox9.TabStop = false;
             // 
@@ -494,7 +588,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(13, 70);
+            this.label6.Location = new System.Drawing.Point(13, 63);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(151, 13);
             this.label6.TabIndex = 35;
@@ -503,7 +597,7 @@
             // nudROMCodeAddress
             // 
             this.nudROMCodeAddress.Hexadecimal = true;
-            this.nudROMCodeAddress.Location = new System.Drawing.Point(35, 86);
+            this.nudROMCodeAddress.Location = new System.Drawing.Point(35, 79);
             this.nudROMCodeAddress.Maximum = new decimal(new int[] {
             32768,
             0,
@@ -532,7 +626,7 @@
             this.groupBox6.Controls.Add(this.groupBox2);
             this.groupBox6.Location = new System.Drawing.Point(932, 6);
             this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Size = new System.Drawing.Size(275, 723);
+            this.groupBox6.Size = new System.Drawing.Size(375, 723);
             this.groupBox6.TabIndex = 17;
             this.groupBox6.TabStop = false;
             // 
@@ -552,7 +646,6 @@
             this.groupBox10.TabIndex = 32;
             this.groupBox10.TabStop = false;
             this.groupBox10.Text = "Advanced ROM Debugger Options";
-            this.groupBox10.Enter += new System.EventHandler(this.groupBox10_Enter);
             // 
             // btnReloadDebuggerCode
             // 
@@ -650,7 +743,7 @@
             this.groupBox3.Anchor = System.Windows.Forms.AnchorStyles.Top;
             this.groupBox3.Controls.Add(this.tboxECUReturnAddress);
             this.groupBox3.Controls.Add(this.label11);
-            this.groupBox3.Location = new System.Drawing.Point(6, 11);
+            this.groupBox3.Location = new System.Drawing.Point(7, 11);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(143, 32);
             this.groupBox3.TabIndex = 28;
@@ -663,7 +756,6 @@
             this.tboxECUReturnAddress.ReadOnly = true;
             this.tboxECUReturnAddress.Size = new System.Drawing.Size(65, 20);
             this.tboxECUReturnAddress.TabIndex = 2;
-            this.tboxECUReturnAddress.TextChanged += new System.EventHandler(this.tboxECUReturnAddress_TextChanged);
             // 
             // label11
             // 
@@ -756,7 +848,7 @@
             // label38
             // 
             this.label38.AutoSize = true;
-            this.label38.Location = new System.Drawing.Point(6, 333);
+            this.label38.Location = new System.Drawing.Point(9, 336);
             this.label38.Name = "label38";
             this.label38.Size = new System.Drawing.Size(22, 13);
             this.label38.TabIndex = 30;
@@ -764,7 +856,7 @@
             // 
             // tboxDP
             // 
-            this.tboxDP.Location = new System.Drawing.Point(43, 330);
+            this.tboxDP.Location = new System.Drawing.Point(46, 333);
             this.tboxDP.Name = "tboxDP";
             this.tboxDP.ReadOnly = true;
             this.tboxDP.Size = new System.Drawing.Size(65, 20);
@@ -774,7 +866,7 @@
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(6, 307);
+            this.label13.Location = new System.Drawing.Point(9, 310);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(28, 13);
             this.label13.TabIndex = 28;
@@ -783,7 +875,7 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(6, 281);
+            this.label12.Location = new System.Drawing.Point(9, 284);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(20, 13);
             this.label12.TabIndex = 27;
@@ -792,7 +884,7 @@
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(6, 255);
+            this.label14.Location = new System.Drawing.Point(9, 258);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(20, 13);
             this.label14.TabIndex = 26;
@@ -881,7 +973,7 @@
             // 
             // tboxLRB
             // 
-            this.tboxLRB.Location = new System.Drawing.Point(43, 304);
+            this.tboxLRB.Location = new System.Drawing.Point(46, 307);
             this.tboxLRB.Name = "tboxLRB";
             this.tboxLRB.ReadOnly = true;
             this.tboxLRB.Size = new System.Drawing.Size(65, 20);
@@ -897,7 +989,7 @@
             // 
             // tboxX2
             // 
-            this.tboxX2.Location = new System.Drawing.Point(43, 278);
+            this.tboxX2.Location = new System.Drawing.Point(46, 281);
             this.tboxX2.Name = "tboxX2";
             this.tboxX2.ReadOnly = true;
             this.tboxX2.Size = new System.Drawing.Size(65, 20);
@@ -914,7 +1006,7 @@
             // 
             // tboxX1
             // 
-            this.tboxX1.Location = new System.Drawing.Point(43, 252);
+            this.tboxX1.Location = new System.Drawing.Point(46, 255);
             this.tboxX1.Name = "tboxX1";
             this.tboxX1.ReadOnly = true;
             this.tboxX1.Size = new System.Drawing.Size(65, 20);
@@ -980,9 +1072,32 @@
             // 
             // groupBox4
             // 
+            this.groupBox4.Controls.Add(this.lblRamWatchBinary);
+            this.groupBox4.Controls.Add(this.lblRamWatch);
+            this.groupBox4.Controls.Add(this.tboxRamWatch);
+            this.groupBox4.Controls.Add(this.lblDPContsBinary);
+            this.groupBox4.Controls.Add(this.lblXram2Binary);
+            this.groupBox4.Controls.Add(this.lblXram1Binary);
+            this.groupBox4.Controls.Add(this.lblRomRam);
+            this.groupBox4.Controls.Add(this.lblDPContents);
+            this.groupBox4.Controls.Add(this.tboxDPconts);
+            this.groupBox4.Controls.Add(this.lblLA12);
+            this.groupBox4.Controls.Add(this.tboxLA1_2);
+            this.groupBox4.Controls.Add(this.lblLA11);
+            this.groupBox4.Controls.Add(this.tboxLA1_1);
+            this.groupBox4.Controls.Add(this.label44);
+            this.groupBox4.Controls.Add(this.tboxStackPointer);
+            this.groupBox4.Controls.Add(this.tboxStack5);
+            this.groupBox4.Controls.Add(this.tboxStack4);
+            this.groupBox4.Controls.Add(this.tboxStack3);
+            this.groupBox4.Controls.Add(this.tboxStack2);
+            this.groupBox4.Controls.Add(this.label41);
+            this.groupBox4.Controls.Add(this.tboxPSWL5);
+            this.groupBox4.Controls.Add(this.label40);
+            this.groupBox4.Controls.Add(this.tboxPSWL4);
             this.groupBox4.Controls.Add(this.label7);
             this.groupBox4.Controls.Add(this.label24);
-            this.groupBox4.Controls.Add(this.tboxSSP);
+            this.groupBox4.Controls.Add(this.tboxStack1);
             this.groupBox4.Controls.Add(this.tboxPSWL);
             this.groupBox4.Controls.Add(this.label23);
             this.groupBox4.Controls.Add(this.tboxPSWH);
@@ -1002,42 +1117,241 @@
             this.groupBox4.Controls.Add(this.tboxDD);
             this.groupBox4.Controls.Add(this.tboxZF);
             this.groupBox4.Controls.Add(this.tboxCF);
-            this.groupBox4.Location = new System.Drawing.Point(155, 49);
+            this.groupBox4.Location = new System.Drawing.Point(155, 16);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(107, 369);
+            this.groupBox4.Size = new System.Drawing.Size(214, 402);
             this.groupBox4.TabIndex = 27;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "PSW";
             // 
+            // lblRamWatchBinary
+            // 
+            this.lblRamWatchBinary.AutoSize = true;
+            this.lblRamWatchBinary.Location = new System.Drawing.Point(66, 240);
+            this.lblRamWatchBinary.Name = "lblRamWatchBinary";
+            this.lblRamWatchBinary.Size = new System.Drawing.Size(58, 13);
+            this.lblRamWatchBinary.TabIndex = 59;
+            this.lblRamWatchBinary.Text = "1111 0000";
+            // 
+            // lblRamWatch
+            // 
+            this.lblRamWatch.AutoSize = true;
+            this.lblRamWatch.Location = new System.Drawing.Point(71, 200);
+            this.lblRamWatch.Name = "lblRamWatch";
+            this.lblRamWatch.Size = new System.Drawing.Size(66, 13);
+            this.lblRamWatch.TabIndex = 58;
+            this.lblRamWatch.Text = "RAM Watch";
+            // 
+            // tboxRamWatch
+            // 
+            this.tboxRamWatch.Location = new System.Drawing.Point(74, 217);
+            this.tboxRamWatch.Name = "tboxRamWatch";
+            this.tboxRamWatch.ReadOnly = true;
+            this.tboxRamWatch.Size = new System.Drawing.Size(42, 20);
+            this.tboxRamWatch.TabIndex = 57;
+            this.tboxRamWatch.TextChanged += new System.EventHandler(this.tboxRamWatch_TextChanged);
+            // 
+            // lblDPContsBinary
+            // 
+            this.lblDPContsBinary.AutoSize = true;
+            this.lblDPContsBinary.Location = new System.Drawing.Point(1, 381);
+            this.lblDPContsBinary.Name = "lblDPContsBinary";
+            this.lblDPContsBinary.Size = new System.Drawing.Size(58, 13);
+            this.lblDPContsBinary.TabIndex = 56;
+            this.lblDPContsBinary.Text = "1111 0000";
+            // 
+            // lblXram2Binary
+            // 
+            this.lblXram2Binary.AutoSize = true;
+            this.lblXram2Binary.Location = new System.Drawing.Point(1, 305);
+            this.lblXram2Binary.Name = "lblXram2Binary";
+            this.lblXram2Binary.Size = new System.Drawing.Size(58, 13);
+            this.lblXram2Binary.TabIndex = 55;
+            this.lblXram2Binary.Text = "1111 0000";
+            // 
+            // lblXram1Binary
+            // 
+            this.lblXram1Binary.AutoSize = true;
+            this.lblXram1Binary.Location = new System.Drawing.Point(1, 240);
+            this.lblXram1Binary.Name = "lblXram1Binary";
+            this.lblXram1Binary.Size = new System.Drawing.Size(58, 13);
+            this.lblXram1Binary.TabIndex = 54;
+            this.lblXram1Binary.Text = "1111 0000";
+            // 
+            // lblRomRam
+            // 
+            this.lblRomRam.AutoSize = true;
+            this.lblRomRam.Location = new System.Drawing.Point(10, 365);
+            this.lblRomRam.Name = "lblRomRam";
+            this.lblRomRam.Size = new System.Drawing.Size(61, 13);
+            this.lblRomRam.TabIndex = 53;
+            this.lblRomRam.Text = "ROM/RAM";
+            this.lblRomRam.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // lblDPContents
+            // 
+            this.lblDPContents.AutoSize = true;
+            this.lblDPContents.Location = new System.Drawing.Point(1, 328);
+            this.lblDPContents.Name = "lblDPContents";
+            this.lblDPContents.Size = new System.Drawing.Size(28, 13);
+            this.lblDPContents.TabIndex = 52;
+            this.lblDPContents.Text = "[DP]";
+            // 
+            // tboxDPconts
+            // 
+            this.tboxDPconts.Location = new System.Drawing.Point(9, 344);
+            this.tboxDPconts.Name = "tboxDPconts";
+            this.tboxDPconts.ReadOnly = true;
+            this.tboxDPconts.Size = new System.Drawing.Size(42, 20);
+            this.tboxDPconts.TabIndex = 51;
+            this.tboxDPconts.TextChanged += new System.EventHandler(this.tboxDPconts_TextChanged);
+            // 
+            // lblLA12
+            // 
+            this.lblLA12.AutoSize = true;
+            this.lblLA12.Location = new System.Drawing.Point(8, 265);
+            this.lblLA12.Name = "lblLA12";
+            this.lblLA12.Size = new System.Drawing.Size(40, 13);
+            this.lblLA12.TabIndex = 46;
+            this.lblLA12.Text = "RAM 2";
+            // 
+            // tboxLA1_2
+            // 
+            this.tboxLA1_2.Location = new System.Drawing.Point(9, 282);
+            this.tboxLA1_2.Name = "tboxLA1_2";
+            this.tboxLA1_2.ReadOnly = true;
+            this.tboxLA1_2.Size = new System.Drawing.Size(42, 20);
+            this.tboxLA1_2.TabIndex = 45;
+            // 
+            // lblLA11
+            // 
+            this.lblLA11.AutoSize = true;
+            this.lblLA11.Location = new System.Drawing.Point(9, 200);
+            this.lblLA11.Name = "lblLA11";
+            this.lblLA11.Size = new System.Drawing.Size(40, 13);
+            this.lblLA11.TabIndex = 44;
+            this.lblLA11.Text = "RAM 1";
+            // 
+            // tboxLA1_1
+            // 
+            this.tboxLA1_1.Location = new System.Drawing.Point(9, 217);
+            this.tboxLA1_1.Name = "tboxLA1_1";
+            this.tboxLA1_1.ReadOnly = true;
+            this.tboxLA1_1.Size = new System.Drawing.Size(42, 20);
+            this.tboxLA1_1.TabIndex = 43;
+            // 
+            // label44
+            // 
+            this.label44.AutoSize = true;
+            this.label44.Location = new System.Drawing.Point(152, 200);
+            this.label44.Name = "label44";
+            this.label44.Size = new System.Drawing.Size(28, 13);
+            this.label44.TabIndex = 42;
+            this.label44.Text = "SSP";
+            // 
+            // tboxStackPointer
+            // 
+            this.tboxStackPointer.Location = new System.Drawing.Point(136, 217);
+            this.tboxStackPointer.Name = "tboxStackPointer";
+            this.tboxStackPointer.ReadOnly = true;
+            this.tboxStackPointer.Size = new System.Drawing.Size(65, 20);
+            this.tboxStackPointer.TabIndex = 41;
+            // 
+            // tboxStack5
+            // 
+            this.tboxStack5.Location = new System.Drawing.Point(136, 365);
+            this.tboxStack5.Name = "tboxStack5";
+            this.tboxStack5.ReadOnly = true;
+            this.tboxStack5.Size = new System.Drawing.Size(65, 20);
+            this.tboxStack5.TabIndex = 40;
+            // 
+            // tboxStack4
+            // 
+            this.tboxStack4.Location = new System.Drawing.Point(136, 339);
+            this.tboxStack4.Name = "tboxStack4";
+            this.tboxStack4.ReadOnly = true;
+            this.tboxStack4.Size = new System.Drawing.Size(65, 20);
+            this.tboxStack4.TabIndex = 39;
+            // 
+            // tboxStack3
+            // 
+            this.tboxStack3.Location = new System.Drawing.Point(136, 313);
+            this.tboxStack3.Name = "tboxStack3";
+            this.tboxStack3.ReadOnly = true;
+            this.tboxStack3.Size = new System.Drawing.Size(65, 20);
+            this.tboxStack3.TabIndex = 38;
+            // 
+            // tboxStack2
+            // 
+            this.tboxStack2.Location = new System.Drawing.Point(136, 288);
+            this.tboxStack2.Name = "tboxStack2";
+            this.tboxStack2.ReadOnly = true;
+            this.tboxStack2.Size = new System.Drawing.Size(65, 20);
+            this.tboxStack2.TabIndex = 37;
+            // 
+            // label41
+            // 
+            this.label41.AutoSize = true;
+            this.label41.Location = new System.Drawing.Point(100, 69);
+            this.label41.Name = "label41";
+            this.label41.Size = new System.Drawing.Size(47, 13);
+            this.label41.TabIndex = 36;
+            this.label41.Text = "PSWL.5";
+            // 
+            // tboxPSWL5
+            // 
+            this.tboxPSWL5.Location = new System.Drawing.Point(154, 66);
+            this.tboxPSWL5.Name = "tboxPSWL5";
+            this.tboxPSWL5.ReadOnly = true;
+            this.tboxPSWL5.Size = new System.Drawing.Size(16, 20);
+            this.tboxPSWL5.TabIndex = 35;
+            // 
+            // label40
+            // 
+            this.label40.AutoSize = true;
+            this.label40.Location = new System.Drawing.Point(6, 69);
+            this.label40.Name = "label40";
+            this.label40.Size = new System.Drawing.Size(47, 13);
+            this.label40.TabIndex = 34;
+            this.label40.Text = "PSWL.4";
+            // 
+            // tboxPSWL4
+            // 
+            this.tboxPSWL4.Location = new System.Drawing.Point(60, 66);
+            this.tboxPSWL4.Name = "tboxPSWL4";
+            this.tboxPSWL4.ReadOnly = true;
+            this.tboxPSWL4.Size = new System.Drawing.Size(16, 20);
+            this.tboxPSWL4.TabIndex = 33;
+            // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(18, 304);
+            this.label7.Location = new System.Drawing.Point(131, 243);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(73, 13);
+            this.label7.Size = new System.Drawing.Size(80, 13);
             this.label7.TabIndex = 32;
-            this.label7.Text = "SSP Contents";
+            this.label7.Text = "Stack Contents";
             // 
             // label24
             // 
             this.label24.AutoSize = true;
-            this.label24.Location = new System.Drawing.Point(6, 251);
+            this.label24.Location = new System.Drawing.Point(100, 157);
             this.label24.Name = "label24";
             this.label24.Size = new System.Drawing.Size(38, 13);
             this.label24.TabIndex = 19;
             this.label24.Text = "PSWL";
             // 
-            // tboxSSP
+            // tboxStack1
             // 
-            this.tboxSSP.Location = new System.Drawing.Point(21, 330);
-            this.tboxSSP.Name = "tboxSSP";
-            this.tboxSSP.ReadOnly = true;
-            this.tboxSSP.Size = new System.Drawing.Size(65, 20);
-            this.tboxSSP.TabIndex = 31;
+            this.tboxStack1.Location = new System.Drawing.Point(136, 262);
+            this.tboxStack1.Name = "tboxStack1";
+            this.tboxStack1.ReadOnly = true;
+            this.tboxStack1.Size = new System.Drawing.Size(65, 20);
+            this.tboxStack1.TabIndex = 31;
             // 
             // tboxPSWL
             // 
-            this.tboxPSWL.Location = new System.Drawing.Point(48, 248);
+            this.tboxPSWL.Location = new System.Drawing.Point(142, 154);
             this.tboxPSWL.Name = "tboxPSWL";
             this.tboxPSWL.ReadOnly = true;
             this.tboxPSWL.Size = new System.Drawing.Size(28, 20);
@@ -1046,7 +1360,7 @@
             // label23
             // 
             this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(6, 225);
+            this.label23.Location = new System.Drawing.Point(6, 160);
             this.label23.Name = "label23";
             this.label23.Size = new System.Drawing.Size(40, 13);
             this.label23.TabIndex = 17;
@@ -1054,7 +1368,7 @@
             // 
             // tboxPSWH
             // 
-            this.tboxPSWH.Location = new System.Drawing.Point(48, 222);
+            this.tboxPSWH.Location = new System.Drawing.Point(48, 157);
             this.tboxPSWH.Name = "tboxPSWH";
             this.tboxPSWH.ReadOnly = true;
             this.tboxPSWH.Size = new System.Drawing.Size(28, 20);
@@ -1063,7 +1377,7 @@
             // label22
             // 
             this.label22.AutoSize = true;
-            this.label22.Location = new System.Drawing.Point(6, 196);
+            this.label22.Location = new System.Drawing.Point(100, 125);
             this.label22.Name = "label22";
             this.label22.Size = new System.Drawing.Size(28, 13);
             this.label22.TabIndex = 15;
@@ -1072,7 +1386,7 @@
             // label21
             // 
             this.label21.AutoSize = true;
-            this.label21.Location = new System.Drawing.Point(6, 173);
+            this.label21.Location = new System.Drawing.Point(6, 125);
             this.label21.Name = "label21";
             this.label21.Size = new System.Drawing.Size(28, 13);
             this.label21.TabIndex = 14;
@@ -1081,7 +1395,7 @@
             // label20
             // 
             this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(6, 95);
+            this.label20.Location = new System.Drawing.Point(100, 43);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(26, 13);
             this.label20.TabIndex = 13;
@@ -1090,7 +1404,7 @@
             // label19
             // 
             this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(6, 69);
+            this.label19.Location = new System.Drawing.Point(6, 43);
             this.label19.Name = "label19";
             this.label19.Size = new System.Drawing.Size(20, 13);
             this.label19.TabIndex = 12;
@@ -1099,7 +1413,7 @@
             // label18
             // 
             this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(6, 43);
+            this.label18.Location = new System.Drawing.Point(100, 17);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(23, 13);
             this.label18.TabIndex = 11;
@@ -1108,7 +1422,7 @@
             // label17
             // 
             this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(6, 121);
+            this.label17.Location = new System.Drawing.Point(6, 95);
             this.label17.Name = "label17";
             this.label17.Size = new System.Drawing.Size(22, 13);
             this.label17.TabIndex = 10;
@@ -1117,7 +1431,7 @@
             // label16
             // 
             this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(6, 148);
+            this.label16.Location = new System.Drawing.Point(100, 95);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(20, 13);
             this.label16.TabIndex = 9;
@@ -1134,7 +1448,7 @@
             // 
             // tboxSCB
             // 
-            this.tboxSCB.Location = new System.Drawing.Point(48, 196);
+            this.tboxSCB.Location = new System.Drawing.Point(142, 122);
             this.tboxSCB.Name = "tboxSCB";
             this.tboxSCB.ReadOnly = true;
             this.tboxSCB.Size = new System.Drawing.Size(28, 20);
@@ -1142,7 +1456,7 @@
             // 
             // tboxSF
             // 
-            this.tboxSF.Location = new System.Drawing.Point(48, 145);
+            this.tboxSF.Location = new System.Drawing.Point(154, 92);
             this.tboxSF.Name = "tboxSF";
             this.tboxSF.ReadOnly = true;
             this.tboxSF.Size = new System.Drawing.Size(16, 20);
@@ -1150,7 +1464,7 @@
             // 
             // tboxMIE
             // 
-            this.tboxMIE.Location = new System.Drawing.Point(48, 92);
+            this.tboxMIE.Location = new System.Drawing.Point(154, 40);
             this.tboxMIE.Name = "tboxMIE";
             this.tboxMIE.ReadOnly = true;
             this.tboxMIE.Size = new System.Drawing.Size(16, 20);
@@ -1158,7 +1472,7 @@
             // 
             // tboxBCB
             // 
-            this.tboxBCB.Location = new System.Drawing.Point(48, 170);
+            this.tboxBCB.Location = new System.Drawing.Point(48, 122);
             this.tboxBCB.Name = "tboxBCB";
             this.tboxBCB.ReadOnly = true;
             this.tboxBCB.Size = new System.Drawing.Size(28, 20);
@@ -1166,7 +1480,7 @@
             // 
             // tboxHC
             // 
-            this.tboxHC.Location = new System.Drawing.Point(48, 118);
+            this.tboxHC.Location = new System.Drawing.Point(60, 92);
             this.tboxHC.Name = "tboxHC";
             this.tboxHC.ReadOnly = true;
             this.tboxHC.Size = new System.Drawing.Size(16, 20);
@@ -1174,7 +1488,7 @@
             // 
             // tboxDD
             // 
-            this.tboxDD.Location = new System.Drawing.Point(48, 40);
+            this.tboxDD.Location = new System.Drawing.Point(154, 14);
             this.tboxDD.Name = "tboxDD";
             this.tboxDD.ReadOnly = true;
             this.tboxDD.Size = new System.Drawing.Size(16, 20);
@@ -1182,7 +1496,7 @@
             // 
             // tboxZF
             // 
-            this.tboxZF.Location = new System.Drawing.Point(48, 66);
+            this.tboxZF.Location = new System.Drawing.Point(60, 40);
             this.tboxZF.Name = "tboxZF";
             this.tboxZF.ReadOnly = true;
             this.tboxZF.Size = new System.Drawing.Size(16, 20);
@@ -1190,7 +1504,7 @@
             // 
             // tboxCF
             // 
-            this.tboxCF.Location = new System.Drawing.Point(48, 14);
+            this.tboxCF.Location = new System.Drawing.Point(60, 14);
             this.tboxCF.Name = "tboxCF";
             this.tboxCF.ReadOnly = true;
             this.tboxCF.Size = new System.Drawing.Size(16, 20);
@@ -1198,6 +1512,10 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.cboxLockRamWatch);
+            this.groupBox2.Controls.Add(this.label45);
+            this.groupBox2.Controls.Add(this.nudRAMWatch);
+            this.groupBox2.Controls.Add(this.btnFindAddress);
             this.groupBox2.Controls.Add(this.cboxLiveEngine);
             this.groupBox2.Controls.Add(this.nudBPAddress);
             this.groupBox2.Controls.Add(this.cboxLockBP);
@@ -1209,22 +1527,68 @@
             this.groupBox2.Controls.Add(this.label9);
             this.groupBox2.Location = new System.Drawing.Point(6, 424);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(256, 141);
+            this.groupBox2.Size = new System.Drawing.Size(363, 141);
             this.groupBox2.TabIndex = 31;
             this.groupBox2.TabStop = false;
+            // 
+            // cboxLockRamWatch
+            // 
+            this.cboxLockRamWatch.AutoSize = true;
+            this.cboxLockRamWatch.Location = new System.Drawing.Point(5, 117);
+            this.cboxLockRamWatch.Name = "cboxLockRamWatch";
+            this.cboxLockRamWatch.Size = new System.Drawing.Size(112, 17);
+            this.cboxLockRamWatch.TabIndex = 37;
+            this.cboxLockRamWatch.Text = "Lock RAM Watch";
+            this.cboxLockRamWatch.UseVisualStyleBackColor = true;
+            // 
+            // label45
+            // 
+            this.label45.AutoSize = true;
+            this.label45.Location = new System.Drawing.Point(18, 87);
+            this.label45.Name = "label45";
+            this.label45.Size = new System.Drawing.Size(66, 13);
+            this.label45.TabIndex = 36;
+            this.label45.Text = "RAM Watch";
+            // 
+            // nudRAMWatch
+            // 
+            this.nudRAMWatch.Hexadecimal = true;
+            this.nudRAMWatch.Location = new System.Drawing.Point(12, 64);
+            this.nudRAMWatch.Maximum = new decimal(new int[] {
+            1150,
+            0,
+            0,
+            0});
+            this.nudRAMWatch.Name = "nudRAMWatch";
+            this.nudRAMWatch.Size = new System.Drawing.Size(92, 20);
+            this.nudRAMWatch.TabIndex = 35;
+            this.nudRAMWatch.Value = new decimal(new int[] {
+            1150,
+            0,
+            0,
+            0});
+            // 
+            // btnFindAddress
+            // 
+            this.btnFindAddress.Location = new System.Drawing.Point(111, 61);
+            this.btnFindAddress.Name = "btnFindAddress";
+            this.btnFindAddress.Size = new System.Drawing.Size(114, 26);
+            this.btnFindAddress.TabIndex = 34;
+            this.btnFindAddress.Text = "Find Address";
+            this.btnFindAddress.UseVisualStyleBackColor = true;
+            this.btnFindAddress.Click += new System.EventHandler(this.btnFindAddress_Click);
             // 
             // cboxLiveEngine
             // 
             this.cboxLiveEngine.AutoSize = true;
             this.cboxLiveEngine.Enabled = false;
-            this.cboxLiveEngine.Location = new System.Drawing.Point(136, 119);
+            this.cboxLiveEngine.Location = new System.Drawing.Point(247, 119);
             this.cboxLiveEngine.Name = "cboxLiveEngine";
             this.cboxLiveEngine.Size = new System.Drawing.Size(82, 17);
             this.cboxLiveEngine.TabIndex = 33;
             this.cboxLiveEngine.Text = "Live Engine";
             this.cboxLiveEngine.UseVisualStyleBackColor = true;
             this.cboxLiveEngine.Visible = false;
-            this.cboxLiveEngine.CheckedChanged += new System.EventHandler(this.cboxLiveEngine_CheckedChanged);
             // 
             // nudBPAddress
             // 
@@ -1243,17 +1607,18 @@
             // cboxLockBP
             // 
             this.cboxLockBP.AutoSize = true;
-            this.cboxLockBP.Location = new System.Drawing.Point(12, 119);
+            this.cboxLockBP.Location = new System.Drawing.Point(123, 119);
             this.cboxLockBP.Name = "cboxLockBP";
             this.cboxLockBP.Size = new System.Drawing.Size(104, 17);
             this.cboxLockBP.TabIndex = 32;
             this.cboxLockBP.Text = "Lock Breakpoint";
             this.cboxLockBP.UseVisualStyleBackColor = true;
+            this.cboxLockBP.CheckedChanged += new System.EventHandler(this.cboxLockBP_CheckedChanged);
             // 
             // cboxAutoStep
             // 
             this.cboxAutoStep.AutoSize = true;
-            this.cboxAutoStep.Location = new System.Drawing.Point(136, 94);
+            this.cboxAutoStep.Location = new System.Drawing.Point(247, 94);
             this.cboxAutoStep.Name = "cboxAutoStep";
             this.cboxAutoStep.Size = new System.Drawing.Size(70, 17);
             this.cboxAutoStep.TabIndex = 31;
@@ -1264,17 +1629,17 @@
             // cboxStepInto
             // 
             this.cboxStepInto.AutoSize = true;
-            this.cboxStepInto.Location = new System.Drawing.Point(12, 94);
+            this.cboxStepInto.Location = new System.Drawing.Point(123, 94);
             this.cboxStepInto.Name = "cboxStepInto";
             this.cboxStepInto.Size = new System.Drawing.Size(102, 17);
             this.cboxStepInto.TabIndex = 30;
             this.cboxStepInto.Text = "Step INTO Calls";
             this.cboxStepInto.UseVisualStyleBackColor = true;
-            this.cboxStepInto.CheckedChanged += new System.EventHandler(this.cboxStepInto_CheckedChanged);
+            this.cboxStepInto.CheckStateChanged += new System.EventHandler(this.cboxStepInto_CheckedChanged);
             // 
             // btnStepFwd
             // 
-            this.btnStepFwd.Location = new System.Drawing.Point(111, 26);
+            this.btnStepFwd.Location = new System.Drawing.Point(233, 61);
             this.btnStepFwd.Name = "btnStepFwd";
             this.btnStepFwd.Size = new System.Drawing.Size(124, 26);
             this.btnStepFwd.TabIndex = 19;
@@ -1284,7 +1649,7 @@
             // 
             // btnRemoveBreakPoint
             // 
-            this.btnRemoveBreakPoint.Location = new System.Drawing.Point(111, 56);
+            this.btnRemoveBreakPoint.Location = new System.Drawing.Point(233, 23);
             this.btnRemoveBreakPoint.Name = "btnRemoveBreakPoint";
             this.btnRemoveBreakPoint.Size = new System.Drawing.Size(124, 29);
             this.btnRemoveBreakPoint.TabIndex = 18;
@@ -1294,9 +1659,9 @@
             // 
             // btnSetBreakpoint
             // 
-            this.btnSetBreakpoint.Location = new System.Drawing.Point(10, 56);
+            this.btnSetBreakpoint.Location = new System.Drawing.Point(111, 23);
             this.btnSetBreakpoint.Name = "btnSetBreakpoint";
-            this.btnSetBreakpoint.Size = new System.Drawing.Size(95, 29);
+            this.btnSetBreakpoint.Size = new System.Drawing.Size(114, 29);
             this.btnSetBreakpoint.TabIndex = 16;
             this.btnSetBreakpoint.Text = "Set Breakpoint";
             this.btnSetBreakpoint.UseVisualStyleBackColor = true;
@@ -1323,7 +1688,7 @@
             this.groupBox8.Controls.Add(this.btnLoadBinFile);
             this.groupBox8.Location = new System.Drawing.Point(3, 524);
             this.groupBox8.Name = "groupBox8";
-            this.groupBox8.Size = new System.Drawing.Size(200, 195);
+            this.groupBox8.Size = new System.Drawing.Size(200, 194);
             this.groupBox8.TabIndex = 33;
             this.groupBox8.TabStop = false;
             this.groupBox8.Text = "Open Files";
@@ -1372,14 +1737,14 @@
             // 
             // tboxASMSimpleName
             // 
-            this.tboxASMSimpleName.Location = new System.Drawing.Point(18, 169);
+            this.tboxASMSimpleName.Location = new System.Drawing.Point(18, 157);
             this.tboxASMSimpleName.Name = "tboxASMSimpleName";
             this.tboxASMSimpleName.Size = new System.Drawing.Size(158, 20);
             this.tboxASMSimpleName.TabIndex = 26;
             // 
             // btnLoadASMFile
             // 
-            this.btnLoadASMFile.Location = new System.Drawing.Point(18, 147);
+            this.btnLoadASMFile.Location = new System.Drawing.Point(18, 135);
             this.btnLoadASMFile.Name = "btnLoadASMFile";
             this.btnLoadASMFile.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.btnLoadASMFile.Size = new System.Drawing.Size(159, 20);
@@ -1416,16 +1781,16 @@
             this.groupBox7.Controls.Add(this.label36);
             this.groupBox7.Controls.Add(this.btnOpenOstrichCom);
             this.groupBox7.Controls.Add(this.cboxOstrichComPortNumber);
-            this.groupBox7.Location = new System.Drawing.Point(3, 279);
+            this.groupBox7.Location = new System.Drawing.Point(3, 269);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(200, 134);
+            this.groupBox7.Size = new System.Drawing.Size(200, 132);
             this.groupBox7.TabIndex = 32;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Ostrich";
             // 
             // btnResetOstrich
             // 
-            this.btnResetOstrich.Location = new System.Drawing.Point(110, 105);
+            this.btnResetOstrich.Location = new System.Drawing.Point(110, 95);
             this.btnResetOstrich.Name = "btnResetOstrich";
             this.btnResetOstrich.Size = new System.Drawing.Size(51, 23);
             this.btnResetOstrich.TabIndex = 29;
@@ -1446,7 +1811,7 @@
             // 
             this.progressBar2.Location = new System.Drawing.Point(4, 80);
             this.progressBar2.Name = "progressBar2";
-            this.progressBar2.Size = new System.Drawing.Size(187, 17);
+            this.progressBar2.Size = new System.Drawing.Size(187, 10);
             this.progressBar2.TabIndex = 25;
             // 
             // tboxOstrichSerialNumber
@@ -1459,7 +1824,7 @@
             // 
             // btnCloseOstrichCom
             // 
-            this.btnCloseOstrichCom.Location = new System.Drawing.Point(55, 105);
+            this.btnCloseOstrichCom.Location = new System.Drawing.Point(55, 95);
             this.btnCloseOstrichCom.Name = "btnCloseOstrichCom";
             this.btnCloseOstrichCom.Size = new System.Drawing.Size(51, 23);
             this.btnCloseOstrichCom.TabIndex = 26;
@@ -1478,7 +1843,7 @@
             // 
             // btnOpenOstrichCom
             // 
-            this.btnOpenOstrichCom.Location = new System.Drawing.Point(3, 105);
+            this.btnOpenOstrichCom.Location = new System.Drawing.Point(3, 95);
             this.btnOpenOstrichCom.Name = "btnOpenOstrichCom";
             this.btnOpenOstrichCom.Size = new System.Drawing.Size(50, 23);
             this.btnOpenOstrichCom.TabIndex = 25;
@@ -1493,12 +1858,13 @@
             this.cboxOstrichComPortNumber.Name = "cboxOstrichComPortNumber";
             this.cboxOstrichComPortNumber.Size = new System.Drawing.Size(99, 21);
             this.cboxOstrichComPortNumber.TabIndex = 25;
-            this.cboxOstrichComPortNumber.Text = "COM14";
+            this.cboxOstrichComPortNumber.Text = "COM9";
             this.cboxOstrichComPortNumber.DropDown += new System.EventHandler(this.cboxOstrichComPortNumber_DropDown);
             // 
             // rtboxASMFile
             // 
             this.rtboxASMFile.BackColor = System.Drawing.SystemColors.Window;
+            this.rtboxASMFile.Font = new System.Drawing.Font("DejaVu Sans Mono", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.rtboxASMFile.Location = new System.Drawing.Point(209, 3);
             this.rtboxASMFile.Name = "rtboxASMFile";
             this.rtboxASMFile.ReadOnly = true;
@@ -1511,6 +1877,7 @@
             // 
             // groupBox12
             // 
+            this.groupBox12.Controls.Add(this.progressBar3);
             this.groupBox12.Controls.Add(this.btnSaveRenamedASM);
             this.groupBox12.Controls.Add(this.btnRestore);
             this.groupBox12.Controls.Add(this.btnOpenXMLFile);
@@ -1525,9 +1892,16 @@
             this.groupBox12.TabStop = false;
             this.groupBox12.Text = "Trace";
             // 
+            // progressBar3
+            // 
+            this.progressBar3.Location = new System.Drawing.Point(274, 37);
+            this.progressBar3.Name = "progressBar3";
+            this.progressBar3.Size = new System.Drawing.Size(399, 10);
+            this.progressBar3.TabIndex = 32;
+            // 
             // btnSaveRenamedASM
             // 
-            this.btnSaveRenamedASM.Location = new System.Drawing.Point(588, 16);
+            this.btnSaveRenamedASM.Location = new System.Drawing.Point(588, 10);
             this.btnSaveRenamedASM.Name = "btnSaveRenamedASM";
             this.btnSaveRenamedASM.Size = new System.Drawing.Size(85, 23);
             this.btnSaveRenamedASM.TabIndex = 31;
@@ -1537,7 +1911,7 @@
             // 
             // btnRestore
             // 
-            this.btnRestore.Location = new System.Drawing.Point(497, 16);
+            this.btnRestore.Location = new System.Drawing.Point(497, 10);
             this.btnRestore.Name = "btnRestore";
             this.btnRestore.Size = new System.Drawing.Size(85, 23);
             this.btnRestore.TabIndex = 30;
@@ -1547,7 +1921,7 @@
             // 
             // btnOpenXMLFile
             // 
-            this.btnOpenXMLFile.Location = new System.Drawing.Point(274, 16);
+            this.btnOpenXMLFile.Location = new System.Drawing.Point(274, 10);
             this.btnOpenXMLFile.Name = "btnOpenXMLFile";
             this.btnOpenXMLFile.Size = new System.Drawing.Size(126, 23);
             this.btnOpenXMLFile.TabIndex = 29;
@@ -1557,7 +1931,7 @@
             // 
             // btnApplyRenamingMask
             // 
-            this.btnApplyRenamingMask.Location = new System.Drawing.Point(406, 16);
+            this.btnApplyRenamingMask.Location = new System.Drawing.Point(406, 10);
             this.btnApplyRenamingMask.Name = "btnApplyRenamingMask";
             this.btnApplyRenamingMask.Size = new System.Drawing.Size(85, 23);
             this.btnApplyRenamingMask.TabIndex = 28;
@@ -1577,6 +1951,7 @@
             // 
             // tboxTraceWindow
             // 
+            this.tboxTraceWindow.Font = new System.Drawing.Font("DejaVu Sans Mono", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tboxTraceWindow.Location = new System.Drawing.Point(9, 51);
             this.tboxTraceWindow.Margin = new System.Windows.Forms.Padding(6);
             this.tboxTraceWindow.MaximumSize = new System.Drawing.Size(797, 271);
@@ -1598,7 +1973,6 @@
             // 
             // timer1
             // 
-            this.timer1.Interval = 250;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // serialPort2
@@ -1628,21 +2002,35 @@
             this.toolTip3.InitialDelay = 1;
             this.toolTip3.ReshowDelay = 0;
             // 
+            // toolTip4
+            // 
+            this.toolTip4.AutomaticDelay = 1;
+            this.toolTip4.AutoPopDelay = 5000;
+            this.toolTip4.InitialDelay = 1;
+            this.toolTip4.ReshowDelay = 0;
+            // 
+            // toolTip5
+            // 
+            this.toolTip5.AutomaticDelay = 1;
+            this.toolTip5.AutoPopDelay = 5000;
+            this.toolTip5.InitialDelay = 1;
+            this.toolTip5.ReshowDelay = 0;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
-            this.AutoScrollMinSize = new System.Drawing.Size(1402, 765);
-            this.ClientSize = new System.Drawing.Size(1256, 749);
+            this.AutoScrollMinSize = new System.Drawing.Size(1150, 650);
+            this.ClientSize = new System.Drawing.Size(1334, 811);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
-            this.MinimumSize = new System.Drawing.Size(593, 293);
+            this.MaximumSize = new System.Drawing.Size(1350, 850);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Honda ECU Debugger v2.1";
+            this.Text = "Honda ECU Debugger v3.0";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.Resize += new System.EventHandler(this.Form1_Resize);
@@ -1651,6 +2039,8 @@
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.panel1.ResumeLayout(false);
+            this.groupBox11.ResumeLayout(false);
+            this.groupBox11.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudVIDNumber)).EndInit();
             this.groupBox9.ResumeLayout(false);
             this.groupBox9.PerformLayout();
@@ -1669,6 +2059,7 @@
             this.groupBox4.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudRAMWatch)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudBPAddress)).EndInit();
             this.groupBox8.ResumeLayout(false);
             this.groupBox8.PerformLayout();
@@ -1782,7 +2173,7 @@
         private System.Windows.Forms.TextBox tboxDP;
         private System.Windows.Forms.GroupBox groupBox6;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.TextBox tboxSSP;
+        private System.Windows.Forms.TextBox tboxStack1;
         private System.Windows.Forms.CheckBox cboxLockBP;
         private System.Windows.Forms.NumericUpDown nudBPAddress;
         private System.Windows.Forms.GroupBox groupBox9;
@@ -1823,6 +2214,42 @@
         private System.Windows.Forms.Label label34;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.CheckBox cboxLiveEngine;
+        private System.Windows.Forms.Label label41;
+        private System.Windows.Forms.TextBox tboxPSWL5;
+        private System.Windows.Forms.Label label40;
+        private System.Windows.Forms.TextBox tboxPSWL4;
+        private System.Windows.Forms.TextBox tboxDasmArgIgnore;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Label label43;
+        private System.Windows.Forms.TextBox tboxDasmArgForce;
+        private System.Windows.Forms.Label label42;
+        private System.Windows.Forms.GroupBox groupBox11;
+        private System.Windows.Forms.Label lblLA12;
+        private System.Windows.Forms.TextBox tboxLA1_2;
+        private System.Windows.Forms.Label lblLA11;
+        private System.Windows.Forms.TextBox tboxLA1_1;
+        private System.Windows.Forms.Label label44;
+        private System.Windows.Forms.TextBox tboxStackPointer;
+        private System.Windows.Forms.TextBox tboxStack5;
+        private System.Windows.Forms.TextBox tboxStack4;
+        private System.Windows.Forms.TextBox tboxStack3;
+        private System.Windows.Forms.TextBox tboxStack2;
+        private System.Windows.Forms.Label lblDPContents;
+        private System.Windows.Forms.TextBox tboxDPconts;
+        private System.Windows.Forms.Label lblRomRam;
+        private System.Windows.Forms.Label lblDPContsBinary;
+        private System.Windows.Forms.Label lblXram2Binary;
+        private System.Windows.Forms.Label lblXram1Binary;
+        private System.Windows.Forms.ToolTip toolTip4;
+        private System.Windows.Forms.ProgressBar progressBar3;
+        private System.Windows.Forms.Button btnFindAddress;
+        private System.Windows.Forms.CheckBox cboxLockRamWatch;
+        private System.Windows.Forms.Label label45;
+        private System.Windows.Forms.NumericUpDown nudRAMWatch;
+        private System.Windows.Forms.Label lblRamWatchBinary;
+        private System.Windows.Forms.Label lblRamWatch;
+        private System.Windows.Forms.TextBox tboxRamWatch;
+        private System.Windows.Forms.ToolTip toolTip5;
     }
 }
 

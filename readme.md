@@ -1,5 +1,5 @@
 ECU Debugger 
-This program will allow a sort of ECU "Debugging" on Honda's OBD 1 computers. 
+This program will allow ECU "Debugging" on Honda's OBD 1 computers. 
 
 The following registers are monitored and logged
 -ACC
@@ -8,8 +8,12 @@ The following registers are monitored and logged
 -X1
 -X2
 -DP
+-[DP]
 -LRB
--[SSP]
+-SSP
+-5 Layers of stack contents
+-Current Instruction RAM
+-User selectable RAM Watch
 
 Requirements:
 	-Moates Ostrich (Tested with v2)
