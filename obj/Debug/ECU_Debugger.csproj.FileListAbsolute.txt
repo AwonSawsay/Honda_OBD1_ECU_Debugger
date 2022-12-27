@@ -75,3 +75,14 @@ D:\Honda ECU\Debugger Project\HondaECUDebugger\HondaECUDebugger\ECU_Debugger\obj
 D:\Honda ECU\Debugger Project\HondaECUDebugger\HondaECUDebugger\ECU_Debugger\obj\Debug\ECU_Debugger.exe
 D:\Honda ECU\Debugger Project\HondaECUDebugger\HondaECUDebugger\ECU_Debugger\obj\Debug\ECU_Debugger.pdb
 F:\xfer\Automotive\Honda ECU\Debugger Project\HondaECUDebugger\HondaECUDebugger\ECU_Debugger\obj\Debug\ECU_Debugger.csproj.AssemblyReference.cache
+C:\Users\Winm3dia\Source\Repos\Honda_OBD1_ECU_Debugger\bin\Debug\ECU_Debugger.exe.config
+C:\Users\Winm3dia\Source\Repos\Honda_OBD1_ECU_Debugger\bin\Debug\ECU_Debugger.exe
+C:\Users\Winm3dia\Source\Repos\Honda_OBD1_ECU_Debugger\bin\Debug\ECU_Debugger.pdb
+C:\Users\Winm3dia\Source\Repos\Honda_OBD1_ECU_Debugger\obj\Debug\ECU_Debugger.csproj.AssemblyReference.cache
+C:\Users\Winm3dia\Source\Repos\Honda_OBD1_ECU_Debugger\obj\Debug\ECU_Debugger.Form1.resources
+C:\Users\Winm3dia\Source\Repos\Honda_OBD1_ECU_Debugger\obj\Debug\ECU_Debugger.Form2.resources
+C:\Users\Winm3dia\Source\Repos\Honda_OBD1_ECU_Debugger\obj\Debug\ECU_Debugger.Properties.Resources.resources
+C:\Users\Winm3dia\Source\Repos\Honda_OBD1_ECU_Debugger\obj\Debug\ECU_Debugger.csproj.GenerateResource.cache
+C:\Users\Winm3dia\Source\Repos\Honda_OBD1_ECU_Debugger\obj\Debug\ECU_Debugger.csproj.CoreCompileInputs.cache
+C:\Users\Winm3dia\Source\Repos\Honda_OBD1_ECU_Debugger\obj\Debug\ECU_Debugger.exe
+C:\Users\Winm3dia\Source\Repos\Honda_OBD1_ECU_Debugger\obj\Debug\ECU_Debugger.pdb
