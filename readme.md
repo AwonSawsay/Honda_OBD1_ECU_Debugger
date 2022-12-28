@@ -1,4 +1,4 @@
-ECU Debugger 
+ECU Debugger \r\n
 This program will allow ECU "Debugging" on Honda's OBD 1 computers. 
 Step through ECU code code line by line and monitor the exact changes
 as the code is executed.  Great for debugging new features or getting a 
