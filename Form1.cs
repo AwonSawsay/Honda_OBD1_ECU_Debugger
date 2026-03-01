@@ -1,22 +1,45 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
+using System.IO.Ports;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.IO.Ports;
-using System.IO;
-using System.Threading;
-
-
 
 namespace ECU_Debugger
 {
     public partial class Form1 : Form
     {
+        bool DEBUG = false;
+        volatile List<int> DEBUG_PACKET = new List<int>
+        { 0x00 , 0x01 , 0x02 , 0x03 , 0x04 , 0x05 , 0x06 , 0x07 , 0x00 , 0x09 , 0x00 ,
+          0x11 , 0x00 , 0x13 , 0x00 , 0x15 , 0x00 , 0x17 , 0x00 , 0x19 , 0x00 ,
+          0x21 , 0x2b , 0x2a , 0x24 , 0x25 , 0x26 , 0x27 , 0x28 , 0x29 , 0x00 ,
+          0x31 , 0x32 , 0x33 , 0x00 , 0x35 , 0x36 , 0x37 , 0x38 , 0x39 , 0x40 ,
+          0x41 , 0xDE , 0xAD , 0x2e
+        };
+        //VCAL Re-Routing
+        bool usingVCALreRoute = true;
+        bool whiteListChangedFromOriginal = false;
+        int VCALNumber = 0;
+        int realVCALAddress = 0;
+        int VCALVectorTableLoc = 0;
+        int romOffsetWhiteList = 0;
+        int VCALcallCount = 0;
+        int romOffsetRealVcalSub = 0;
+        const int BEGIN_VCAL_VECTOR_TABLE = 0x28;
+        const byte VCAL_0_OPCODE = 0x10;
+        List<int> VCALWhiteList = new List<int>();
+        int[] VCALvectorTable = new int[8];
+
+
 
         //Strings for trace log
         string strTrace_R0 = "";
@@ -55,11 +78,13 @@ namespace ECU_Debugger
         string strTrace_Xram2Addy = "";
         string strTrace_Xram1Conts = "";
         string strTrace_Xram2Conts = "";
+        string strtrace_RamWatch = "";
+        string strExpectedRAMWatchAddress = "";
 
         //Trace Log
         StreamWriter objStreamWriter;
         int ContentsAddress = 0;
-        bool state_AppendText = true;
+        int intDPConts_RAM = 0;
         bool boolOffsetPointer = false;
         string PointerContentsHexValue = "";
         string InstructionLine = "";
@@ -76,6 +101,10 @@ namespace ECU_Debugger
         string strPlain_DP = "";
         string strPlain_X1 = "";
         string strPlain_X2 = "";
+        string strPlain_er0 = "";
+        string strPlain_er1 = "";
+        string strPlain_er2 = "";
+        string strPlain_er3 = "";
         string strPlain_ACC = "";
         string strPlain_LRB = "";
         string strPlain_PSWL4 = "";
@@ -105,22 +134,27 @@ namespace ECU_Debugger
         OpenFileDialog OPENAsmDialog = new OpenFileDialog();
         string[] ASMFileArray;
         string[] RenamedASMFileArray;
+        string[] ASMSourceCodeArray;
+        string xmlRenamingFilePath = "";
         string strIgnoreDasmArgs = "";
         string strForceDasmArgs = "";
         string Dasm662Path;
         string DasmDefaultArea = " 5000 7fff";
-        string DasmOptions = "";
         string DasmIndirectJumps = "";
         string CurrentASMPath;
+        string ASMtoCompilePath;
+        string compiledBINPath;
         bool ASMOpened = false;
-        bool UseUserDasmOptions = false;
         bool RenameXMLReady = false;
+        bool readyToRename = false;
+        bool showRenamed = false;
         int CurrentASMIndex;
 
 
         //Debugger ROM Code
         bool LRBConflict = false;
         bool SCBConflict = false;
+        bool codeFileHasBeenOpened = false;
         int LRBDebuggerValue = 0;
         int PSWDebuggerValue = 0;
         int BaudRateAddress1;
@@ -136,17 +170,21 @@ namespace ECU_Debugger
         //Bin and Ostrich
         OpenFileDialog OPENBINDialog = new OpenFileDialog();
         bool BINOpened = false;
-        bool OstrichSentError = false;
+        bool quietBulkWrite = false;
+        bool usingASMFile = false;
         List<int> OstrichRXBuffer = new List<int>();
-        Byte[] OriginalBinArray;
+        List<int> chunkAddresses = new List<int>();
+        List<int> addressLength = new List<int>();
+        Byte[] currentBINArray;
+        Byte[] newBinArray;
         Byte[] BinWithPatchesAndDebuggerCode;
         Byte[] OstrichBinArrayOut;
         byte[] OstrichSerialNumber = new byte[9];
         byte[] byteCodeStubCAll = new byte[] { 50, 0, 117, 3 };
         byte[] byteAltCodeStubCall = new byte[] { 4, 50, 0, 117, 3, 50, 0, 117, 255 };
         byte[] ROMSettingsAndDebuggerCodeArray;
-        byte MMSB = (byte)(00);
-        byte MSB = (byte)(112);
+        string[] strAryNewASM;
+
         int intDebuggerCodeStubSourceOffset = 0;
         int intCodeStubAddress = 0;
         int intPatchBytesSourceOffset = 0;
@@ -156,11 +194,13 @@ namespace ECU_Debugger
         int intExtraRam4Offset = 0;
         int intExtraRam5Offset = 0;
         int intExtraRam6Offset = 0;
+        int intExtraRam7Offset = 0;
+        int intExtraRam8Offset = 0;
+        int intExtraRam9Offset = 0;
+        int intExtraRam10Offset = 0;
         int intDPAddress = 0;
         int OstrichStatus;
         int InitialOstrichBP = 0;
-        int StartChunkAddress = 0;
-        int BulkChunkNumber = 0;
         int TimerTickCount;
         int LowerBoundary = 0;
         int UpperBoundary = 32768;
@@ -169,7 +209,8 @@ namespace ECU_Debugger
         int intPrevChunkSize = 0;
         int intChunkSize = 0;
         string ROMSettingsAndDebuggerCodePath;
-        string strBinInput;
+        string strBINPath = "";
+
 
 
         //Serial
@@ -187,7 +228,6 @@ namespace ECU_Debugger
         bool DDFlag = false;
         bool DDFlagCorrection = false;
         bool BinHasBeenUploadedSinceCreation = false;
-        bool StopWriteDueToError = false;
         bool ROMWhichLoopEquals1 = false;
 
         //Debugger handling
@@ -206,46 +246,46 @@ namespace ECU_Debugger
         bool boolNewBreakpoint = false;
 
         //Look ahead ram
-        int intLA1XRAMAddress1 = 0;
-        int intLA1XRAMAddress2 = 0;
-        int intLA2XRAMAddress1 = 0;
-        int intLA2XRAMAddress2 = 0;
-        int intXramLA11Value = 0;
-        int intXramLA12Value = 0;
-        int intXramLA21Value = 0;
-        int intXramLA22Value = 0;
-        int intRAMWatchByte1 = 0;
-        int intRAMWatchByte2 = 0;
-        int intRamWatchAddress = 0;
-        int intRAMWatchDisplayedAddy = 0;
+        int XRAMBox1AddressRequested = 0;
+        int XRAMBox2AddressRequested = 0;
+        int ALT_XRAMBox1AddressRequested = 0;
+        int ALT_XRAMBox2AddressRequested = 0;
+        int XRAMByte1 = 0;
+        int XRAMByte2 = 0;
+        int XRAMByte3 = 0;
+        int XRAMByte4 = 0;
+        int XRAMByte5 = 0;
+        int XRAMByte6 = 0;
+        int XRAMByte7 = 0;
+        int XRAMByte8 = 0;
+        int XRAMByte9 = 0;
+        int XRAMByte10 = 0;
+        int RAMWatchAddressRequested = 0;
+        int ExpectedRAMWatchAddress = 0;
         int intRamWatchValue = 0;
-        int intIncomingRAMAddress1 = 0;
-        int intIncomingRAMAddress2 = 0;
-        int intIncomingRAMAddress3 = 0;
-        int intIncomingRAMAddress4 = 0;
+        int XRAMAddressForBox1 = 0;
+        int XRAMAddressForBox2 = 0;
+        int XRAMAddressForBox1_ALT = 0;
+        int XRAMAddressForBox2_ALT = 0;
         int intModifiedX1 = 0;
         int intModifiedX2 = 0;
-        bool boolLA1word = false;
-        bool boolLA2word = false;
-        bool boolIncomingWordLA1 = false;
-        bool boolIncomingWordLA2 = false;
+        bool XRAMWordRequestBox1and2 = false;
+        bool XRAMWordRequestBox1and2_ALT = false;
+        bool ExpectingWordforBox1and2 = false;
+        bool ExpectingWordForBox1and2_ALT = false;
         bool dotFoundonNextInstruction = false;
         bool dotFoundonBranchInstruction = false;
-        bool boolXRam1Found = false;
-        bool boolXRam2Found = false;
-        bool boolXRam3Found = false;
-        bool boolXRam4Found = false;
-        bool ExtraRam1incoming = false;
-        bool ExtraRam2incoming = false;
-        bool ExtraRam3incoming = false;
-        bool ExtraRam4incoming = false;
+        bool RequestForXRAMBox1 = false;
+        bool RequestForXRAMBox2 = false;
+        bool RequestForXRAMBox1_ALT = false;
+        bool RequestForXRAMBox2_ALT = false;
+        bool ExpectingXRAMForBox1 = false;
+        bool ExpectingXRAMForBox2 = false;
+        bool ExpectingXRAMForBox1_ALT = false;
+        bool ExpectingXRAMForBox2_ALT = false;
         bool instructionBranched = false;
         bool useModifiedX1 = false;
         bool useModifiedX2 = false;
-
-
-
-
 
         string[] SFRLabels = {"NO_NAME" , "NO_NAME" , "NO_NAME" , "LRB"   , "LRBH"     , "NO_NAME" , "NO_NAME" , "NO_NAME" , "NO_NAME" , "NO_NAME",
                               "NO_NAME" , "NO_NAME" , "NO_NAME" , "NO_NAME", "NO_NAME" , "NO_NAME" , "SBYCON"  , "WDT"     , "PRPHF"   , "STPACP",
@@ -261,53 +301,122 @@ namespace ECU_Debugger
                               "ADCR7"   , "ADCR7H"  , "PWMC0"   , "PWMC0H" , "PWMR0"   , "PWMR0H"  , "PWMC1"   , "PWMC1H"  , "PWMR1"   , "PWMR1H",
                               "PWCON0"  , "NO_NAME" , "PWCON1"};
 
-        #region My Own Method
-        //Save Trace log file
-        private void SaveDataToTxtFile() 
+        Emulator Emulator = new Emulator();
+        SerialPort OstrichPort;
+        public Form1()
         {
-            if (cboxSaveTrace.Checked)
+            InitializeComponent();
+            setMiscToolTips();
+        }
+
+        //Set checkboxes and paths
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            serialPort1.DtrEnable = false;
+            serialPort1.RtsEnable = false;
+            cboxAutoStep.Checked = false;
+            cboxDebuggerIE.Checked = false;
+            nudDebuggerIE.Enabled = false;
+            cboxDebuggerLRB.Checked = false;
+            nudDebuggerLRB.Enabled = false;
+            cboxDebuggerPSW.Checked = false;
+            nudDebuggerPSW.Enabled = false;
+            cboxAutoUploadOnBINLoad.Checked = true;
+            pathFile = Directory.GetCurrentDirectory();
+            pathFile += @"\ECUTrace.txt";
+            cboxSaveTrace.Checked = false;
+            progressBar3.Visible = false;
+            cboxQuietCompiler.Enabled = false;
+            lblChangedBytes.Text = "";
+            lblRamWatchBinary.Text = "";
+            lblXram1Binary.Text = "";
+            lblXram2Binary.Text = "";
+            lblDPContsBinary.Text = "";
+            lblSizeWithVCAL.Text = "";
+            lblVCALbyteSize.Text = "";
+            lblVCALnumber.Text = "";
+
+        }
+
+        //About - menu item
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("This program will allow you to step through the instructions on " +
+                "OBD 1 Honda ECUs while monitoring the main registers as they are changed " +
+                "\r\n\r\n Created by Awon using code provided by Catur P.  " +
+                "\r\n dasm662 by Andy Sloan and Doc is also used and distributed with ECU Debugger.",
+                "About ECU Debugger", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        //Exit - menu item
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void Form1_Resize(object sender, EventArgs e)
+        {
+            groupBox12.Width = panel1.Width - 213;
+            groupBox12.Height = panel1.Height - 40;
+
+            tboxTraceWindow.Height = panel1.Height - 92;
+        }
+
+        //------------------ ASM Source Code handling -----------------------------
+
+        private void btnLoadASMFile_Click(object sender, EventArgs e)
+        {
+            OPENAsmDialog.Filter = "ASM Files | *.asm";
+            if (OPENAsmDialog.ShowDialog() == DialogResult.OK)
             {
-                try
+                lblChangedBytes.Text = "";
+                tboxOpenFileSimpleName.Text = "";
+                ASMtoCompilePath = OPENAsmDialog.FileName;
+                compiledBINPath = System.IO.Path.GetDirectoryName(ASMtoCompilePath) + "\\" + System.IO.Path.GetFileNameWithoutExtension(ASMtoCompilePath) + "_DBG";
+                readAllLinesInASM(ASMtoCompilePath, ref ASMSourceCodeArray);
+                //Compile ASM
+                if (compileASMtoBIN(ASMtoCompilePath, compiledBINPath))
                 {
-                    objStreamWriter = new StreamWriter(pathFile, state_AppendText);
-                    objStreamWriter.WriteLine(strTraceLog);
-                    objStreamWriter.Close();
+                    strBINPath = compiledBINPath + ".bin";
+                    BINOpened = true;
+                    usingASMFile = true;
+                    CreateBINArraysDecompileBINandUpdateASMWindow();
+
                 }
-                catch (Exception err)
+                //Decompile
+                if (decompileBIN(strBINPath, compiledBINPath + ".asm", false, getDasmArgs()))
                 {
-                    MessageBox.Show(err.Message);
+                    CurrentASMPath = compiledBINPath + ".asm";
+                    ASMOpened = true;
+                    LoadASMFileIntoArraysRenameIfNeededAndUpdateASMWindow();
+                    ASMOpened = true;
+                    getVCALroutingInfoFromROM();
+                    AddDebuggerCodeAndPatchesToRomAndUpload();
                 }
+
+
+
+
             }
         }
 
-        #endregion
-
-        #region ASM Handling
-
-        private void CreateAsmFileFromBin()
+        private bool decompileBIN(string binPath, string asmPath, bool quiet = false, string args = "")
         {
             try
             {
-                strBinInput = OPENBINDialog.FileName;
-                CurrentASMPath = System.IO.Path.GetDirectoryName(OPENBINDialog.FileName) +  System.IO.Path.GetFileNameWithoutExtension(OPENBINDialog.FileName) + ".asm";
+                bool noExitError = true;
+                string strCompilerError = "";
+                string strCompilerOutput = "";
 
                 Dasm662Path = Directory.GetCurrentDirectory();
                 Dasm662Path += @"\dasm662.exe";
-                DasmOptions = DasmDefaultArea;
-                if (UseUserDasmOptions)
-                {
-                    DasmOptions += strIgnoreDasmArgs;
-                    DasmOptions += strForceDasmArgs;
-                    UseUserDasmOptions = false;
-                }
-                DasmOptions += DasmIndirectJumps;
 
                 var proc = new System.Diagnostics.Process
                 {
                     StartInfo = new System.Diagnostics.ProcessStartInfo
                     {
                         FileName = Dasm662Path,
-                        Arguments = "\"" + strBinInput + "\"" + " " + "\"" + CurrentASMPath + "\"" + DasmOptions,
+                        Arguments = "\"" + binPath + "\"" + " " + "\"" + asmPath + "\"" + args,
                         UseShellExecute = false,
                         RedirectStandardOutput = true,
                         RedirectStandardError = true,
@@ -315,45 +424,163 @@ namespace ECU_Debugger
                     }
                 };
                 proc.Start();
-                while (!proc.StandardError.EndOfStream)
+                if (!quiet)
                 {
-                    string error = proc.StandardError.ReadLine();
-                    MessageBox.Show(error, "dasm662 Error");
-                }
+                    //If there are any errors reported by dasm662, gather and send to messagebox
+                    strCompilerError = "";
+                    while (!proc.StandardError.EndOfStream)
+                    {
+                        strCompilerError += proc.StandardError.ReadLine() + "\r\n";
+                    }
+                    if (strCompilerError != "") MessageBox.Show(strCompilerError, "DASM662 Error");
 
-                while (!proc.StandardOutput.EndOfStream)
-                {
-                    string line = proc.StandardOutput.ReadLine();
-                    MessageBox.Show(line, "dasm662 Error");
+
+                    //Gather dasm662 output then send to messagebox
+                    strCompilerOutput = "";
+                    while (!proc.StandardOutput.EndOfStream)
+                    {
+                        strCompilerOutput += proc.StandardOutput.ReadLine() + "\r\n";
+                    }
+                    if (strCompilerOutput != "") MessageBox.Show(strCompilerOutput, "DASM662 Output");
+
+                    //Exit error
+                    if (proc.ExitCode != 0)
+                    {
+                        MessageBox.Show("Error, Exit Code not equal to 0", "DASM662 Error");
+                        noExitError = false;
+                    }
                 }
-                LoadASMFileIntoStringArrayUpdatetBox();
-                tboxASMSimpleName.Text = System.IO.Path.GetFileNameWithoutExtension(OPENBINDialog.FileName) + ".asm";
-                ASMOpened = true;
+                proc.WaitForExit();
+                return noExitError;
             }
             catch (Exception error)
             {
                 MessageBox.Show(error.Message + "\r\n\r\n" + "Is dasm662.exe located int the same directory as ECU Debugger? \r\n " +
                     "Also make sure the bin path does not contain illegal characters. \r\n Try moving the bin the root directory and using a simple name.");
+                return false;
             }
         }
 
-        private void btnLoadASMFile_Click(object sender, EventArgs e)
+        //Read all the lines in an ASM file to a string []
+        //Needed to do it this way to work around file access issues while another process is using the file
+        private void readAllLinesInASM(string path, ref string[] destArray)
         {
-            OPENAsmDialog.Filter = "ASM Files | *.asm";
-            if (OPENAsmDialog.ShowDialog() == DialogResult.OK)
+            int ioRetries = 3;
+            int retryDelay = 200;
+            for (int i = 0; i < ioRetries; i++)
             {
-                CurrentASMPath = OPENAsmDialog.FileName;
-                LoadASMFileIntoStringArrayUpdatetBox();
-                tboxASMSimpleName.Text = OPENAsmDialog.SafeFileName;
-                ASMOpened = true;
+                try
+                {
+                    using (FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    {
+                        using (StreamReader reader = new StreamReader(stream))
+                        {
+                            string streamString = reader.ReadToEnd();
+                            destArray = streamString.Split('\n');
+                            for (int idx = 0; idx < destArray.Length; idx++)
+                            {
+                                destArray[idx] = destArray[idx].Replace("\r", "");
+                            }
+
+                        }
+                    }
+                }
+                catch (IOException) when (i < ioRetries)
+                {
+                    System.Threading.Thread.Sleep(retryDelay);
+                }
             }
         }
-        private void LoadASMFileIntoStringArrayUpdatetBox()
+
+        //Compile ASM into BIN return true if program exits clean
+        private bool compileASMtoBIN(string inputPath, string outputPath, bool quiet = false, string args = "")
         {
-            ASMFileArray = System.IO.File.ReadAllLines(CurrentASMPath);
-            RenamedASMFileArray = System.IO.File.ReadAllLines(CurrentASMPath);
-            rtboxASMFile.SelectionFont = new Font("DejaVu Sans Mono", 8, FontStyle.Bold);
-            rtboxASMFile.Lines = ASMFileArray;
+
+            bool booldeleteFile = false;
+            string strCompilerError = "";
+            string strCompilerOutput = "";
+            string strCommand = args + "\"" + inputPath + "\" \"" + outputPath + "\"";
+            bool noExitError = true;
+            try
+            {
+                //extract resource asm662.exe
+                // booldeleteFile = extractASM662();
+
+                var proc = new System.Diagnostics.Process
+                {
+                    StartInfo = new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = "asm662.exe",
+                        Arguments = strCommand,
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        CreateNoWindow = true
+                    }
+                };
+                proc.Start();
+                if (!quiet)
+                {
+                    //If there are any errors reported by asm662, gather and send to messagebox
+                    strCompilerError = "";
+                    while (!proc.StandardError.EndOfStream)
+                    {
+                        strCompilerError += proc.StandardError.ReadLine() + "\r\n";
+                    }
+                    if (strCompilerError != "") MessageBox.Show(strCompilerError, "ASM662 Error");
+
+
+
+                    strCompilerOutput = "";
+                    //Gather asm662 output then send to messagebox 
+
+                    while (!proc.StandardOutput.EndOfStream)
+                    {
+                        strCompilerOutput += proc.StandardOutput.ReadLine() + "\r\n";
+                    }
+                    if (strCompilerOutput != "") MessageBox.Show(strCompilerOutput, "ASM662 Output");
+                }
+                proc.WaitForExit();
+
+                //Exit error
+                if (proc.ExitCode != 0)
+                {
+                    MessageBox.Show("Error, Exit Code not equal to 0", "ASM662 Error");
+                    noExitError = false;
+                }
+            }
+            catch (Exception error)
+            {
+                MessageBox.Show(error.Message);
+            }
+            if (booldeleteFile)
+            {
+                //System.IO.File.Delete(System.IO.Directory.GetCurrentDirectory() + @"\asm662.exe");
+            }
+            return noExitError;
+        }
+
+        //Read the asm files into working arrays, rename the asm if option is selected and then update the ASM window
+        private void LoadASMFileIntoArraysRenameIfNeededAndUpdateASMWindow()
+        {
+            try
+            {
+                ASMFileArray = System.IO.File.ReadAllLines(CurrentASMPath);
+                RenamedASMFileArray = System.IO.File.ReadAllLines(CurrentASMPath);
+                rtboxASMFile.SelectionFont = new Font("DejaVu Sans Mono", 8, FontStyle.Bold);
+                if (cboxRenameOnChange.Checked && readyToRename)
+                {
+                    renameASMArray();
+                    rtboxASMFile.Lines = RenamedASMFileArray;
+                    return;
+                }
+
+                rtboxASMFile.Lines = ASMFileArray;
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(err.Message);
+            }
         }
 
         //Finds the index in ASM array for the given address. If address is invalid, it is reduced until it's valid
@@ -381,7 +608,6 @@ namespace ECU_Debugger
             }
         }
 
-
         private void HighlightLineInASMTextBox(int Index)
         {
             if (Index > 0 && ASMOpened)
@@ -391,6 +617,7 @@ namespace ECU_Debugger
             }
         }
         //Search Array for the last instance of an address preceeded by "; "
+        //Returns -1 if not found
         private int IndexOfInstructionAddressInArray(string[] myarray, int address)
         {
             int Index = 0;
@@ -399,7 +626,10 @@ namespace ECU_Debugger
             {
                 Index = Array.FindLastIndex(myarray, s => s.Contains(strSearchString));
             }
-            catch { }
+            catch
+            {
+                //MessageBox.Show(err.Message + "\r\n While parsing BP address from ASM file.");
+            }
             return Index;
         }
         private void SelectLineInRichTextBox(RichTextBox myRichTextBox, Int32 lineIndex)
@@ -412,10 +642,10 @@ namespace ECU_Debugger
             //Add the index of all \n characters until we reach the index of the address. This will give us the starting character to highlight
             for (Int32 i = 1; i < lineIndex; i++)
             {
-               j = text.IndexOf('\n', j + 1);
-              if (j == -1) break;
+                j = text.IndexOf('\n', j + 1);
+                if (j == -1) break;
             }
-            
+
             if (lineIndex > 1)
             {
                 myRichTextBox.Select(j + 1, myRichTextBox.Lines[lineIndex - 1].Length);
@@ -446,15 +676,14 @@ namespace ECU_Debugger
                 MessageBox.Show("Be sure that you are using a clean asm file produced by asm662.", "Can not parse next address from ASM");
                 NextLineAddress = "0000";
             }
+            if (NextLineAddress == "    ") return 0;
             return Convert.ToInt32(NextLineAddress, 16);
-            
+
         }
-        
-        
-        
-        private bool ParseInstructionLineAndOpCodes(int intAddress, int index, ref int nextAddress, ref int branchAddress, ref int callAddress, ref string ROMPointerContents, ref string opCode )
+
+        private bool ParseInstructionLineAndOpCodes(int intAddress, int index, ref int nextAddress, ref int branchAddress, ref int callAddress, ref string ROMPointerContents, ref string opCode)
         {
-            
+
             int intNextInstAddy = 0;
             int intBranchAddy = 0;
             int intCallAddy = 0;
@@ -474,7 +703,7 @@ namespace ECU_Debugger
             //thisOpcode = ASMFileArray[index].Substring(16, 5).Trim();
             thisOpcode = thisInstructionLine.Substring(16, 5).Trim();
             firstOperand = thisInstructionLine.Substring(24, thisInstructionLine.IndexOf(";") - 24).Trim();
-            if(thisInstructionLine.Contains(","))
+            if (thisInstructionLine.Contains(","))
             {
                 firstOperand = thisInstructionLine.Substring(24).Split(',', ';')[0];
                 secondOperand = thisInstructionLine.Split(',', ';')[1].Trim();
@@ -489,18 +718,21 @@ namespace ECU_Debugger
                 {
                     case "J":
                         //Regular Jump - Reverse endian of the last two opcode bytes, then convert to int
-                        //string strIndirectJumpAddy = ASMFileArray[index].Substring(ASMFileArray[index].Length - 2, 2) + ASMFileArray[index].Substring(ASMFileArray[index].Length - 4, 2);
-                        string strIndirectJumpAddy =thisInstructionLine.Substring(thisInstructionLine.Length - 2, 2) + thisInstructionLine.Substring(thisInstructionLine.Length - 4, 2);
+                        string strIndirectJumpAddy = thisInstructionLine.Substring(thisInstructionLine.Length - 2, 2) + thisInstructionLine.Substring(thisInstructionLine.Length - 4, 2);
                         intNextInstAddy = Convert.ToInt32(strIndirectJumpAddy, 16);
 
-                        
+                        // Indirect Jump?
                         if (thisInstructionLine.Contains("["))
                         {
+                            // Yes. Get the address and re-dasm
                             int intPossiblePointer = GetPointerFromReg(ASMFileArray[index].Split('[', ']')[1]);
-                            if(intPossiblePointer != 0)
+                            if (intPossiblePointer != 0)
                             {
                                 boolReDasm = true;
                                 intNextInstAddy = intPossiblePointer;
+
+                                // Updates tracelog value to show indirect address
+                                pointerContents = Convert.ToInt16(intPossiblePointer).ToString("X4");
                             }
 
 
@@ -536,6 +768,8 @@ namespace ECU_Debugger
                         int intVCALNum = Convert.ToInt32(ASMFileArray[index].Substring(24, 1));
                         string CallAddress = String.Concat(ASMFileArray[21 + intVCALNum].Substring(ASMFileArray[21 + intVCALNum].LastIndexOf(";") + 9, 2), ASMFileArray[21 + intVCALNum].Substring(ASMFileArray[21 + intVCALNum].LastIndexOf(";") + 7, 2));
                         intCallAddy = Convert.ToInt32(CallAddress, 16);
+                        //If using vcal reroute and the vcal being called is the one we are re-reouting- change the breakpoint to the actual vcal sub, not where the vector table says
+                        if (usingVCALreRoute && intVCALNum == VCALNumber) intCallAddy = realVCALAddress;
                         break;
                     case "RT":
                         intNextInstAddy = intStack1Value;
@@ -568,13 +802,13 @@ namespace ECU_Debugger
                         break;
                     //Used only for lookahead ram pointers
                     case "MOV":
-                        if(firstOperand == "X1" && secondOperand.Contains("#") || firstOperand == "X1" && secondOperand.Contains("tbl_"))
+                        if (firstOperand == "X1" && secondOperand.Contains("#") || firstOperand == "X1" && secondOperand.Contains("tbl_"))
                         {
                             string strNewX1 = thisInstructionLine.Substring(thisInstructionLine.Length - 2, 2) + thisInstructionLine.Substring(thisInstructionLine.Length - 4, 2);
                             intModifiedX1 = Convert.ToInt32(strNewX1, 16);
                             useModifiedX1 = true;
                         }
-                        if(firstOperand == "X2" && secondOperand.Contains("#") || firstOperand == "X2" && secondOperand.Contains("tbl_"))
+                        if (firstOperand == "X2" && secondOperand.Contains("#") || firstOperand == "X2" && secondOperand.Contains("tbl_"))
                         {
                             string strNewX2 = thisInstructionLine.Substring(thisInstructionLine.Length - 2, 2) + thisInstructionLine.Substring(thisInstructionLine.Length - 4, 2);
                             intModifiedX2 = Convert.ToInt32(strNewX2, 16);
@@ -589,7 +823,7 @@ namespace ECU_Debugger
                         if (firstOperand == "X2" && secondOperand == "A")
                         {
 
-                            intModifiedX1 = GetPointerFromReg("ACC");
+                            intModifiedX2 = GetPointerFromReg("ACC");
                             useModifiedX2 = true;
                         }
                         break;
@@ -647,9 +881,10 @@ namespace ECU_Debugger
             callAddress = intCallAddy;
             ROMPointerContents = pointerContents;
             opCode = thisOpcode;
-            return DDCorrect;   
+            return DDCorrect;
 
         }
+
         //Use the last byte in the opcode to determine the Jump offset and address
         private int determineOffsetJumpAddress(int instructionAddress, int ASMIndex, int OpcodeBytelength)
         {
@@ -661,7 +896,7 @@ namespace ECU_Debugger
             }
             return jumpAddress;
         }
-        
+
         // handles the following cases, [Pointer] , 0xxxxh[Pointer] , tbl_XXXX[Pointer] , 0xxxxh , tbl_XXXX
         // This will check for "h", "tbl_", and "[]" and get the int value of each and then add them to get the address.
         // Then the contents of the adress is obtained and returned as a hex string. 
@@ -678,7 +913,7 @@ namespace ECU_Debugger
             bool boolNegativeOffset = false;
             string SecondInstructionOperand = ASMFileArray[ArrayIndex].Split(',', ';')[1].Trim();
 
-            
+
             if (SecondInstructionOperand.Contains("h"))
             {
                 hAddress = Convert.ToInt32(SecondInstructionOperand.Substring(
@@ -715,31 +950,82 @@ namespace ECU_Debugger
                 ContentsAddress = hAddress + TableAddress + PointerRegisterAddress;
             }
 
-                ContentsByte1 = BinWithPatchesAndDebuggerCode[ContentsAddress];
-                ContentsByte2 = BinWithPatchesAndDebuggerCode[ContentsAddress + 1];
-                if (ReturnWord)
-                {
-                    int WordValue = (ContentsByte2 << 8) + ContentsByte1;
-                    ContentsHexString = WordValue.ToString("X4");
-                }
-                else
-                {
-                    ContentsHexString = ContentsByte1.ToString("X2");
-                }
+            ContentsByte1 = BinWithPatchesAndDebuggerCode[ContentsAddress];
+            ContentsByte2 = BinWithPatchesAndDebuggerCode[ContentsAddress + 1];
+            if (ReturnWord)
+            {
+                int WordValue = (ContentsByte2 << 8) + ContentsByte1;
+                ContentsHexString = WordValue.ToString("X4");
+            }
+            else
+            {
+                ContentsHexString = ContentsByte1.ToString("X2");
+            }
             return ContentsHexString;
         }
 
-
         private void btnClearText_Click(object sender, EventArgs e)
+        {
+            ClearTraceLogBox();
+        }
+        
+        // Clear tracebox
+        private void ClearTraceLogBox()
         {
             if (tboxTraceWindow.Text != "")
             {
                 tboxTraceWindow.Text = "";
             }
         }
+        
+        // Clear all data boxes
+        private void ClearAllDataBoxes()
+        {
+            //ClearTraceLogBox();
+            tboxR0.Text = string.Empty;
+            tboxR1.Text = string.Empty;
+            tboxR2.Text = string.Empty;
+            tboxR3.Text = string.Empty;
+            tboxR4.Text = string.Empty;
+            tboxR5.Text = string.Empty;
+            tboxR6.Text = string.Empty;
+            tboxR7.Text = string.Empty;
+            tboxDP.Text = string.Empty;
+            tboxX1.Text = string.Empty;
+            tboxX2.Text = string.Empty;
+            tboxLRB.Text = string.Empty;
+            tboxDPconts.Text = string.Empty;
+            tboxDPConts_ROM.Text = string.Empty;
+            tboxACC.Text = string.Empty;
+            tboxXRAM1.Text = string.Empty;
+            tboxXRAM2.Text = string.Empty;
+            tboxStackPointer.Text = string.Empty;
+            tboxStack1.Text = string.Empty;
+            tboxStack2.Text = string.Empty;
+            tboxStack3.Text = string.Empty;
+            tboxStack4.Text = string.Empty;
+            tboxStack5.Text = string.Empty;
+            tboxRamWatch.Text = string.Empty;
+            tboxPSWH.Text = string.Empty;
+            tboxPSWL.Text = string.Empty;
+            tboxPSWL4.Text = string.Empty;
+            tboxPSWL5.Text = string.Empty;
+            tboxCF.Text = string.Empty;
+            tboxZF.Text = string.Empty;
+            tboxHC.Text = string.Empty;
+            tboxBCB.Text = string.Empty;
+            tboxDD.Text = string.Empty;
+            tboxMIE.Text = string.Empty;
+            tboxSF.Text = string.Empty;
+            tboxSCB.Text = string.Empty;
+            //nudBPAddress.Value = 0;
+            tboxBreakPoint.Text = string.Empty;
+
+        }
+
         private void rtboxASMFile_MouseDown(object sender, MouseEventArgs e)
         {
-            if (tboxECUReturnAddress.Text != "")
+            if (tboxBreakPoint.Text != "")
             {
                 HighlightLineInASMTextBox(CurrentASMIndex);
             }
@@ -748,21 +1034,19 @@ namespace ECU_Debugger
 
         private void rtboxASMFile_Click(object sender, EventArgs e)
         {
-            if (tboxECUReturnAddress.Text != "")
-            {
-                HighlightLineInASMTextBox(CurrentASMIndex);
-            }
-
+            highlightAfterValidating(0);
         }
-        #endregion
 
-        #region ASM Renaming
+        //---------------- ASM Renaming -------------------------------------------
+
         DataSet dataset1 = new DataSet();
         OpenFileDialog OPENAsmRenamingFile = new OpenFileDialog();
+
         
         private void btnOpenXMLFile_Click(object sender, EventArgs e)
         {
             OpenXMLFile();
+            readyToRename = true; ;
         }
 
         private void OpenXMLFile()
@@ -770,16 +1054,17 @@ namespace ECU_Debugger
             OPENAsmRenamingFile.Filter = "XML Files | *.xml";
             if (OPENAsmRenamingFile.ShowDialog() == DialogResult.OK)
             {
-                ReadXMLFileIntoDataset();
+                xmlRenamingFilePath = OPENAsmRenamingFile.FileName;
+                ReadXMLFileIntoDataset(xmlRenamingFilePath);
             }
         }
 
-        private void ReadXMLFileIntoDataset()
+        private void ReadXMLFileIntoDataset(string xmlPath)
         {
             try
             {
                 dataset1.Clear();
-                dataset1.ReadXml(OPENAsmRenamingFile.FileName);
+                dataset1.ReadXml(xmlPath);
                 RenameXMLReady = true;
             }
             catch (Exception error)
@@ -787,7 +1072,6 @@ namespace ECU_Debugger
                 MessageBox.Show(error.Message);
             }
         }
-
 
         private void RenameUsingValuesFromXML(string[] OrigArray, string[] NewArray, bool RestoreToOriginalValue = false)
         {
@@ -838,15 +1122,17 @@ namespace ECU_Debugger
                 }
                 progressBar3.PerformStep();
             }
-            MessageBox.Show("Rename Complete");
+            if(!cboxRenameOnChange.Checked)
+            {
+                MessageBox.Show("Rename Complete");
+            }
             progressBar3.Visible = false;
 
         }
 
-
         public string CaseSenstiveReplace(string originalString, string oldValue, string newValue)
         {
-
+            if (oldValue == "") return originalString;
             //Ignore search match if it is located after " DB "
             //if (cBoxIgnoreDB.Checked && originalString.Contains(" DB ") && originalString.IndexOf(" DB ") < originalString.IndexOf(oldValue))
             if (originalString.Contains(" DB ") && originalString.IndexOf(" DB ") < originalString.IndexOf(oldValue))
@@ -878,14 +1164,20 @@ namespace ECU_Debugger
             return originalString.Replace(oldValue, newValue);
         }
 
-
         private void btnApplyRenamingMask_Click(object sender, EventArgs e)
         {
+            renameASMArray();
+        }
+
+        private void renameASMArray()
+        {
+            if (!readyToRename)
+            {
+                return;
+            }
             try
             {
-
-                RenamedASMFileArray = System.IO.File.ReadAllLines(CurrentASMPath);
-                ReadXMLFileIntoDataset();
+                ReadXMLFileIntoDataset(xmlRenamingFilePath);
                 RenameUsingValuesFromXML(ASMFileArray, RenamedASMFileArray);
                 rtboxASMFile.Lines = RenamedASMFileArray;
             }
@@ -893,77 +1185,52 @@ namespace ECU_Debugger
             {
                 MessageBox.Show(error.Message);
             }
-
-
         }
 
         private void btnRestore_Click(object sender, EventArgs e)
         {
-            try
+            if (showRenamed)
             {
-                ReadXMLFileIntoDataset();
-                RenameUsingValuesFromXML(ASMFileArray, RenamedASMFileArray, true);
                 rtboxASMFile.Lines = RenamedASMFileArray;
             }
-            catch (Exception error)
+            else
             {
-                MessageBox.Show(error.Message);
+                rtboxASMFile.Lines = ASMFileArray;
             }
+            showRenamed = !showRenamed;
+            highlightAfterValidating(0);
+            
         }
         private void btnSaveRenamedASM_Click(object sender, EventArgs e)
         {
-            string RenamedAsmName = System.IO.Path.GetDirectoryName(CurrentASMPath) + "\\" + "RENAMED_" + tboxASMSimpleName.Text;
+            string RenamedAsmName = System.IO.Path.GetDirectoryName(CurrentASMPath) + "RENAMED_" + System.IO.Path.GetFileName(CurrentASMPath);
             using (StreamWriter outputfile = new StreamWriter(RenamedAsmName))
             {
                 foreach (string line in RenamedASMFileArray)
                     outputfile.WriteLine(line);
             }
-            MessageBox.Show("File saved as RENAMED_" + tboxASMSimpleName.Text);
+            MessageBox.Show("File saved as " + System.IO.Path.GetFileName(RenamedAsmName));
         }
 
-        #endregion
+        //-------------------------------------------------------------------------
 
-        #region GUI Method
-        public Form1()
-        {
-            InitializeComponent();
-        }
+
         //Used to convert hex values written in serial send box to their byte values
         public static byte[] StringToByteArray(String hex)
         {
+            hex = hex.Replace(" ", string.Empty);
+
             int NumberChars = hex.Length;
             byte[] bytes = new byte[NumberChars / 2];
             for (int i = 0; i < NumberChars; i += 2)
                 bytes[i / 2] = Convert.ToByte(hex.Substring(i, 2), 16);
             return bytes;
         }
-        //Set checkboxes and paths
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            serialPort1.DtrEnable = false;
-            serialPort1.RtsEnable = false;
-            chboxChecksum.Checked = true;
-            cboxAutoStep.Checked = false;
-            cboxAddCodeToRom.Checked = true;
-            cboxAutoDasmBin.Checked = true;
-            btnLoadASMFile.Enabled = false;
-            cboxDebuggerIE.Checked = false;
-            nudDebuggerIE.Enabled = false;
-            cboxDebuggerLRB.Checked = false;
-            nudDebuggerLRB.Enabled = false;
-            cboxDebuggerPSW.Checked = false;
-            nudDebuggerPSW.Enabled = false;
-            cboxAutoUploadOnBINLoad.Checked = true;
-            pathFile = Directory.GetCurrentDirectory();
-            pathFile += @"\ECUTrace.txt";
-            cboxSaveTrace.Checked = false;
-            progressBar3.Visible = false;
-        }
 
         private string GetPointerValuesFromPointerTextBox(TextBox Textbox, string PointerName)
         {
             string Output = "";
-            if (Textbox.Text != "" && Convert.ToInt32(Textbox.Text, 16) > 12288 && Convert.ToInt32(Textbox.Text, 16) < 32769)
+            if (Textbox.Text != "" && Convert.ToInt32(Textbox.Text, 16) > 0x47e && Convert.ToInt32(Textbox.Text, 16) < 0x8000 && BINOpened)
             {
                 try
                 {
@@ -990,8 +1257,10 @@ namespace ECU_Debugger
             return Output;
         }
 
+        //------------------- Serial and ECU Datastream --------------------------
+        
         //Serial handler for data received from the ECU - grab a packet, switch buffers and send it off for processing
-        private void serialPort1_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        private void SerialPort1_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             if(serialPort1.BytesToRead == 0) { return; }
 
@@ -1000,7 +1269,6 @@ namespace ECU_Debugger
             int PacketStatus = 1;
             int BytesRead = 0;
             int ErrorCount = 0;
-            //Thread.Sleep(2);
 
             //while (serialPort1.BytesToRead > 0)
             bool ChecksumReceived = false;
@@ -1029,11 +1297,12 @@ namespace ECU_Debugger
                             else
                             { PacketStatus--; }
                             break;
+                        // Packet status 3 = footer recd. Get byte count
                         case 3:
                             ReportedByteCount = CurrentByte;
                             PacketStatus++;
                             break;
-                        //Packet status 4 = Found DE and AD. This is the checksum byte. Send packet for processing
+                        //Packet status 4 = Found DE and AD and byte count . This is the checksum byte. Send packet for processing
                         case 4:
                             PacketStatus = 1;
                             ChecksumReceived = true;
@@ -1053,7 +1322,11 @@ namespace ECU_Debugger
 
                         dataBuffer.Clear();
                         dataBuffer1.Clear();
-                        MessageBox.Show(error.Message + "There was a problem reading from the ECU serial port. Check the COM port settings to be sure they match the ECU settings.");
+                        if (!cbox_QuietTimeOuts.Checked)
+                        {
+                            MessageBox.Show(error.Message + "There was a problem reading from the ECU serial port. Check the COM port settings to be sure they match the ECU settings.");
+                        }
+                        
                         break;
                     }
 
@@ -1084,21 +1357,22 @@ namespace ECU_Debugger
                     BufferBeingProcessed = dataBuffer.GetRange(intPacketStartIndex, ReportedByteCount);
                     dataBuffer.Clear();
                 }
-            }
+
+                CheckSumPassed = CheckCheckSum(BufferBeingProcessed);
+
+                if (CheckSumPassed )
+                {
+                    this.ProcessSerialPacketUpdateTraceAndTboxes(BufferBeingProcessed);
+                }
+                else
+                {
+                    MessageBox.Show("Serial Packet from ECU failed Checksum");
+                }
+                }
             catch (Exception error)
             {
                 MessageBox.Show(error.Message);
                 serialPort1.DiscardInBuffer();
-            }
-            CheckSumPassed = CheckCheckSum(BufferBeingProcessed);
-
-            if (CheckSumPassed || !chboxChecksum.Checked)
-            {
-                this.ProcessSerialPacketUpdateTraceAndTboxes();
-            }
-            else
-            {
-                MessageBox.Show("Serial Packet from ECU failed Checksum");
             }
         }
         
@@ -1167,7 +1441,7 @@ namespace ECU_Debugger
                    "              " + "SS1 ="            + strTrace_Stack1+ "      "            + "SS2 =" + strTrace_Stack2+ "      "    + "SS3 =" + strTrace_Stack3 + "      "    + "SS4 =" + strTrace_Stack4        + "\r\n" +
                    "              " + "DP  ="            + strTrace_DP    + "      "            + "X1  =" + strTrace_X1    + "      "    + "X2  =" + strTrace_X2     + "      "    + "SSP =" + strTrace_StackPointer  + "\r\n" +
                    "              " + "CF  ="            + strTrace_CF    + "         "         + "DD  =" + strTrace_DD    + "         " + "ZF  =" + strTrace_ZF     + "         " + "PSW =" + strTrace_PSW           + "\r\n" +
-                   "              " + strTrace_Xram1Addy + " = "          + strTrace_Xram1Conts + "     " + strTrace_Xram2Addy + " =" + strTrace_Xram2Conts + "      " + "DPC =" + /*tboxDPconts.Text*/ strTrace_DPconts +  "\r\n" +
+                   "              " + strTrace_Xram1Addy + " = "          + strTrace_Xram1Conts + "     " + strTrace_Xram2Addy + " =" + strTrace_Xram2Conts + "      " + strExpectedRAMWatchAddress + " = " + strtrace_RamWatch + "     " + "DPC =" +  strTrace_DPconts +  "\r\n" +
                    "              " + "ACC ="            + strTrace_ACC ;
                    
             try
@@ -1182,12 +1456,23 @@ namespace ECU_Debugger
                     {
                         InstructionLine = ASMFileArray[CurrentASMIndex];
                     }
+                    
+                    
                     //Show calculated pointer location and ROM contents for indirect referencing pointers in tracelog
                     if (PointerContentsHexValue != "")
                     {
-                        InstructionLine = InstructionLine.Insert(InstructionLine.IndexOf(";") - 8, "( " + ContentsAddress.ToString("X2") + " = " +PointerContentsHexValue + " )");
-                        lblLA11.Text = ContentsAddress.ToString("X4") + "h";
-                        tboxLA1_1.Text = PointerContentsHexValue;
+                        // Output for indirect Jump instruction
+                        if(boolReDasm)
+                        {
+                            InstructionLine = InstructionLine.Insert(InstructionLine.IndexOf("]") +1 , "( " + PointerContentsHexValue + "h )");
+                        }
+                        // Output for contents instruction
+                        else
+                        {
+                            InstructionLine = InstructionLine.Insert(InstructionLine.IndexOf(";") - 8, "( " + ContentsAddress.ToString("X2") + " = " + PointerContentsHexValue + " )");
+                        }
+                        lblXRAMbox1.Text = ContentsAddress.ToString("X4") + "h";
+                        tboxXRAM1.Text = PointerContentsHexValue;
 
                         //Rename pointer location for tracelog if a rename file XML has been read already
                         if (RenameXMLReady && boolOffsetPointer)
@@ -1223,18 +1508,28 @@ namespace ECU_Debugger
             return strRegisters;
         }
         //Get strings from Packet data, create trace string, update trace window, save to log file
-        private void ProcessSerialPacketUpdateTraceAndTboxes()
+        private void ProcessSerialPacketUpdateTraceAndTboxes(List<int> buffer)
         {
-
+            // If debug mode, checksum dummy packet and use
+            if (DEBUG) 
+            {
+                int chkSum = 0;
+                foreach(int i in DEBUG_PACKET) 
+                {
+                    chkSum += i; 
+                }
+                DEBUG_PACKET.Add(chkSum & 0xff);
+                buffer = DEBUG_PACKET; 
+            }
 
             //Update all register strings and textboxes from ECU serial packet
-            GetVariablesAndStringsFromDataPacket(BufferBeingProcessed);
+            GetVariablesAndStringsFromDataPacket(buffer);
 
-            if (boolNewBreakpoint)
+            if (boolNewBreakpoint && OstrichPort!=null && OstrichPort.IsOpen)
             {
                 boolNewBreakpoint = false;
                 WriteTheNextBreakpoint();
-                displayExtraRamData();
+                XRAMReceivedHandler();
             }
 
             //Create PSW bit arrray and parse data into strings for tboxes and trace log
@@ -1248,7 +1543,7 @@ namespace ECU_Debugger
             tboxTraceWindow.AppendText(strTraceLog);
             
             //Save data to log file
-            SaveDataToTxtFile();
+            if(cboxSaveTrace.Checked) SaveDataToTxtFile(pathFile, strTraceLog, true);
 
             //Report LRB or SCB conflicts
             if (LRBConflict)
@@ -1308,7 +1603,8 @@ namespace ECU_Debugger
             //Process byte from packet, stopping before the footer, byte count, and checksum
             foreach (int element in dataInput)
             {
-                if (PacketIndex == ReportedByteCount - 6) break;
+                //Data = packet size - 4 for 2 termination bytes, byte count, and checksum
+                if (PacketIndex == ReportedByteCount - 4) break;
 
                 switch (PacketIndex)
                 {
@@ -1321,6 +1617,7 @@ namespace ECU_Debugger
                     case 1:
                         OldR1 = strPlain_R1;
                         strPlain_R1 = element.ToString("X2");
+                        strPlain_er0 = strPlain_R1 + strPlain_R0;
                         tboxR1.Text = strPlain_R1;
                         strTrace_R1 = AddBracketsIfNotEqual(OldR1, strPlain_R1);
                         break;
@@ -1333,6 +1630,7 @@ namespace ECU_Debugger
                     case 3:
                         OldR3 = strPlain_R3;
                         strPlain_R3 = element.ToString("X2");
+                        strPlain_er1 = strPlain_R3 + strPlain_R2;
                         tboxR3.Text = strPlain_R3;
                         strTrace_R3 = AddBracketsIfNotEqual(OldR3, strPlain_R3);
                         break;
@@ -1345,6 +1643,7 @@ namespace ECU_Debugger
                     case 5:
                         OldR5 = strPlain_R5;
                         strPlain_R5 = element.ToString("X2");
+                        strPlain_er2 = strPlain_R5 + strPlain_R4;
                         tboxR5.Text = strPlain_R5;
                         strTrace_R5 = AddBracketsIfNotEqual(OldR5, strPlain_R5);
                         break;
@@ -1357,17 +1656,20 @@ namespace ECU_Debugger
                     case 7:
                         OldR7 = strPlain_R7;
                         strPlain_R7 = element.ToString("X2");
+                        strPlain_er3 = strPlain_R7 + strPlain_R6;
                         tboxR7.Text = strPlain_R7;
                         strTrace_R7 = AddBracketsIfNotEqual(OldR7, strPlain_R7);
                         break;
-
+                    //[DP] RAM Contents high byte
                     case 8:
                         Old_DPconts = strPlain_DPconts;
+                        intDPConts_RAM = element << 8;
                         strPlain_DPconts = element.ToString("X2");
                         break;
+                    //[DP] RAM Contents low byte
                     case 9:
+                        intDPConts_RAM += element;
                         strPlain_DPconts += element.ToString("X2");
-                        //tboxDPconts.Text = strPlain_DPconts;
                         strTrace_DPconts = AddBracketsIfNotEqual(Old_DPconts, strPlain_DPconts);
                         break;
 
@@ -1375,25 +1677,35 @@ namespace ECU_Debugger
                     case 10:
                         OldDP = strPlain_DP;
                         intDPAddress = element << 8;
-                        strPlain_DP = element.ToString("X2");
+                        //strPlain_DP = element.ToString("X2");
                         break;
                     //DP Low byte
                     case 11:
                         intDPAddress += element;
-                        strPlain_DP += element.ToString("X2");
+                        strPlain_DP = intDPAddress.ToString("X4");
                         tboxDP.Text = strPlain_DP;
                         strTrace_DP = AddBracketsIfNotEqual(OldDP, strPlain_DP);
-                        lblDPContents.Text = "[DP=" + (Convert.ToInt32(strPlain_DP, 16) & 0xfffe).ToString("X4") + "h]";
+                        
+                        //Update DP RAM contents tbox
                         tboxDPconts.Text = strPlain_DPconts;
+
+                        //Update DP ROM contents tbox
+                        tboxDPConts_ROM.Text = "";
+                        if(intDPAddress < 0x8000 && intDPAddress > 0 && BINOpened) tboxDPConts_ROM.Text = ((BinWithPatchesAndDebuggerCode[intDPAddress + 1] << 8) + BinWithPatchesAndDebuggerCode[intDPAddress]).ToString("X4");
+                        
+                        //Update DP Ram binary display
                         lblDPContsBinary.Text = "";
-                        lblRomRam.Text = "RAM";
-                        if (intDPAddress > 0x47f)
+
+                        //Byte for binary label = DP low byte
+                        byte DPByteForBinary = (byte)intDPConts_RAM;
+
+                        //If DP address is not even the high byte is the actual addressed byte
+                        if ((intDPAddress & 1) == 1)
                         {
-                            lblDPContents.Text = "[DP=" + Convert.ToInt32(strPlain_DP, 16).ToString("X4") + "h]";
-                            tboxDPconts.Text = ((BinWithPatchesAndDebuggerCode[intDPAddress + 1] << 8) + BinWithPatchesAndDebuggerCode[intDPAddress]).ToString("X4");
-                            lblRomRam.Text = "ROM";
+                            DPByteForBinary = (byte)(intDPConts_RAM >> 8); 
                         }
-                        lblDPContsBinary.Text = Convert.ToString((Convert.ToInt32(tboxDPconts.Text, 16) & 0xff) >> 4, 2).PadLeft(4, '0') + " " + Convert.ToString((Convert.ToInt32(tboxDPconts.Text, 16) & 0xf), 2).PadLeft(4, '0');
+                        string[] DPContsNibs = ConvertToBinaryNibbles(DPByteForBinary);
+                        lblDPContsBinary.Text = DPContsNibs[2] + " " + DPContsNibs[3];
                         break;
                     //X1 high Byte
                     case 12:
@@ -1470,7 +1782,7 @@ namespace ECU_Debugger
                     case 23:
                         intCurrent_BP = intCurrent_BP + element;
                         strPlain_BP += element.ToString("X2");
-                        tboxECUReturnAddress.Text = strPlain_BP;
+                        tboxBreakPoint.Text = strPlain_BP;
                         strTrace_BP = "[" + strPlain_BP + "]";
                         //Breakpoint data has been updated, write next jump
                         if (OldBP != strPlain_BP)
@@ -1480,98 +1792,112 @@ namespace ECU_Debugger
                             strTrace_BP = " " + strPlain_BP + " ";
                         }
                         break;
-                    //Extra RAM Lookup 1 byte 1
+                    //Extra RAM byte 1
                     case 24:
-                        intXramLA11Value = element;
+                        XRAMByte1 = element;
                         break;
-                    //Extra RAM Lookup 1 byte 2
+                    //Extra RAM byte 2
                     case 25:
-                        intXramLA12Value = element;
+                        XRAMByte2 = element;
                         break;
-                    //Extra RAM Lookup 2 byte 1
+                    //Extra RAM byte 3
                     case 26:
-                        intXramLA21Value = element;
+                        XRAMByte3 = element;
                         break;
-                    //Extra RAM Lookup 2 byte 2
+                    //Extra RAM byte 4
                     case 27:
-                        intXramLA22Value = element;
+                        XRAMByte4 = element;
                         break;
-                    //RAM watch byte 1
+                    //Extra RAM byte 5
                     case 28:
-                        intRAMWatchByte1 = element;
-                        intRamWatchValue = intRAMWatchByte1;
+                        XRAMByte5 = element;
                         break;
-                    //Ram watch Byte 2
+                    //Extra RAM byte 6
                     case 29:
-                        intRAMWatchByte2 = element;
-                        intRamWatchValue += (intRAMWatchByte2 >> 8);
+                        XRAMByte6 = element;
+                        break;
+                    //Extra RAM byte 7
+                    case 30:
+                        XRAMByte7 = element;
+                        break;
+                    //Extra RAM byte 8
+                    case 31:
+                        XRAMByte8 = element;
+                        break;
+                    //Extra RAM byte 9
+                    case 32:
+                        XRAMByte9 = element;
+                        break;
+                    //Extra RAM byte 10
+                    case 33:
+                        XRAMByte10 = element;
                         break;
                     //Stack pointer high
-                    case 30:
+                    case 34:
                         OldStackPointer = strPlain_StackPointer;
                         strPlain_StackPointer = element.ToString("X2");
                         break;
                     //Stack pointer Low
-                    case 31:
+                    case 35:
                         strPlain_StackPointer += element.ToString("X2");
                         strTrace_StackPointer = AddBracketsIfNotEqual(OldStackPointer, strPlain_StackPointer);
                         tboxStackPointer.Text = strPlain_StackPointer;
                         break;
                     //Top of stack High byte (PC for normal RT or PSW for ISR RTI)
-                    case 32:
+                    case 36:
                         Old_Stack1 = strPlain_Stack1;
                         intStack1Value = element << 8;
                         strPlain_Stack1 = element.ToString("X2");
                         break;
                     //Top of stack low byte
-                    case 33:
+                    case 37:
                         intStack1Value = intStack1Value + element;
                         strPlain_Stack1 += element.ToString("X2");
                         tboxStack1.Text = strPlain_Stack1;
                         strTrace_Stack1 = AddBracketsIfNotEqual(Old_Stack1, strPlain_Stack1);
                         break;
                     //Stack 2 High byte (LRB for ISR RTI)
-                    case 34:
+                    case 38:
                         Old_Stack2 = strPlain_Stack2;
                         strPlain_Stack2 = element.ToString("X2");
                         break;
                     //Stack 2 low byte 
-                    case 35:
+                    case 39:
                         strPlain_Stack2 += element.ToString("X2");
                         tboxStack2.Text = strPlain_Stack2;
                         strTrace_Stack2 = AddBracketsIfNotEqual(Old_Stack2, strPlain_Stack2);
                         break;
                     //Stack 3 high Byte (ACC for ISR RTI)
-                    case 36:
+                    case 40:
                         Old_Stack3 = strPlain_Stack3;
                         strPlain_Stack3 = element.ToString("X2");
                         break;
                     //Stack 3 low byte
-                    case 37:
+                    case 41:
                         strPlain_Stack3 += element.ToString("X2");
                         tboxStack3.Text = strPlain_Stack3;
                         strTrace_Stack3 = AddBracketsIfNotEqual(Old_Stack3, strPlain_Stack3);
                         break;
                     //Stack 4 High byte (PC for RTI if in ISR)
-                    case 38:
+                    case 42:
                         Old_Stack4 = strPlain_Stack4;
                         intStack4Value = element << 8;
                         strPlain_Stack4 = element.ToString("X2");
                         break;
                     //stack4 lo
-                    case 39:
+                    case 43:
                         intStack4Value = intStack4Value + element;
                         strPlain_Stack4 += element.ToString("X2");
                         tboxStack4.Text = strPlain_Stack4;
                         strTrace_Stack4 = AddBracketsIfNotEqual(Old_Stack4, strPlain_Stack4);
                         break;
                     //Stack 5 hi byte (Top of stack pre ISR)
-                    case 40:
+                    case 44:
                         Old_Stack5 = strPlain_Stack5;
                         strPlain_Stack5 = element.ToString("X2");
                         break;
                     //Stack 5
-                    case 41:
+                    case 45:
                         strPlain_Stack5 += element.ToString("X2");
                         tboxStack5.Text = strPlain_Stack5;
                         strTrace_Stack5 = AddBracketsIfNotEqual(Old_Stack5, strPlain_Stack5);
@@ -1585,7 +1911,13 @@ namespace ECU_Debugger
 
             return;
         }
-
+        // Returns string[] of 4 nibbles {MSB , MMSB, MLSB, LSB}
+        private string[] ConvertToBinaryNibbles(int value)
+        {
+            BitArray bits = CreateBitArray(value, 16);
+            string[] nibs = BitArrayToBinaryNibbles(bits);
+            return nibs;
+        }
         //Convert byte or word into bit array
         private System.Collections.BitArray CreateBitArray(int value, int BitCount)
         {
@@ -1755,7 +2087,22 @@ namespace ECU_Debugger
             return;
             
         }
-        
+
+        // Convert a bit array into string [] split up into 4 bit nibbles
+        private string[] BitArrayToBinaryNibbles(System.Collections.BitArray bitArray)
+        {
+            string[] nibs = new string[4];
+            int nib = 0;
+            //for (int i = bitArray.Length -1 ; i >= 0; i--)
+            for (int i = 0; i < bitArray.Length; i++)
+            {
+                nibs[nib] += bitArray[i] ? "1" : "0";
+                if ((i+1) % 4 == 0) nib++;
+            }
+            return nibs;
+               
+        }
+
         //Compare the original and Current string. Add [] if differnt, spaces if the same
         private string AddBracketsIfNotEqual(string Orig, string Current)
         {
@@ -1767,29 +2114,22 @@ namespace ECU_Debugger
             Current = " " + Current + " ";
             return Current;
         }
-        
-        //About - menu item
-        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            MessageBox.Show("This program will allow you to step through the instructions on " +
-                "OBD 1 Honda ECUs while monitoring the main registers as they are changed " +
-                "\r\n\r\n Created by Awon using code provided by Catur P.  " +
-                "\r\n dasm662 by Andy Sloan and Doc is also used and distributed with ECU Debugger." ,
-                "About ECU Debugger", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-       
-        //Exit - menu item
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Application.Exit();
-        }
 
-        private void Form1_Resize(object sender, EventArgs e)
+        //Save Trace log file
+        private void SaveDataToTxtFile(string Filepath, string stringToWrite, bool append)
         {
-            groupBox12.Width = panel1.Width - 213;
-            groupBox12.Height = panel1.Height - 40;
+            try
+            {
+                //objStreamWriter = new StreamWriter(pathFile, state_AppendText);
+                objStreamWriter = new StreamWriter(Filepath, append);
+                objStreamWriter.WriteLine(stringToWrite);
+                objStreamWriter.Close();
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(err.Message);
+            }
 
-            tboxTraceWindow.Height = panel1.Height - 92;
         }
 
         //Get available ports for Serial 1 - ECU serial
@@ -1826,7 +2166,7 @@ namespace ECU_Debugger
             }
         }
 
-       //Close Serial port 1 - ECU serial port
+        //Close Serial port 1 - ECU serial port
         private void btnCloseCOMPort_Click(object sender, EventArgs e)
         {
             progressBar1.Value = 0;
@@ -1843,576 +2183,83 @@ namespace ECU_Debugger
             }
         }
 
-        #endregion
-
-        #region Ostrich
-        //Handle data sent from connected ostrich - eg serial fetch and bulk write operations
-        private void serialport2_DataReceived(object sender, SerialDataReceivedEventArgs e)
-        {
-            OstrichRXBuffer.Clear();
-            int CurrentByte;
-            int OstrichRXChecksum = 0;
-            int ByteCount = 0;
-            
-            while (OstrichStatus != 0)
-            //while (serialPort2.BytesToRead > 0)
-            {
-
-                try
-                {
-                    CurrentByte = (serialPort2.ReadByte());
-                    OstrichRXChecksum = OstrichRXChecksum + CurrentByte;
-                    ByteCount++;
-                    if(CurrentByte == 63) // ? sent from ostrich, indicating an error
-                    {
-                        OstrichSentError = true;
-                        OstrichStatus = 0;
-                    }
-                    switch (OstrichStatus)
-                    {
-                        //Packet status 1 = Looking For serial number
-                        case 1:
-                            if (ByteCount == 10)
-                            {
-                                OstrichRXChecksum = OstrichRXChecksum - CurrentByte;
-                                ushort WordCheckSum = Convert.ToUInt16(OstrichRXChecksum);
-                                byte ByteCheckSum = (byte)(WordCheckSum & 0xFF);
-                                OstrichStatus = 0;
-                                this.Invoke(new EventHandler(DisplayOstrichSerialNumber));
-                            }
-                            else
-                            {
-                                OstrichRXBuffer.Add(CurrentByte);
-                                OstrichSerialNumber[ByteCount - 1] = (byte)CurrentByte;
-                            }
-                            break;
-                        //Currently bulk sending BinWithPatchesAndDebuggerCode
-                        case 2:
-                           if(CurrentByte == 79) //Got good response from ostrich, Continue upload
-                            {
-                                this.Invoke(new EventHandler(ContinueBulkWrite));
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                catch (Exception error)
-                {
-                    MessageBox.Show(error.Message);
-                }
-            }
-            if (OstrichSentError)
-            {
-                this.Invoke(new EventHandler(DisplayOstrichError));
-            }
-        }
-        //Show that there was an error in the ostrich serial number box, show message box, set ostrich error
-        private void DisplayOstrichError(object sender, EventArgs e)
-        {
-            tboxOstrichSerialNumber.Text = "Ostrich Error";
-            MessageBox.Show("Ostrich Sent an Error");
-            OstrichSentError = false;
-        }
-        
-        //Display ostrich serial number and clear ostrich buffer
-        private void DisplayOstrichSerialNumber(object sender, EventArgs e)
-        {
-            tboxOstrichSerialNumber.Text = OstrichRXDataFormat(OstrichRXBuffer);
-            OstrichRXBuffer.Clear();
-        }
-        
-        //Open BIN file and create 3 arrays of it.  Dasm if autodasm is checked
-        private void CreateNewBinArraysFromOpenBINDialogFile()
-        {
-            tboxBinSimpleName.Text = OPENBINDialog.SafeFileName;
-            OriginalBinArray = System.IO.File.ReadAllBytes(OPENBINDialog.FileName);
-            OstrichBinArrayOut = System.IO.File.ReadAllBytes(OPENBINDialog.FileName);
-            BinWithPatchesAndDebuggerCode = System.IO.File.ReadAllBytes(OPENBINDialog.FileName);
-            if (cboxAutoDasmBin.Checked)
-            {
-                rtboxASMFile.Text = "";
-                CreateAsmFileFromBin();
-            }
-            BinHasBeenUploadedSinceCreation = false;
-        }
+        //------------------- BIN and EMU Handling --------------------------------
         
         //Patch bin using .code file and upload to ostrich (also update PSW LRB IE nuds)
-        private void PrepareBinAndUploadToOstrich()
+        private void AddDebuggerCodeAndPatchesToRomAndUpload()
         {
-            if (BINOpened)
+            //No Bin file has been opened
+            if (!BINOpened)
             {
-                if (BinHasBeenUploadedSinceCreation)
-                {
-                    CreateNewBinArraysFromOpenBINDialogFile();
-                }
-                LoadCodeFileSettings();
+                MessageBox.Show("Please open a BIN file first.");
+                return;
+            }
+            
+            //Problem getting ROM settings, return
+            if (!getDebuggerSettingsForROM())
+            {
+                return;
+            }
+            try
+            {
+                ClearAllDataBoxes();
                 CreateRomCallArraysBasedOnRomAddress(Convert.ToInt32(nudROMCodeAddress.Value));
-
-                if (ROMSettingsAndDebuggerCodePath.Contains(".code"))
+                AddDebuggerCodeToRom();
+                SetECUBaudRateInROM(BinWithPatchesAndDebuggerCode, BaudRateAddress1, BaudRateAddress2, BaudRatePatchValue);
+                AddConfigPatchesToRom();
+                reRouteVCALinRomVectorTable(BinWithPatchesAndDebuggerCode, VCALVectorTableLoc, intCodeStubAddress, false);
+                UpdateLRB_PSW_IE_Nuds();
+                if (cboxSlowUpload.Checked)
                 {
-                    try
-                    {
-                        if (cboxAddCodeToRom.Checked)
-                        {
-                            AddDebuggerCodeToRom();
-                        }
-                        SetECUBaudRateInROM(BinWithPatchesAndDebuggerCode, BaudRateAddress1, BaudRateAddress2, BaudRatePatchValue);
-                        AddConfigPatchesToRom();
-                        UpdateLRB_PSW_IE_Nuds();
-                        if (cboxSlowUpload.Checked)
-                        {
-                            OstrichSlowWriteEntireRom(BinWithPatchesAndDebuggerCode);
-                        }
-                        else
-                        {
-                            OstrichWriteBulk(BinWithPatchesAndDebuggerCode);
-                        }
-                        BinHasBeenUploadedSinceCreation = true;
-                        ROMWhichLoopEquals1 = false;
-                    }
-                    catch (Exception error)
-                    {
-                        MessageBox.Show(error.Message);
-                    }
+                    Emulator.OstrichSlowWriteEntireRom(BinWithPatchesAndDebuggerCode);
                 }
                 else
                 {
-                    MessageBox.Show("Problem with Debugger code path. Have you selected a valid ROM?");
+                    Emulator.OstrichWriteBulk(BinWithPatchesAndDebuggerCode, quietBulkWrite, true);
                 }
+                BinHasBeenUploadedSinceCreation = true;
+                ROMWhichLoopEquals1 = false;
             }
-            else
+            catch (Exception error)
             {
-                MessageBox.Show("Please open a BIN file first.");
+                MessageBox.Show(error.Message);
             }
+
         }
         
-        //Upload button pressed, prepare and upload BIN with patches to emulator
-        private void btnLoadBinToOstrich_Click(object sender, EventArgs e)
+        //Open BIN file and create 3 working arrays of it.  Decompile the BIN and use the dasm to update the ASM window. Rename the asm content if needed
+        private void CreateBINArraysDecompileBINandUpdateASMWindow()
         {
-            PrepareBinAndUploadToOstrich();
+            tboxOpenFileSimpleName.Text = System.IO.Path.GetFileName(strBINPath);
+            currentBINArray = System.IO.File.ReadAllBytes(strBINPath);
+            OstrichBinArrayOut = System.IO.File.ReadAllBytes(strBINPath);
+            BinWithPatchesAndDebuggerCode = System.IO.File.ReadAllBytes(strBINPath);
+            rtboxASMFile.Text = "";
+            string ASMPath = System.IO.Path.GetDirectoryName(strBINPath) + "\\" + System.IO.Path.GetFileNameWithoutExtension(strBINPath);
+            if (!usingASMFile) ASMPath += "_DBG.asm";
+            else ASMPath += ".asm";
+            if (decompileBIN(strBINPath, ASMPath, false, getDasmArgs()))
+            {
+                ASMOpened = true;
+                CurrentASMPath = ASMPath;
+                LoadASMFileIntoArraysRenameIfNeededAndUpdateASMWindow();
+
+            }
+
+
         }
 
-        private void ContinueBulkWrite(object sender, EventArgs e)
-        {
-            StartChunkAddress = StartChunkAddress + 4096;
-            OstrichWriteBulk(BinWithPatchesAndDebuggerCode);
-        }
-       
-        //Convert list of int to a space seperated string
-        private string OstrichRXDataFormat(List<int> dataInput)
-        {
-            string strOut = "";
-
-            foreach (int element in dataInput)
-            {
-                strOut += element.ToString("X2") + " ";
-            }
-            return strOut;
-        }
-        
-        //Show available COM ports for ostrich
-        private void cboxOstrichComPortNumber_DropDown(object sender, EventArgs e)
-        {
-            string[] ports = SerialPort.GetPortNames();
-            cboxOstrichComPortNumber.Items.Clear();
-            cboxOstrichComPortNumber.Items.AddRange(ports);
-        }
-       
-        //Open ostrich serial port
-        private void btnOpenOstrichCom_Click(object sender, EventArgs e)
-        {
-            Array.Clear(OstrichSerialNumber,0,OstrichSerialNumber.Length);
-            tboxOstrichSerialNumber.Clear();
-            try
-            {
-                serialPort2.PortName = cboxOstrichComPortNumber.Text;
-                serialPort2.BaudRate = 921600;
-                serialPort2.DataBits = 8;
-                serialPort2.StopBits = StopBits.One;
-                serialPort2.Parity = Parity.None;
-                serialPort2.RtsEnable = false;
-
-                serialPort2.Open();
-                progressBar2.Value = 100;
-                byte[] OstrichRequestSerial = new byte[3] { 78, 83, 161 };
-                serialPort2.Write(OstrichRequestSerial, 0, 3);
-                OstrichStatus = 1;
-            }
-            catch (Exception err)
-            {
-                MessageBox.Show(err.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-        
         //Add baud patches to bin to be uploaded
-        private void SetECUBaudRateInROM(byte[] DestinationArray, int RomAddress1, int RomAddress2, int BaudByte )
+        private void SetECUBaudRateInROM(byte[] DestinationArray, int RomAddress1, int RomAddress2, int BaudByte)
         {
 
             DestinationArray[RomAddress1] = (byte)BaudByte;
             DestinationArray[RomAddress2] = (byte)BaudByte;
         }
-        
-        //Close ostrich port
-        private void btnCloseOstrichCom_Click(object sender, EventArgs e)
-        {
-            tboxOstrichSerialNumber.Clear();
-            if (serialPort2.IsOpen)
-            {
-                serialPort2.Close();
-                progressBar2.Value = 0;
-            }
-        }
-
-        private void OLD_OstrichRestoreArrayAndRestoreDistantROMJumps(bool WriteAll)
-        {
-            //This will attempt to restore the emulator to it's original Loaded bin code, with as few writes as possible.
-            
-            //Get the current breakpoint address and then restore the original data if its outside of the boundaries
-            if (intCurrent_BP > 0 && (intCurrent_BP < (LowerBoundary) || intCurrent_BP > (UpperBoundary)))
-            {
-                OstrichWriteSpecific(BinWithPatchesAndDebuggerCode, intCurrent_BP, intCurrent_BP, (byte)byteCodeStubCAll.Length); 
-            }
-
-            //Restore the original breakpoint address if it hasn't been done already and its outside the boundaries
-            if (InitialOstrichBP > 0 && !InitialBPAlreadyRemoved && (InitialOstrichBP < (LowerBoundary) || InitialOstrichBP > (UpperBoundary)))
-            {
-                OstrichWriteSpecific(BinWithPatchesAndDebuggerCode, InitialOstrichBP, InitialOstrichBP, (byte)byteCodeStubCAll.Length);
-                InitialBPAlreadyRemoved = true;
-            }
-            //Restore the previous jump address if its outside the boundaries
-            if (intPrevBranchAddress > 0 && (intPrevBranchAddress < (LowerBoundary) ||intPrevBranchAddress > (UpperBoundary)))
-            {
-                OstrichWriteSpecific(BinWithPatchesAndDebuggerCode, intPrevBranchAddress, intPrevBranchAddress, (byte)byteCodeStubCAll.Length);
-            }
-            //Restore the previous call address if its outside the boundaries
-            if (intPrevCallAddress > 0 && (intPrevCallAddress < (LowerBoundary) || intPrevCallAddress > (UpperBoundary)))
-            {
-                OstrichWriteSpecific(BinWithPatchesAndDebuggerCode, intPrevCallAddress, intPrevCallAddress, (byte)byteCodeStubCAll.Length);
-            }
-           //Copy our original bin file to the OstrichBinArrayOut array and write our 255 byte chunk if we're suppose to.
-            Array.Copy(BinWithPatchesAndDebuggerCode, 0, OstrichBinArrayOut, 0, BinWithPatchesAndDebuggerCode.Length);
-            if (WriteAll)
-            {
-                OstrichWriteSpecific(BinWithPatchesAndDebuggerCode, LowerBoundary,  LowerBoundary, 255);
-            }
-        }
-
-
-        private void OstrichRestoreArrayAndRestoreDistantROMJumps()
-        {
-            //This will attempt to restore the emulator to it's original Loaded bin code, with as few writes as possible.
-
-            //Restore the output array 
-            //OstrichBinArrayOut = BinWithPatchesAndDebuggerCode;
-            Array.Copy(BinWithPatchesAndDebuggerCode, 0, OstrichBinArrayOut, 0, BinWithPatchesAndDebuggerCode.Length);
-
-            //Restore the original breakpoint address if it hasn't been done already and its outside the boundaries
-            if (!InitialBPAlreadyRemoved && !WithinRange(intPrevBranchAddress, byteCodeStubCAll.Length, intPrevLowerBoundary, intPrevUpperBoundary))
-            {
-                OstrichWriteSpecific(BinWithPatchesAndDebuggerCode, InitialOstrichBP, InitialOstrichBP, (byte)byteCodeStubCAll.Length);
-                InitialBPAlreadyRemoved = true;
-            }
-
-
-            //There was a branch and it was outside of the previous chunk, restore it
-            if (intPrevBranchAddress > 0 && !WithinRange(intPrevBranchAddress,byteCodeStubCAll.Length, intPrevLowerBoundary, intPrevUpperBoundary))
-            {
-                OstrichWriteSpecific(BinWithPatchesAndDebuggerCode, intPrevBranchAddress, intPrevBranchAddress, (byte)byteCodeStubCAll.Length, true);
-            }
-            
-            //There was a call and it was outside of the chunk, restore it
-            if (intPrevCallAddress > 0 && !WithinRange(intPrevCallAddress, byteCodeStubCAll.Length, intPrevLowerBoundary, intPrevUpperBoundary))
-            {
-                OstrichWriteSpecific(BinWithPatchesAndDebuggerCode, intPrevCallAddress, intPrevCallAddress, (byte)byteCodeStubCAll.Length, true);
-            }
-
-            if(intPrevNextInstruction > 0 && !WithinRange(intPrevNextInstruction -2, byteAltCodeStubCall.Length + 2, intPrevLowerBoundary, intPrevUpperBoundary))
-            {
-                OstrichWriteSpecific(BinWithPatchesAndDebuggerCode, intPrevNextInstruction - 2, intPrevNextInstruction - 2, (byte)(byteAltCodeStubCall.Length + 2), true);
-            }
-            
-            if(intPrevChunkSize != 0)
-            {
-                //Restore the chunk
-                OstrichWriteSpecific(BinWithPatchesAndDebuggerCode, intPrevLowerBoundary, intPrevLowerBoundary, (byte)intPrevChunkSize, true);
-            }
-                
-
-        }
-
-        private void OstrichSetBreakpoint(int breakpointAddress)
-        {
-            if (BINOpened)
-            {
-                OstrichRestoreArrayAndRestoreDistantROMJumps();
-                //intBreakpointToSet = intValidatedAddress;
-                //Write romcallarrary to ostrich
-                //OstrichWriteSpecific(byteCodeStubCAll, intBreakpointToSet);
-                OstrichWriteSpecific(byteCodeStubCAll, breakpointAddress);
-                InitialOstrichBP = breakpointAddress;
-
-                InitialBPAlreadyRemoved = false;
-
-            }
-            else
-            {
-                MessageBox.Show("Open a Bin file first");
-            }
-        }
-        //Reset ostrich vendor ID
-        private void ResetOstrichVID()
-        {
-            byte VendorIDNumber = Convert.ToByte(nudVIDNumber.Value);
-            byte[] OstrichUpdateSerialAndVidCommand = new byte[11];
-            OstrichUpdateSerialAndVidCommand[0] = 78;//4e
-            OstrichUpdateSerialAndVidCommand[1] = VendorIDNumber;
-            OstrichUpdateSerialAndVidCommand[10] = 0;
-            Array.Copy(OstrichSerialNumber, 1, OstrichUpdateSerialAndVidCommand, 2, OstrichSerialNumber.Length - 1);
-            int Checksum = 0;
-            foreach (byte element in OstrichUpdateSerialAndVidCommand)
-            {
-                Checksum = Checksum + element;
-            }
-            byte[] ChecksumByte = BitConverter.GetBytes(Checksum);
-            OstrichUpdateSerialAndVidCommand[10] = ChecksumByte[0];
-            if (serialPort2.IsOpen)
-            {
-                serialPort2.Write(OstrichUpdateSerialAndVidCommand, 0, OstrichUpdateSerialAndVidCommand.Length);
-                    try
-                    {
-                        serialPort2.ReadTimeout = 3000;
-                        int OstrichResponse = serialPort2.ReadByte();
-                        if (OstrichResponse == 79)
-                        {
-                        MessageBox.Show("Ostrich Vendor ID reset to " + VendorIDNumber);
-                        byte[] OstrichRequestSerial = new byte[3] { 78, 83, 161 };
-                        serialPort2.Write(OstrichRequestSerial, 0, 3);
-                        OstrichStatus = 1;
-                    }
-                    else
-                    {
-                        MessageBox.Show("Bad response from Ostrich after write request");
-                        cboxAutoStep.Checked = false;
-                        StopWriteDueToError = true;
-                    }
-                    }
-                    catch (Exception error)
-                    {
-                        MessageBox.Show(error.Message + "\r\n" + "If this continues to happen, you may need to unplug and replug the Ostrich and re-open the port");
-                        cboxAutoStep.Checked = false;
-                        StopWriteDueToError = true;
-                    }
-             }
-        }
-        //Slow write to ostrich if bulk write isn't working (never happens)
-        private void OstrichSlowWriteEntireRom(byte[] SourceRomArray)
-        {
-            int WriteStartAddress = 0;
-            byte ByteBlockSize = 255;
-            StopWriteDueToError = false;
-            while(WriteStartAddress < 32513 && !StopWriteDueToError)
-            {
-                OstrichWriteSpecific(SourceRomArray, WriteStartAddress, WriteStartAddress, ByteBlockSize, false);
-                serialPort2.ReadTimeout = 250;
-                int OstrichResponse = serialPort2.ReadByte();
-                if (OstrichResponse != 79)
-                {
-                    MessageBox.Show("Bad response from Ostrich after write request");
-                    cboxAutoStep.Checked = false;
-                    StopWriteDueToError = true;
-                }
-                WriteStartAddress = WriteStartAddress + 256;
-            }
-            MessageBox.Show("Slow write completed.");
-            
-        }
-        private void OstrichWriteSpecific(byte[] SourceArray, int RomStartAddress, int SourceArrayStartAddress = 0, byte BytesToWrite = 0, bool WaitForResponse = true)
-        {
-
-            if (serialPort2.IsOpen)
-            {
-                OstrichSentError = false;
-                int ActualBytesToWrite = Convert.ToInt32(SourceArray.Length);
-                byte[] sourceArraySize = BitConverter.GetBytes(SourceArray.Length);
-                if (BytesToWrite > 0)
-                {
-                    if(BytesToWrite > 254)
-                    {
-                        sourceArraySize[0] = 0;
-                        ActualBytesToWrite = 256;
-                        
-
-                    }
-                    else
-                    {
-                        sourceArraySize[0] = BytesToWrite;
-                        ActualBytesToWrite = Convert.ToInt32(BytesToWrite);
-                    }
-                    
-                }
-
-                RomStartAddress = RomStartAddress + 32768;
-                byte[] OutputArray = new byte[ActualBytesToWrite + 5];
-                byte MSB = (byte)(RomStartAddress >> 8);
-                byte LSB = (byte)(RomStartAddress & 0xFF);
-                int ByteCount = 0;
-
-
-                bool LoopDone = false;
-                while (!LoopDone)
-                {
-
-                    switch (ByteCount)
-                    {
-                        case 0:
-                            OutputArray[ByteCount] = 87; //W for write
-                            break;
-                        case 1:
-                            OutputArray[ByteCount] = sourceArraySize[0];
-                            break;
-                        case 2:
-                            OutputArray[ByteCount] = MSB;
-                            break;
-                        case 3:
-                            OutputArray[ByteCount] = LSB;
-                            break;
-                        case 4:
-                            Array.Copy(SourceArray, SourceArrayStartAddress, OutputArray, ByteCount, ActualBytesToWrite);
-                            break;
-                        case 5:
-                            int ChecksumLocation = OutputArray.Length - 1;
-                            int Checksum = 0;
-                            foreach (byte element in OutputArray)
-                            {
-                                Checksum = Checksum + element;
-                            }
-
-                            OutputArray[ChecksumLocation] = (byte)Checksum;
-                            LoopDone = true;
-                            break;
-                    }
-                    ByteCount++;
-                }
-                if (serialPort2.IsOpen)
-                {
-                    int ReadAttempts = 0;
-                    serialPort2.Write(OutputArray, 0, OutputArray.Length);
-                    if (WaitForResponse)
-                    {
-                        try
-                        {
-                            serialPort2.ReadTimeout = 250;
-                            //int OstrichResponse = serialPort2.ReadByte();
-                            int OstrichResponse = 0;
-                            while(OstrichResponse == 0 || OstrichResponse == -1)
-                            {
-                                OstrichResponse = serialPort2.ReadByte();
-                            }
-                            if (OstrichResponse != 79)
-                            {
-                                MessageBox.Show("Bad response from Ostrich after write request");
-                                cboxAutoStep.Checked = false;
-                                StopWriteDueToError = true;
-                             }
-                        }
-                        catch (Exception error)
-                        {
-                            ReadAttempts++;
-                            if(ReadAttempts > 50)
-                            {
-                                MessageBox.Show(error.Message + "\r\n" + "If this continues to happen, you may need to unplug and replug the Ostrich and re-open the port");
-                                StopWriteDueToError = true;
-                            }
-
-                        }
-                    }
-                }
-            }
-            else
-            {
-                MessageBox.Show("Open Ostrich COM port first.");
-                StopWriteDueToError = true;
-            }
-        }
-        
-        //Write full size 32k bin to ostrich
-        private void OstrichWriteBulk(byte[] SourceArray)
-        {
-            try
-            {
-                if (SourceArray.Length == 32768)
-                {
-                    byte Ten = (byte)(16);
-                    MSB = (byte)(MSB + Ten);
-
-
-                    if (BulkChunkNumber < 8)
-                    {
-                        BulkChunkNumber++;
-                        byte Z = (byte)(90);
-                        byte W = (byte)(87);
-                        byte n = (byte)(16);
-
-
-                        byte[] OutputArray = new byte[4102];
-                        byte[] Header = new byte[5] { Z, W, n, MMSB, MSB };
-                        Array.Copy(Header, 0, OutputArray, 0, Header.Length);
-                        Array.Copy(SourceArray, StartChunkAddress, OutputArray, 5, 4096);
-
-                        int Checksum = 0;
-                        foreach (byte element in OutputArray)
-                        {
-                            Checksum = Checksum + element;
-                        }
-
-                        byte[] ChecksumByte = BitConverter.GetBytes(Checksum);
-                        OutputArray[OutputArray.Length - 1] = ChecksumByte[0];
-
-
-                        if (serialPort2.IsOpen)
-                        {
-                            OstrichStatus = 2;
-                            serialPort2.Write(OutputArray, 0, OutputArray.Length);
-                        }
-                        else
-                        {
-                            MessageBox.Show("Ostrich COM Port not opened");
-                            BulkChunkNumber = 0;
-                            StartChunkAddress = 0;
-                            OstrichStatus = 0;
-                            MSB = (byte)(112);
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show("BIN Uploaded to Ostrich without error.");
-                        BulkChunkNumber = 0;
-                        StartChunkAddress = 0;
-                        OstrichStatus = 0;
-                        MSB = (byte)(112);
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Invalid BIN Size. Bin must be 32768 bytes.");
-                }
-            }
-            catch (Exception error)
-            {
-                MessageBox.Show(error.Message + "A proper size BIN must be opened first");
-            }
-        }
-        
-        private void setAltStubCallAndCopyToOutArray(byte ReturnAddressOffset)
-        {
-            byteAltCodeStubCall[byteAltCodeStubCall.Length - 1] = ReturnAddressOffset;
-            Array.Copy(byteAltCodeStubCall, 0, OstrichBinArrayOut, (intNextInstructionAddress - 1), byteAltCodeStubCall.Length);
-        }
-
         //This routine will evaluate the distance between the jump address and the next instruction address and then write the calls to the dumper routine
         // if there is not enough room inbetween, the jump offset will be changed to make room and the return address modifier will be changed to reflect the intended return address
-        private void OstrichWriteJumpsToRom()
+        //Much of this code is pointless with the addition of VCAL routing since the call only occupies 1 byte
+        private void OrganizeAndWriteJumpsToEMU()
         {
 
             try
@@ -2420,26 +2267,59 @@ namespace ECU_Debugger
                 //This first part will set boundaries for a 256 byte write to the ostrich. 
                 // We're going to write all the different changes to an array and then execute 1 write for all the changes in the 256 byte block
                 //If something is outside of the boundaries, we will write it seperately
-                //OstrichBinArrayOut = BinWithPatchesAndDebuggerCode;
+                
+                //Start with a clean copy of the BIN file with debugger settings 
                 Array.Copy(BinWithPatchesAndDebuggerCode, 0, OstrichBinArrayOut, 0, BinWithPatchesAndDebuggerCode.Length);
-
-
-
+                
+                //Clear the lists used for determining the final chunk size
+                chunkAddresses.Clear();
+                addressLength.Clear();
+                
                 //Setting boundaries
                 setChunkBoundariesAndChunkSize(intNextInstructionAddress);
 
                 //Restore previous breakpoints if they are outside of the new chunk
-                if ( intPrevBranchAddress > 0 && !WithinRange(intPrevBranchAddress, byteCodeStubCAll.Length, LowerBoundary, UpperBoundary))
+                if (!InitialBPAlreadyRemoved  && !WithinRange(InitialOstrichBP, byteCodeStubCAll.Length, LowerBoundary, UpperBoundary))
                 {
-                    OstrichWriteSpecific(BinWithPatchesAndDebuggerCode, intPrevBranchAddress, intPrevBranchAddress, (byte)byteCodeStubCAll.Length, true);
+                    Emulator.OstrichWriteSpecific_256Max(BinWithPatchesAndDebuggerCode, InitialOstrichBP,InitialOstrichBP, (byte)byteCodeStubCAll.Length, true);
+                    InitialBPAlreadyRemoved = true;
                 }
+                else if(!InitialBPAlreadyRemoved)
+                {
+                    chunkAddresses.Add(InitialOstrichBP);
+                    addressLength.Add(byteCodeStubCAll.Length);
+                    InitialBPAlreadyRemoved = true;
+                }
+
+                if (intPrevBranchAddress > 0 && !WithinRange(intPrevBranchAddress, byteCodeStubCAll.Length, LowerBoundary, UpperBoundary))
+                {
+                    Emulator.OstrichWriteSpecific_256Max(BinWithPatchesAndDebuggerCode, intPrevBranchAddress, intPrevBranchAddress, (byte)byteCodeStubCAll.Length, true);
+                }
+                else
+                {
+                    chunkAddresses.Add(intPrevBranchAddress);
+                    addressLength.Add(byteCodeStubCAll.Length);
+                }
+
                 if (intPrevCallAddress > 0 && !WithinRange(intPrevCallAddress, byteCodeStubCAll.Length, LowerBoundary, UpperBoundary))
                 {
-                    OstrichWriteSpecific(BinWithPatchesAndDebuggerCode, intPrevCallAddress, intPrevCallAddress, (byte)byteCodeStubCAll.Length, true);
+                    Emulator.OstrichWriteSpecific_256Max(BinWithPatchesAndDebuggerCode, intPrevCallAddress, intPrevCallAddress, (byte)byteCodeStubCAll.Length, true);
                 }
-                if (intPrevNextInstruction > 0 && !WithinRange(intPrevNextInstruction-2, byteAltCodeStubCall.Length + 2, LowerBoundary, UpperBoundary))
+                else
                 {
-                    OstrichWriteSpecific(BinWithPatchesAndDebuggerCode, intPrevNextInstruction-2, intPrevNextInstruction-2, (byte)(byteAltCodeStubCall.Length + 2), true);
+                    chunkAddresses.Add(intPrevCallAddress);
+                    addressLength.Add(byteCodeStubCAll.Length);
+                }
+
+
+                if (intPrevNextInstruction > 0 && !WithinRange(intPrevNextInstruction - 2, byteAltCodeStubCall.Length + 2, LowerBoundary, UpperBoundary))
+                {
+                    Emulator.OstrichWriteSpecific_256Max(BinWithPatchesAndDebuggerCode, intPrevNextInstruction - 2, intPrevNextInstruction - 2, (byte)(byteAltCodeStubCall.Length + 2), true);
+                }
+                else
+                {
+                    chunkAddresses.Add(intPrevNextInstruction);
+                    addressLength.Add(byteCodeStubCAll.Length + 2);
                 }
 
 
@@ -2477,23 +2357,30 @@ namespace ECU_Debugger
                     //Byte 4 and byte 6 are the return address offsets used by the debugger code stub, to send the code back from the trap loops to the correct address (after the jumps are cleared and original code restored)
 
                     //If there is a branch possible, and it's less than 4 bytes ahead of the next instruction, re-route the jump offset to the alt code call, and send the appropriate offset return byte
-                    if (intBranchAddress > intNextInstructionAddress && (intBranchAddress - intNextInstructionAddress) < 4)
+                    //And we're not using VCAL re-routing
+                    if (intBranchAddress > intNextInstructionAddress && (intBranchAddress - intNextInstructionAddress) < 4 && !usingVCALreRoute)
                     {
                         int N = 7 - BinWithPatchesAndDebuggerCode[(intNextInstructionAddress - 1)];
                         setAltStubCallAndCopyToOutArray((byte)N);
                     }
 
                     //If the branch instruction is behind the next instruction by less than 7 bytes
-                    else if (intNextInstructionAddress > intBranchAddress && (intNextInstructionAddress - intBranchAddress) < 7)
+                    //And we're not using VCAL re-routing
+                    else if (intNextInstructionAddress > intBranchAddress && (intNextInstructionAddress - intBranchAddress) < 7 && !usingVCALreRoute)
                     {
                         int N = 263 - BinWithPatchesAndDebuggerCode[(intNextInstructionAddress - 1)];
                         setAltStubCallAndCopyToOutArray((byte)N);
                     }
                     //branch address is out of the way, but within the chunk. Use normal debugger calls at branch address and next sequential address
-                    else 
+                    //may or may not be using VCAL re-routing
+                    else
                     {
                         Array.Copy(byteCodeStubCAll, 0, OstrichBinArrayOut, intBranchAddress, byteCodeStubCAll.Length);
                         Array.Copy(byteCodeStubCAll, 0, OstrichBinArrayOut, intNextInstructionAddress, byteCodeStubCAll.Length);
+                        chunkAddresses.Add(intBranchAddress);
+                        addressLength.Add(byteCodeStubCAll.Length);
+                        chunkAddresses.Add(intNextInstructionAddress);
+                        addressLength.Add(byteCodeStubCAll.Length);
                     }
                 }
 
@@ -2501,9 +2388,12 @@ namespace ECU_Debugger
                 else
                 {
                     Array.Copy(byteCodeStubCAll, 0, OstrichBinArrayOut, intNextInstructionAddress, byteCodeStubCAll.Length);
-                    if(intBranchAddress > 0 && !WithinRange(intBranchAddress, byteCodeStubCAll.Length, LowerBoundary, UpperBoundary))
+                    chunkAddresses.Add(intNextInstructionAddress);
+                    addressLength.Add(byteCodeStubCAll.Length);
+
+                    if (intBranchAddress > 0 && !WithinRange(intBranchAddress, byteCodeStubCAll.Length, LowerBoundary, UpperBoundary))
                     {
-                        OstrichWriteSpecific(byteCodeStubCAll, intBranchAddress);
+                        Emulator.OstrichWriteSpecific_256Max(byteCodeStubCAll, intBranchAddress);
                     }
                 }
 
@@ -2513,17 +2403,53 @@ namespace ECU_Debugger
                     //Call address is outside of the "chunk" boundaries. Write the debugger call to it's address directly
                     if (!WithinRange(intCallAddress, byteCodeStubCAll.Length, LowerBoundary, UpperBoundary))
                     {
-                        OstrichWriteSpecific(byteCodeStubCAll, intCallAddress);
+                        Emulator.OstrichWriteSpecific_256Max(byteCodeStubCAll, intCallAddress);
                     }
                     //Call address is within our "chunk" add it to the chunk array
                     else
                     {
                         Array.Copy(byteCodeStubCAll, 0, OstrichBinArrayOut, intCallAddress, byteCodeStubCAll.Length);
+                        chunkAddresses.Add(intCallAddress);
+                        addressLength.Add(byteCodeStubCAll.Length);
                     }
                 }
-
+                //Trim the chunk size down to the distance between the 2 farthest addresses
+                MinimizeChunkSize(ref LowerBoundary, ref UpperBoundary, ref intChunkSize);
+                if (intChunkSize > 255) throw new IndexOutOfRangeException ("BP chunk size too large.");
                 //Write the chunk 
-                OstrichWriteSpecific(OstrichBinArrayOut, LowerBoundary, LowerBoundary, (byte)intChunkSize, true);
+                Emulator.OstrichWriteSpecific_256Max(OstrichBinArrayOut, LowerBoundary, LowerBoundary, (byte)intChunkSize, true);
+
+                //White list was changed last time by, change it back
+                bool updateRomWhitelist = false;
+                if (whiteListChangedFromOriginal)
+                {
+                    whiteListChangedFromOriginal = false;
+                    CreateVCALwhiteList(ASMFileArray, VCALvectorTable, VCALNumber, VCALWhiteList);
+                    updateRomWhitelist = true ;
+                }
+
+                //Check to see if any of the BP addresses are on the whitelist. If they are, remove them from the ecu
+                if (usingVCALreRoute) 
+                {
+                    int whiteListCount = VCALWhiteList.Count;
+                    if(CheckListForItem(intNextInstructionAddress, VCALWhiteList)) VCALWhiteList.RemoveAll(item => item == intNextInstructionAddress);
+                    if(CheckListForItem(intBranchAddress, VCALWhiteList)) VCALWhiteList.RemoveAll(item => item == intBranchAddress);
+                    if(CheckListForItem(intCallAddress, VCALWhiteList)) VCALWhiteList.RemoveAll(item => item == intCallAddress);
+                    
+                    if(VCALWhiteList.Count != whiteListCount)
+                    {
+                        whiteListChangedFromOriginal = true; 
+                        updateRomWhitelist = true;
+                    }
+
+                }
+                
+                //Update the ECU whitelist if there has been changes to it
+                if (updateRomWhitelist) 
+                {
+                    UpdateWhiteListOnRom(VCALWhiteList);
+                    updateRomWhitelist = false;
+                }
 
                 intPrevNextInstruction = intNextInstructionAddress;
                 intPrevBranchAddress = intBranchAddress;
@@ -2540,11 +2466,53 @@ namespace ECU_Debugger
                     //Task.Delay(0).ContinueWith(_ => { BreakLoopUsingRomAddress(); });
                     BreakLoopUsingRomAddress();
                 }
+
             }
             catch (Exception error)
             {
                 MessageBox.Show(error.Message);
             }
+        }
+        
+        private void MinimizeChunkSize(ref int lowerBounds, ref int upperBounds, ref int chunkLength )
+        {
+            int highestAddressIndex;
+            int lowestAddressIndex;
+
+            //delete all 0 entries in chunkAddress
+            //delete corresponding indexes in addressLength
+            for (int i = 0; i < chunkAddresses.Count; i++)
+            {
+                if(chunkAddresses[i] == 0)
+                {
+                    chunkAddresses.RemoveAt(i);
+                    addressLength.RemoveAt(i);
+                    i--;
+                }
+            }
+            //Check chunkAddress list for lowest and highest index
+            highestAddressIndex = chunkAddresses.IndexOf(chunkAddresses.Max());
+            lowestAddressIndex = chunkAddresses.IndexOf(chunkAddresses.Min());
+
+            //set lowerbounds to lowest index, upperBounds to highest index + length
+            lowerBounds = chunkAddresses[lowestAddressIndex];
+            upperBounds = chunkAddresses[highestAddressIndex] + addressLength[highestAddressIndex];
+
+            if (lowerBounds + addressLength[lowestAddressIndex] > upperBounds) upperBounds = lowerBounds + addressLength[lowestAddressIndex];
+            chunkLength = upperBounds - lowerBounds;
+            
+
+        }
+
+        //determine if a value plus its length is within a range
+        private bool WithinRange(int value, int length, int LowerLimit, int UpperLimit)
+        {
+            bool result = false;
+            if ((value) > LowerLimit && (value + length) < UpperLimit)
+            {
+                result = true;
+            }
+            return result;
         }
 
         private void setChunkBoundariesAndChunkSize(int address)
@@ -2560,18 +2528,7 @@ namespace ECU_Debugger
                 UpperBoundary = address + 127;
             }
             intChunkSize = UpperBoundary - LowerBoundary;
-            
-        }
-        
-        //determine if a value plus its length is within a range
-        private bool WithinRange(int value, int length, int LowerLimit, int UpperLimit)
-        {
-            bool result = false;
-            if((value) > LowerLimit && (value + length) < UpperLimit)
-            {
-                result = true;
-            }
-            return result;
+
         }
 
         //This will write to the ROM to break the waiting loops and allow the ECU to execute the next line of code
@@ -2583,24 +2540,193 @@ namespace ECU_Debugger
             if (ROMWhichLoopEquals1)
             {
                 byte[] LoopBreak = new byte[1] { 0 };
-                OstrichWriteSpecific(LoopBreak, ROMWhichLoopAddress, 0, 1, true);
+                Emulator.OstrichWriteSpecific_256Max(LoopBreak, ROMWhichLoopAddress, 0, 1, true);
                 ROMWhichLoopEquals1 = false;
             }
             else
             {
                 byte[] LoopBreak = new byte[1] { 1 };
-                OstrichWriteSpecific(LoopBreak, ROMWhichLoopAddress, 0, 1, true);
+                Emulator.OstrichWriteSpecific_256Max(LoopBreak, ROMWhichLoopAddress, 0, 1, true);
                 ROMWhichLoopEquals1 = true;
             }
         }
+        private void OstrichRestoreArrayAndRestoreDistantROMJumps()
+        {
+            //This will attempt to restore the emulator to it's original Loaded bin code, with as few writes as possible.
+
+            //Restore the output array 
+            Array.Copy(BinWithPatchesAndDebuggerCode, 0, OstrichBinArrayOut, 0, BinWithPatchesAndDebuggerCode.Length);
+
+            //Restore the original breakpoint address if it hasn't been done already and its outside the boundaries
+            if (!InitialBPAlreadyRemoved && !WithinRange(InitialOstrichBP, byteCodeStubCAll.Length, intPrevLowerBoundary, intPrevUpperBoundary))
+            {
+                Emulator.OstrichWriteSpecific_256Max(BinWithPatchesAndDebuggerCode, InitialOstrichBP, InitialOstrichBP, (byte)byteCodeStubCAll.Length);
+                InitialBPAlreadyRemoved = true;
+            }
 
 
-        #endregion
+            //There was a branch and it was outside of the previous chunk, restore it
+            if (intPrevBranchAddress > 0 && !WithinRange(intPrevBranchAddress, byteCodeStubCAll.Length, intPrevLowerBoundary, intPrevUpperBoundary))
+            {
+                Emulator.OstrichWriteSpecific_256Max(BinWithPatchesAndDebuggerCode, intPrevBranchAddress, intPrevBranchAddress, (byte)byteCodeStubCAll.Length, true);
+            }
 
-        #region P28 Compatibility
+            //There was a call and it was outside of the chunk, restore it
+            if (intPrevCallAddress > 0 && !WithinRange(intPrevCallAddress, byteCodeStubCAll.Length, intPrevLowerBoundary, intPrevUpperBoundary))
+            {
+                Emulator.OstrichWriteSpecific_256Max(BinWithPatchesAndDebuggerCode, intPrevCallAddress, intPrevCallAddress, (byte)byteCodeStubCAll.Length, true);
+            }
+
+            if (intPrevNextInstruction > 0 && !WithinRange(intPrevNextInstruction - 2, byteAltCodeStubCall.Length + 2, intPrevLowerBoundary, intPrevUpperBoundary))
+            {
+                Emulator.OstrichWriteSpecific_256Max(BinWithPatchesAndDebuggerCode, intPrevNextInstruction - 2, intPrevNextInstruction - 2, (byte)(byteAltCodeStubCall.Length + 2), true);
+            }
+
+            if (intPrevChunkSize != 0)
+            {
+                //Restore the chunk
+                Emulator.OstrichWriteSpecific_256Max(BinWithPatchesAndDebuggerCode, intPrevLowerBoundary, intPrevLowerBoundary, (byte)intPrevChunkSize, true);
+            }
+
+
+        }
+
+        private void OstrichSetBreakpoint(int breakpointAddress, bool restoreFirst = true)
+        {
+            if (BINOpened)
+            {
+                if(restoreFirst) OstrichRestoreArrayAndRestoreDistantROMJumps();
+                Emulator.OstrichWriteSpecific_256Max(byteCodeStubCAll, breakpointAddress);
+                InitialOstrichBP = breakpointAddress;
+
+                InitialBPAlreadyRemoved = false;
+
+            }
+            else
+            {
+                MessageBox.Show("Open a Bin file first");
+            }
+        }
+        private void setAltStubCallAndCopyToOutArray(byte ReturnAddressOffset)
+        {
+            byteAltCodeStubCall[byteAltCodeStubCall.Length - 1] = ReturnAddressOffset;
+            Array.Copy(byteAltCodeStubCall, 0, OstrichBinArrayOut, (intNextInstructionAddress - 1), byteAltCodeStubCall.Length);
+            chunkAddresses.Add(intNextInstructionAddress - 1);
+            addressLength.Add(byteAltCodeStubCall.Length);
+        }
+
+
+        //-------------------- Ostrich --------------------------------------------
+
+        //Show available COM ports for ostrich
+        private void cboxOstrichComPortNumber_DropDown(object sender, EventArgs e)
+        {
+            string[] ports = SerialPort.GetPortNames();
+            cboxOstrichComPortNumber.Items.Clear();
+            cboxOstrichComPortNumber.Items.AddRange(ports);
+        }
+
+        //Open ostrich serial port
+        private void btnOpenOstrichCom_Click(object sender, EventArgs e)
+        {
+            tboxOstrichSerialNumber.Clear();
+            
+            OstrichPort = Emulator.OstrichOpenPort(cboxOstrichComPortNumber.Text);
+
+            if (OstrichPort.IsOpen)
+            {
+                progressBar2.Value = 100;
+            }
+           
+            // Attach event handler to track emulator events
+            Emulator.PropertyChanged += this.OnPropertyChanged;
+        }
+
+        // Notify when emulator event happen
+        void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            // Serial Number changed
+            if (e.PropertyName == "OstrichSerialString")
+            {
+                // Update the serial number tbox
+                this.Invoke(new EventHandler( DisplayOstrichSerialNumber));
+            }
+            
+            // Ostrich reported an error
+            if (e.PropertyName == "OstrichError" && Emulator.OstrichError)
+            {
+                // Update the serial number tbox
+                this.Invoke(new EventHandler(DisplayOstrichError));
+                cboxAutoStep.Checked = false;
+            }
+
+            // Ostrich ROM Dump is complete
+            if (e.PropertyName == "EmuDumpReady" && Emulator.EmuDumpReady)
+            {
+                // EMU dump complete.
+            }
+        }
+
+        //Close ostrich port
+        private void btnCloseOstrichCom_Click(object sender, EventArgs e)
+        {
+            tboxOstrichSerialNumber.Clear();
+            progressBar2.Value = 0;
+            if (OstrichPort != null && OstrichPort.IsOpen)
+            {
+               Emulator.OstrichClosePort();
+            }
+
+        }
+
+        //Display ostrich serial number and clear ostrich buffer
+        private void DisplayOstrichSerialNumber(object sender, EventArgs e)
+        {
+
+            tboxOstrichSerialNumber.Text = Emulator.OstrichSerialString;
+        }
+        
+        //Show that there was an error in the ostrich serial number box, show message box, set ostrich error
+        private void DisplayOstrichError(object sender, EventArgs e)
+        {
+            tboxOstrichSerialNumber.Text = "Ostrich Error";
+            MessageBox.Show("Ostrich Sent an Error");
+            Emulator.OstrichError = false;
+        }
+
+        //Upload button pressed, prepare and upload BIN with patches to emulator
+        private void btnLoadBinToOstrich_Click(object sender, EventArgs e)
+        {
+            if (usingASMFile)
+            {
+                compileASMtoBIN(ASMtoCompilePath, Path.GetDirectoryName(strBINPath) + "\\" + Path.GetFileNameWithoutExtension(strBINPath) );
+            }
+            CreateBINArraysDecompileBINandUpdateASMWindow();
+            LoadASMFileIntoArraysRenameIfNeededAndUpdateASMWindow();
+            AddDebuggerCodeAndPatchesToRomAndUpload();
+            highlightAfterValidating(Convert.ToInt32(nudBPAddress.Value));
+        }
+
+        
+
+        
+
+
+                
+        
+        
+        //---------------- code files and ROM Debugger Code -----------------------
+        
         //Prepare the debugger caller code based on where it will be stored in the ROM
         private void CreateRomCallArraysBasedOnRomAddress(int ROMAddress)
         {
+            if (usingVCALreRoute)
+            {
+                byteCodeStubCAll = new byte[1];
+                byteCodeStubCAll[0] = (byte)(VCAL_0_OPCODE + VCALNumber);
+                return;
+            }
+            byteCodeStubCAll = new byte[] { 50, 0, 117, 3 };
             int HiByte = ROMAddress >> 8;
             int LoByte = ROMAddress & 255;
             byteCodeStubCAll[1] = (byte)LoByte;
@@ -2610,63 +2736,153 @@ namespace ECU_Debugger
             byteAltCodeStubCall[6] = (byte)LoByte;
             byteAltCodeStubCall[7] = (byte)HiByte;
         }
-       
-        //Get settings from .code file chosen by drop down menu and store in array
-        private void LoadCodeFileSettings()
+               
+        //Get settings from .code file and VCAL settings from rom chosen by drop down menu and store in array
+        //Return true if succesful
+        private bool getDebuggerSettingsForROM()
         {
+            codeFileHasBeenOpened = false; 
+            byte[] tempCodeFileArray;
             ROMSettingsAndDebuggerCodePath = Directory.GetCurrentDirectory();
             switch (cmboxRomType.Text)
             {
                 case "P12-P13-P14":
                     ROMSettingsAndDebuggerCodePath += @"\P13DebuggerCode.code";
+                    tempCodeFileArray = Properties.Resources.P13DebuggerCode;
+                    if(usingVCALreRoute) tempCodeFileArray = Properties.Resources.P13DebuggerCode_VCAL;
                     break;
                 case "P13 Based HTS":
                     ROMSettingsAndDebuggerCodePath += @"\P13HTSDebuggerCode.code";
+                    tempCodeFileArray = Properties.Resources.P13HTSDebuggerCode;
+                    if(usingVCALreRoute) tempCodeFileArray = Properties.Resources.P13HTSDebuggerCode_VCAL;
                     break;
                 case "ectune / HTS":
                     ROMSettingsAndDebuggerCodePath += @"\HTSDebuggerCode.code";
+                    tempCodeFileArray = Properties.Resources.HTSDebuggerCode;
+                    if (usingVCALreRoute) tempCodeFileArray = Properties.Resources.HTSDebuggerCode_VCAL;
                     break;
                 case "P72":
                     ROMSettingsAndDebuggerCodePath += @"\P72DebuggerCode.code";
+                    tempCodeFileArray = Properties.Resources.P72DebuggerCode;
+                    if (usingVCALreRoute) tempCodeFileArray = Properties.Resources.P72DebuggerCode_VCAL;
                     break;
                 case "P30":
                     ROMSettingsAndDebuggerCodePath += @"\P30DebuggerCode.code";
+                    tempCodeFileArray = Properties.Resources.P30DebuggerCode;
+                    if (usingVCALreRoute) tempCodeFileArray = Properties.Resources.P30DebuggerCode_VCAL;
                     break;
                 case "Custom ROM":
                     ROMSettingsAndDebuggerCodePath += @"\CustomDebuggerCode.code";
+                    tempCodeFileArray = Properties.Resources.CustomDebuggerCode;
+                    if (usingVCALreRoute) tempCodeFileArray = Properties.Resources.P13HTSDebuggerCode_VCAL;
                     break;
                 default:
-                    MessageBox.Show("Check that you have selected a valid ROM Type");
-                    return;
+                    MessageBox.Show("Check that you have selected a valid ECU Type");
+                    return codeFileHasBeenOpened;
 
             }
-
-            if (ROMSettingsAndDebuggerCodePath.Contains(".code"))
+            if(usingVCALreRoute)
             {
-                try
-                {
-
-                    GetInfoFromCodeFile();
-
-                }
-                catch (Exception error)
-                {
-                    MessageBox.Show(error.Message + "\r\n There is a problem with " + ROMSettingsAndDebuggerCodePath);
-                    return;
-                }
-
+                ROMSettingsAndDebuggerCodePath = ROMSettingsAndDebuggerCodePath.Insert(ROMSettingsAndDebuggerCodePath.IndexOf(".code") , "_VCAL");
             }
-            else
+           
+            try
             {
-                MessageBox.Show("Please select a valid ROM type.");
+                
+                if (checkForCodeFile(ROMSettingsAndDebuggerCodePath))
+                {
+                    tempCodeFileArray = System.IO.File.ReadAllBytes(ROMSettingsAndDebuggerCodePath);
+                }
+                if (ASMOpened) getVCALroutingInfoFromROM();
+                codeFileHasBeenOpened = true;
+                GetInfoFromCodeFile(tempCodeFileArray);
+                if (usingVCALreRoute) 
+                {
+                    addVCALcodeToDebuggerCode();
+                    CreateRomCallArraysBasedOnRomAddress(Convert.ToInt32(nudROMCodeAddress.Value));
+                    
+                }
+
             }
+            catch (Exception error)
+            {
+                MessageBox.Show(error.Message + "\r\n There is a problem with " + ROMSettingsAndDebuggerCodePath);
+                codeFileHasBeenOpened = false;
+            }
+            return codeFileHasBeenOpened;
 
-        }    
+        }
 
+
+        private bool checkForCodeFile(string path)
+        {
+            //Check directory for code file, if found return true
+            //Unless checking for CustomDebuggerCode.code, then extract and show popup
+            bool codeFileExists = false;
+            if(File.Exists(path))
+            {
+                codeFileExists = true;
+            }
+            if((!codeFileExists && Path.GetFileName(path) == "CustomDebuggerCode.code") || (!codeFileExists && Path.GetFileName(path) == "CustomDebuggerCode_VCAL.code"))
+            {
+                extractCustomCodeFileShowPopup();
+            }
+            return codeFileExists; // True to file from folder
+        }
+        private void extractCustomCodeFileShowPopup()
+        {
+            try
+            {
+               
+                //Extract CustomDebuggerCode.code
+                byte[] tempCodeFile = Properties.Resources.CustomDebuggerCode;
+                string newCodeFilePath = System.IO.Directory.GetCurrentDirectory() + @"\CustomDebuggerCode.code";
+                using (System.IO.FileStream newCodeFile = new System.IO.FileStream(newCodeFilePath, System.IO.FileMode.CreateNew))
+                {
+                    newCodeFile.Write(tempCodeFile, 0, tempCodeFile.Length);
+                }
+
+
+                //extract CustomDebuggerCode_VCAL.code
+                tempCodeFile = Properties.Resources.CustomDebuggerCode_VCAL;
+                newCodeFilePath = System.IO.Directory.GetCurrentDirectory() + @"\CustomDebuggerCode_VCAL.code";
+                using (System.IO.FileStream newCodeFile = new System.IO.FileStream(newCodeFilePath, System.IO.FileMode.CreateNew))
+                {
+                    newCodeFile.Write(tempCodeFile, 0, tempCodeFile.Length);
+                }
+
+
+
+
+                //Extract Debugger_ROM_Code.asm
+                string tempASM = Properties.Resources.Debugger_ROM_Code;
+                string newASMFilePath = System.IO.Directory.GetCurrentDirectory() + @"\Debugger_ROM_Code.asm";
+                SaveDataToTxtFile(newASMFilePath, tempASM, false);
+
+                //Extract Debugger_ROM_Code_VCAL.asm
+                tempASM = Properties.Resources.Debugger_ROM_Code_VCAL;
+                newASMFilePath = System.IO.Directory.GetCurrentDirectory() + @"\Debugger_ROM_Code_VCAL.asm";
+                SaveDataToTxtFile(newASMFilePath, tempASM, false);
+
+                MessageBox.Show("The files: \r\n\r\n" +
+                                "CustomDebuggerCode.code,\r\n" +
+                                "CustomDebuggerCode_VCAL.code,\r\n" +
+                                "Debugger_ROM_Code.asm \r\n" +
+                                "Debugger_ROM_Code_VCAL.asm \r\n\r\n" +
+                                "have been extracted to the current directory.\r\n" +
+                                "Modify the .code file to use the debugger with any unsupported ECU running OKI 66k asm from a 32KB ROM.\r\n" +
+                                "See Debugger_ROM_Code.asm for details.", "Custom ECU Code");
+            }
+            catch (Exception error)
+            {
+                MessageBox.Show(error.Message, "Extraction Error");
+            }
+        }
         //Read Code file and assign variables data  
-        private void GetInfoFromCodeFile()
+        private void GetInfoFromCodeFile(byte[] codeFileArray)
         {
             int intVectorTblOffset = 0;
+            int whiteListSize = 0;
             int cf_PatchBytesLo = 0;
             int cf_PatchBytesHi = 1;
             int cf_CodeStubStartLo = 2;
@@ -2698,17 +2914,28 @@ namespace ECU_Debugger
             int cf_XtraRam5Hi = 28;
             int cf_XtraRam6Lo = 29;
             int cf_XtraRam6Hi = 30;
-            byte[] tempArray = System.IO.File.ReadAllBytes(ROMSettingsAndDebuggerCodePath);
+            int cf_XtraRam7Lo = 31;
+            int cf_XtraRam7Hi = 32;
+            int cf_XtraRam8Lo = 33;
+            int cf_XtraRam8Hi = 34;
+            int cf_XtraRam9Lo = 35;
+            int cf_XtraRam9Hi = 36;
+            int cf_XtraRam10Lo = 37;
+            int cf_XtraRam10Hi = 38;
+            int cf_OrigVcalLocLo = 39;
+            int cf_OrigVcalLocHi = 40;
+            int cf_whiteListLocLo = 41;
+            int cf_whiteListLocHi = 42;
             
             //If the .code file is a full 32kb , cut all the 0xff off the tail of it
             //Check for vector table and offset the .code pointers to read after it
             //Useful to use a fresh asm code file without having to trim it manually
-            if(tempArray.Length == 32768)
+            if (codeFileArray.Length == 32768)
             {
                 int endAddress = 0;
                 for (int i = 32768 -1 ; i > 0 ; i--)
                 {
-                    if(tempArray[i] != 0xff)
+                    if(codeFileArray[i] != 0xff)
                     {
                         endAddress = i;
                         break;
@@ -2717,7 +2944,7 @@ namespace ECU_Debugger
                 int intFFcount = 0;
                 for(int i = 0; i < 0x39; i++)
                 {
-                    if(tempArray[i] == 0xff)
+                    if(codeFileArray[i] == 0xff)
                     {
                         intFFcount++;
                     }
@@ -2726,8 +2953,19 @@ namespace ECU_Debugger
                 {
                     intVectorTblOffset = 0x38;
                 }
-                ROMSettingsAndDebuggerCodeArray = new byte[endAddress + 1];
-                Array.Copy(tempArray,ROMSettingsAndDebuggerCodeArray, endAddress +1);
+                //If using vcal reroute make the array big enough to include whiteList
+                if (usingVCALreRoute)
+                {
+                    whiteListSize = (VCALWhiteList.Count - 1) * 2;
+                    ROMSettingsAndDebuggerCodeArray = new byte[(endAddress + 1) + whiteListSize];
+                }
+                else 
+                { 
+                    ROMSettingsAndDebuggerCodeArray = new byte[endAddress + 1];
+                }
+
+                Array.Copy(codeFileArray, ROMSettingsAndDebuggerCodeArray, ROMSettingsAndDebuggerCodeArray.Length);
+
             }
 
             //Default location to place debugger code stub in ROM
@@ -2754,7 +2992,17 @@ namespace ECU_Debugger
             intExtraRam4Offset = (ROMSettingsAndDebuggerCodeArray[cf_XtraRam4Hi + intVectorTblOffset] << 8) + ROMSettingsAndDebuggerCodeArray[cf_XtraRam4Lo + intVectorTblOffset];
             intExtraRam5Offset = (ROMSettingsAndDebuggerCodeArray[cf_XtraRam5Hi + intVectorTblOffset] << 8) + ROMSettingsAndDebuggerCodeArray[cf_XtraRam5Lo + intVectorTblOffset];
             intExtraRam6Offset = (ROMSettingsAndDebuggerCodeArray[cf_XtraRam6Hi + intVectorTblOffset] << 8) + ROMSettingsAndDebuggerCodeArray[cf_XtraRam6Lo + intVectorTblOffset];
+            intExtraRam7Offset = (ROMSettingsAndDebuggerCodeArray[cf_XtraRam7Hi + intVectorTblOffset] << 8) + ROMSettingsAndDebuggerCodeArray[cf_XtraRam7Lo + intVectorTblOffset];
+            intExtraRam8Offset = (ROMSettingsAndDebuggerCodeArray[cf_XtraRam8Hi + intVectorTblOffset] << 8) + ROMSettingsAndDebuggerCodeArray[cf_XtraRam8Lo + intVectorTblOffset];
+            intExtraRam9Offset = (ROMSettingsAndDebuggerCodeArray[cf_XtraRam9Hi + intVectorTblOffset] << 8) + ROMSettingsAndDebuggerCodeArray[cf_XtraRam9Lo + intVectorTblOffset];
+            intExtraRam10Offset = (ROMSettingsAndDebuggerCodeArray[cf_XtraRam10Hi + intVectorTblOffset] << 8) + ROMSettingsAndDebuggerCodeArray[cf_XtraRam10Lo + intVectorTblOffset];
+            lblDebuggerCodeSize.Text = ((ROMSettingsAndDebuggerCodeArray.Length - intDebuggerCodeStubSourceOffset) - whiteListSize) + " Bytes";
+            //VCAL re routing
+            romOffsetRealVcalSub = (ROMSettingsAndDebuggerCodeArray[cf_OrigVcalLocHi + intVectorTblOffset] << 8) + ROMSettingsAndDebuggerCodeArray[cf_OrigVcalLocLo + intVectorTblOffset];
+            romOffsetWhiteList = (ROMSettingsAndDebuggerCodeArray[cf_whiteListLocHi + intVectorTblOffset] << 8) + ROMSettingsAndDebuggerCodeArray[cf_whiteListLocLo + intVectorTblOffset];
+
         }
+        
         //Add byte patches to the ROM being debugged based on the patches in the .code file
         private void AddConfigPatchesToRom()
         {
@@ -2785,10 +3033,11 @@ namespace ECU_Debugger
             if (cboxDebuggerPSW.Checked)
             {
                 int PSWValue = Convert.ToInt32(nudDebuggerPSW.Value);
-                byte HiByte = (byte)(PSWValue >> 8);
-                byte LoByte = (byte)(PSWValue & 255);
-                ROMSettingsAndDebuggerCodeArray[DebuggerPSWOffsetFromRom] = LoByte;
-                ROMSettingsAndDebuggerCodeArray[DebuggerPSWOffsetFromRom + 1] = HiByte;
+                // byte HiByte = (byte)(PSWValue >> 8);
+                // byte LoByte = (byte)(PSWValue & 255);
+                // ROMSettingsAndDebuggerCodeArray[DebuggerPSWOffsetFromRom] = LoByte;
+                //ROMSettingsAndDebuggerCodeArray[DebuggerPSWOffsetFromRom + 1] = HiByte;
+                ROMSettingsAndDebuggerCodeArray[DebuggerPSWOffsetFromRom] = (byte)(PSWValue & 0xff);
                 PSWDebuggerValue = PSWValue;
             }
             if (cboxDebuggerIE.Checked)
@@ -2806,9 +3055,12 @@ namespace ECU_Debugger
         {
             LRBDebuggerValue = (ROMSettingsAndDebuggerCodeArray[DebuggerLRBOffsetFromRom + 1] << 8) + (ROMSettingsAndDebuggerCodeArray[DebuggerLRBOffsetFromRom]);
             nudDebuggerLRB.Value = LRBDebuggerValue;
+            lblDebuggerExtRegRam.Text = ((LRBDebuggerValue) * 8).ToString("X4") + "h - " + ((LRBDebuggerValue) * 8 + 7).ToString("X4") + "h";
 
-            PSWDebuggerValue = (ROMSettingsAndDebuggerCodeArray[DebuggerPSWOffsetFromRom + 1] << 8) + (ROMSettingsAndDebuggerCodeArray[DebuggerPSWOffsetFromRom]);
+            //PSWDebuggerValue = (ROMSettingsAndDebuggerCodeArray[DebuggerPSWOffsetFromRom + 1] << 8) + (ROMSettingsAndDebuggerCodeArray[DebuggerPSWOffsetFromRom]);
+            PSWDebuggerValue = ROMSettingsAndDebuggerCodeArray[DebuggerPSWOffsetFromRom];
             nudDebuggerPSW.Value = PSWDebuggerValue;
+            lblDebuggerPointerRam.Text = ((PSWDebuggerValue & 0x07) * 8 + 0x80).ToString("X4") + "h - " + ((PSWDebuggerValue & 0x07) * 8 + 0x87).ToString("X4") + "h";
 
             int IEDebuggervalue = (ROMSettingsAndDebuggerCodeArray[DebuggerIEOffsetFromRom + 1] << 8) + (ROMSettingsAndDebuggerCodeArray[DebuggerIEOffsetFromRom]);
             nudDebuggerIE.Value = IEDebuggervalue;
@@ -2833,17 +3085,15 @@ namespace ECU_Debugger
                 }
             }
         }
+        //-------------------------------------------------------------------------
 
-        #endregion
 
         //Set breakpoint pressed, parse instruction line, highlight ASm window, write breakpoint to emulator, reset packet counter
         private void btnSetBreakpoint_Click(object sender, EventArgs e)
         {
-            OstrichRestoreArrayAndRestoreDistantROMJumps();
+            //OstrichRestoreArrayAndRestoreDistantROMJumps();
             intCurrent_BP = Convert.ToInt32(nudBPAddress.Value);
             getIndex_ValidateAddress(ref CurrentASMIndex, ref intCurrent_BP);
-            //ParseInstructionLineAndOpCodes(intCurrent_BP, CurrentASMIndex);
-            //DDFlagCorrection = ParseInstructionLineAndOpCodes(intCurrent_BP, CurrentASMIndex, ref intNextInstructionAddress, ref intBranchAddress, ref intCallAddress, ref PointerContentsHexValue, ref strOpCode);
             HighlightLineInASMTextBox(CurrentASMIndex);
             OstrichSetBreakpoint(intCurrent_BP);
             intPacketsRecd = 0;
@@ -2851,13 +3101,26 @@ namespace ECU_Debugger
         //Remove breakpoint pressed - restore array and jumps, uncheck autostep and lock BP
         private void btnRemoveBreakPoint_Click(object sender, EventArgs e)
         {
+            // Ostrich Open?
+            if(OstrichPort != null && OstrichPort.IsOpen)
+            {
                 OstrichRestoreArrayAndRestoreDistantROMJumps();
-                cboxAutoStep.Checked = false;
-                cboxLockBP.Checked = false;
+                stepDebugger();
+            }
+            ClearAllDataBoxes();
+            cboxAutoStep.Checked = false;
+            cboxLockBP.Checked = false;
+            
         }
 
         //Step button pressed - break waiting loop, and start autostep timer if necessary
         private void btnStepFwd_Click(object sender, EventArgs e)
+        {
+            if(OstrichPort != null && OstrichPort.IsOpen) stepDebugger();
+            if (DEBUG) ProcessSerialPacketUpdateTraceAndTboxes(DEBUG_PACKET);
+        }
+
+        private void stepDebugger()
         {
 
             strPlain_BP = "";
@@ -2869,24 +3132,25 @@ namespace ECU_Debugger
                 {
                     timer1.Enabled = true;
                 }
-                //OstrichRestoreArrayAndRestoreDistantROMJumps(true);
+                OstrichRestoreArrayAndRestoreDistantROMJumps();
                 BreakLoopUsingRomAddress();
-                //OstrichSetBreakpoint(intCurrent_BP);
-                OstrichSetBreakpoint(Convert.ToInt32(nudBPAddress.Value));
+                Thread.Sleep(50);
+                OstrichSetBreakpoint(Convert.ToInt32(nudBPAddress.Value), false);
+             
+
             }
             else
             {
                 BreakLoopUsingRomAddress();
             }
-
         }
        
         //Program exit. Close Com ports
         private void Form1_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (serialPort2.IsOpen)
+            if (OstrichPort != null && OstrichPort.IsOpen)
             {
-                serialPort2.Close();
+                OstrichPort.Close();
                 progressBar2.Value = 0;
             }
             if (serialPort1.IsOpen)
@@ -2902,11 +3166,14 @@ namespace ECU_Debugger
             OPENBINDialog.Filter = "BIN Files | *.bin";
             if (OPENBINDialog.ShowDialog() == DialogResult.OK)
             {
+                lblChangedBytes.Text = "";
+                strBINPath = OPENBINDialog.FileName;
+                usingASMFile = false;
+                CreateBINArraysDecompileBINandUpdateASMWindow();
                 BINOpened = true;
-                CreateNewBinArraysFromOpenBINDialogFile();
                 if (cboxAutoUploadOnBINLoad.Checked)
                 {
-                    PrepareBinAndUploadToOstrich();
+                    AddDebuggerCodeAndPatchesToRomAndUpload();
                 }
                     
             }
@@ -2916,263 +3183,74 @@ namespace ECU_Debugger
         private void WriteTheNextBreakpoint()
         {
             //Copy the lookahead variables, becuase we are about to change them to the next instruction
-            copyLookAheadVariables();
+            UpdateXRAMVariables();
             
             //Find the BP in the ASM file, parse the opcode and next potential instruction or branch address, re-dasm if an indirect jump is used and highlight the line in ASM
             CurrentASMIndex = IndexOfInstructionAddressInArray(ASMFileArray, intCurrent_BP);
+
             ParseInstructionLineAndOpCodes(intCurrent_BP, CurrentASMIndex, ref intNextInstructionAddress, ref intBranchAddress, ref intCallAddress, ref PointerContentsHexValue, ref strOpCode);
-            RedasmDueToIndirects(boolReDasm);
+            if(boolReDasm) ReDasmBinFUpdateIndirectJumps();
             HighlightLineInASMTextBox(CurrentASMIndex);
 
-            lookAheadRamHandling();
-
+            XRAMRequestHandler();
 
             //Write the appropriate breakpoints to the emulator
-            //OstrichRestoreArrayAndRestoreDistantROMJumps(false);
             if(!cboxLockBP.Checked)
             {
-                OstrichWriteJumpsToRom();
+                OrganizeAndWriteJumpsToEMU();
             }
 
         }
 
-        void copyLookAheadVariables()
+        //Re dasm the bin file to include the indirect jump location that was probably overlooked on initial dasm
+
+        void ReDasmBinFUpdateIndirectJumps()
         {
-            lblRamWatch.Text = intRamWatchAddress.ToString("X4") + "h";
-            intRAMWatchDisplayedAddy = intRamWatchAddress;
-            //Determine if we are going to show the next instruction RAM or the branch RAM
-            instructionBranched = true;
-            if (intCurrent_BP == intNextInstructionAddress)
-            {
-                instructionBranched = false;
-            }
-
-            //workaround x1 or x2 being changed on the line before a RAM lookup
-            //Since we are always working one instruction behind,(ahead?) The request for the [x1] pointer address will be invalid and too late to change it
-            //Only "real fix" would be to parse the lines manually to determine X1's value before the ECu changes it
-            string currentInst = ASMFileArray[CurrentASMIndex];
-
-            intIncomingRAMAddress1 = intLA1XRAMAddress1;
-            intIncomingRAMAddress2 = intLA1XRAMAddress2;
-            intIncomingRAMAddress3 = intLA2XRAMAddress1;
-            intIncomingRAMAddress4 = intLA2XRAMAddress2;
-            ExtraRam1incoming = boolXRam1Found;
-            ExtraRam2incoming = boolXRam2Found;
-            ExtraRam3incoming = boolXRam3Found;
-            ExtraRam4incoming = boolXRam4Found;
-            boolIncomingWordLA1 = boolLA1word;
-            boolIncomingWordLA2 = boolLA2word;
-
+            // Add indirect Jump address to dasm args if its not already there
+            string instAddy = intNextInstructionAddress.ToString("X4");
+            if (!DasmIndirectJumps.Contains(instAddy)) DasmIndirectJumps += " " + instAddy;
+            refreshDasm();
         }
 
-        //Check upcoming instructions for RAM addresses.  If found, write them to the ROM debugger code stub so we can retreive their data on the next BP
-        void lookAheadRamHandling()
+        //highlight an address in the asm window 
+        //If address is invalid the next lowest address will be highlighted
+        //If 0 the current BP will be highlighted, if current bp = 0 the BP nud value will be used
+        private void highlightAfterValidating(int address)
         {
-            //Parse the next possible instruction to find any hex addresses for RAm lookup. Set DDflagcorrection for CMP CMPB DD errors
-            int LA1index = IndexOfInstructionAddressInArray(ASMFileArray, intNextInstructionAddress);
-            dotFoundonNextInstruction = lookAheadForRamValues(intNextInstructionAddress, LA1index, ref intLA1XRAMAddress1, ref intLA1XRAMAddress2, ref strOpCode, ref boolLA1word);
-
-            //Parse possible branch instruction to find any hex addresses for RAm lookup
-
-            int LA2Index;
-            int LookUp2 = intBranchAddress;
-            if (intBranchAddress != 0)
+            if(address ==0)
             {
-                LookUp2 = intBranchAddress;
-                LA2Index = IndexOfInstructionAddressInArray(ASMFileArray, intBranchAddress);
-                dotFoundonBranchInstruction = lookAheadForRamValues(LookUp2, LA2Index, ref intLA2XRAMAddress1, ref intLA2XRAMAddress2, ref strOpCode, ref boolLA2word);
+                if (intCurrent_BP != 0) address = intCurrent_BP;
+                else address = Convert.ToInt32(nudBPAddress.Value);
             }
-
-            if (cboxStepInto.Checked && intCallAddress != 0)
-            {
-                LookUp2 = intCallAddress;
-                LA2Index = IndexOfInstructionAddressInArray(ASMFileArray, intCallAddress);
-                dotFoundonBranchInstruction = lookAheadForRamValues(LookUp2, LA2Index, ref intLA2XRAMAddress1, ref intLA2XRAMAddress2, ref strOpCode, ref boolLA2word);
-            }
-            useModifiedX1 = false;
-            useModifiedX2 = false;
-
-            writeExtraRamAddressesToEmulator();
+            rtboxASMFile.Focus();
+            int idx = 0;
+            getIndex_ValidateAddress(ref idx, ref address);
+            SelectLineInRichTextBox(rtboxASMFile, IndexOfInstructionAddressInArray(ASMFileArray, address));
         }
-
-        void writeExtraRamAddressesToEmulator()
+        private string getDasmArgs()
         {
-            boolXRam1Found = false;
-            boolXRam2Found = false;
-            boolXRam3Found = false;
-            boolXRam4Found = false;
-
-            //Get RAM watch value from nud box and make "even" to respect ram boundary
-            intRamWatchAddress = Convert.ToInt32(nudRAMWatch.Value) & 0xffe;
-            ROMSettingsAndDebuggerCodeArray[intExtraRam5Offset] = (byte)(intRamWatchAddress & 0xff);
-            ROMSettingsAndDebuggerCodeArray[intExtraRam5Offset + 1] = (byte)(intRamWatchAddress >> 8);
-            ROMSettingsAndDebuggerCodeArray[intExtraRam6Offset] = (byte)((intRamWatchAddress +1) & 0xff);
-            ROMSettingsAndDebuggerCodeArray[intExtraRam6Offset + 1] = (byte)((intRamWatchAddress + 1) >> 8);
-
-
-            if (intLA1XRAMAddress1 != 0)
+            strIgnoreDasmArgs = "";
+            strForceDasmArgs = "";
+            if(tboxDasmArgIgnore.Text != "")
             {
-                ROMSettingsAndDebuggerCodeArray[intExtraRam1Offset] = (byte)(intLA1XRAMAddress1 & 0xff);
-                ROMSettingsAndDebuggerCodeArray[intExtraRam1Offset +1 ] = (byte)(intLA1XRAMAddress1 >> 8);
-                boolXRam1Found = true;
+                strIgnoreDasmArgs = " " + tboxDasmArgIgnore.Text;
+                strIgnoreDasmArgs = strIgnoreDasmArgs.Replace(" ", " D");
             }
-            if (intLA1XRAMAddress2 != 0)
+            if(tboxDasmArgForce.Text != "")
             {
-                ROMSettingsAndDebuggerCodeArray[intExtraRam2Offset] = (byte)(intLA1XRAMAddress2 & 0xff);
-                ROMSettingsAndDebuggerCodeArray[intExtraRam2Offset + 1] = (byte)(intLA1XRAMAddress2 >> 8);
-                boolXRam2Found = true;
-            }
-            //If returning word value set address 2 to the high byte
-            if (boolLA1word)
-            {
-                ROMSettingsAndDebuggerCodeArray[intExtraRam2Offset] = (byte)((intLA1XRAMAddress1 + 1) & 0xff);
-                ROMSettingsAndDebuggerCodeArray[intExtraRam2Offset + 1] = (byte)((intLA1XRAMAddress1 + 1) >> 8);
+                strForceDasmArgs = " " + tboxDasmArgForce.Text;
             }
 
-            if (intLA2XRAMAddress1 != 0)
-            {
-                ROMSettingsAndDebuggerCodeArray[intExtraRam3Offset] = (byte)(intLA2XRAMAddress1 & 0xff);
-                ROMSettingsAndDebuggerCodeArray[intExtraRam3Offset + 1] = (byte)(intLA2XRAMAddress1 >> 8);
-                boolXRam3Found = true;
-            }
-            if (intLA2XRAMAddress2 != 0)
-            {
-                ROMSettingsAndDebuggerCodeArray[intExtraRam4Offset] = (byte)(intLA2XRAMAddress2 & 0xff);
-                ROMSettingsAndDebuggerCodeArray[intExtraRam4Offset + 1] = (byte)(intLA2XRAMAddress2 >> 8);
-                boolXRam4Found = true;
-            }
-            //If returning word value set address 2 to the high byte
-            if (boolLA2word)
-            {
-                ROMSettingsAndDebuggerCodeArray[intExtraRam4Offset] = (byte)((intLA2XRAMAddress1 + 1) & 0xff);
-                ROMSettingsAndDebuggerCodeArray[intExtraRam4Offset + 1] = (byte)((intLA2XRAMAddress1 + 1) >> 8);
-            }
-            int romstartaddy = intExtraRam1Offset + intCodeStubAddress;
-            int sourcestartaddy = intExtraRam1Offset;
-            byte copylength = (byte)((intExtraRam6Offset + 2) - intExtraRam1Offset);
-            OstrichWriteSpecific(ROMSettingsAndDebuggerCodeArray, intCodeStubAddress + (intExtraRam1Offset - intDebuggerCodeStubSourceOffset), intExtraRam1Offset, (byte)(intExtraRam6Offset + 2 - intExtraRam1Offset), true);
+
+            string dasmArgs = DasmDefaultArea;
+            dasmArgs += strIgnoreDasmArgs;
+            dasmArgs += strForceDasmArgs;
+
+            dasmArgs += DasmIndirectJumps;
+            return dasmArgs;
         }
        
-
-        
-        void displayExtraRamData()
-        {
-            string strLA11value = intXramLA11Value.ToString("X2");
-            string strLA12value = intXramLA12Value.ToString("X2");
-            string strLA21value = intXramLA21Value.ToString("X2");
-            string strLA22value = intXramLA22Value.ToString("X2");
-
-
-            string strword1value;
-            string strword2value;
-
-            int intword1Value;
-            int intword2Value;
-            int intRamWatchAddress =0;
-
-            lblLA11.Text = "";
-            lblLA12.Text = "";
-            tboxLA1_1.Text = "";
-            tboxLA1_2.Text = "";
-            strTrace_Xram1Addy = "Xram1";
-            strTrace_Xram2Addy = "Xram2";
-            strTrace_Xram1Conts = "    ";
-            strTrace_Xram2Conts = "    ";
-            lblXram1Binary.Text = "";
-            lblXram2Binary.Text = "";
-
-
-
-            if (!instructionBranched)
-            {
-                if (ExtraRam1incoming)
-                {
-                    
-                    lblLA11.Text = intIncomingRAMAddress1.ToString("X4") + "h";
-                    intRamWatchAddress = intIncomingRAMAddress1;
-                    strTrace_Xram1Addy = lblLA11.Text;
-                    if (boolIncomingWordLA1)
-                    {
-                        intword1Value = (intXramLA12Value << 8) + intXramLA11Value;
-                        strword1value = intword1Value.ToString("X4");
-                        tboxLA1_1.Text = strword1value;
-                        strTrace_Xram1Conts = strword1value.PadLeft(4,'0');
-                    }
-                    else
-                    {
-                        tboxLA1_1.Text = strLA11value;
-                        strTrace_Xram1Conts = strLA11value.PadLeft(4,'0');
-                    }
-                }
-                if (ExtraRam2incoming && !boolLA1word)
-                {
-                    lblLA12.Text = intIncomingRAMAddress2.ToString("X4") + "h";
-                    tboxLA1_2.Text = strLA12value;
-                    strTrace_Xram2Conts = strLA12value.PadLeft(4, '0');
-                }
-            }
-
-
-
-            if (instructionBranched)
-            {
-                if (ExtraRam3incoming)
-                {
-
-                    lblLA11.Text = intIncomingRAMAddress3.ToString("X4") + "h";
-                    intRamWatchAddress = intIncomingRAMAddress3;
-                    strTrace_Xram1Addy = lblLA11.Text;
-
-                    if (boolIncomingWordLA2)
-                    {
-                        intword2Value = (intXramLA22Value << 8) + intXramLA21Value;
-                        strword2value = intword2Value.ToString("X4");
-                        tboxLA1_1.Text = strword2value;
-                        strTrace_Xram1Conts = strword2value.PadLeft(4, '0');
-                    }
-                    else
-                    {
-                        tboxLA1_1.Text = strLA21value;
-                        strTrace_Xram1Conts = strLA21value.PadLeft(4, '0');
-                    }
-                }
-                if (ExtraRam4incoming && !boolLA2word)
-                {
-                    lblLA11.Text = intIncomingRAMAddress4.ToString("X4") + "h";
-                    tboxLA1_2.Text = strLA22value;
-                    strTrace_Xram2Conts = strLA22value.PadLeft(4, '0');
-                }
-            }
-            if(tboxLA1_1.Text != "")
-            {
-                lblXram1Binary.Text = Convert.ToString((Convert.ToInt32(tboxLA1_1.Text, 16) & 0xff) >> 4, 2).PadLeft(4,'0') + " " + Convert.ToString((Convert.ToInt32(tboxLA1_1.Text, 16) & 0xf), 2).PadLeft(4, '0');
-            }
-            if (tboxLA1_2.Text != "")
-            {
-                lblXram2Binary.Text = Convert.ToString((Convert.ToInt32(tboxLA1_2.Text, 16) & 0xff) >> 4, 2).PadLeft(4, '0') + " " + Convert.ToString((Convert.ToInt32(tboxLA1_2.Text, 16) & 0xf), 2).PadLeft(4, '0');
-            }
-
-            tboxRamWatch.Text = ((intRAMWatchByte2 << 8) + intRAMWatchByte1).ToString("X4");
-            lblRamWatchBinary.Text = Convert.ToString((intRAMWatchByte1 & 0xff) >> 4, 2).PadLeft(4, '0') + " " + Convert.ToString((intRAMWatchByte1 & 0xf), 2).PadLeft(4, '0');
-            
-            if (!cboxLockRamWatch.Checked && intRamWatchAddress != 0)
-            {
-                nudRAMWatch.Value = intRamWatchAddress;
-            }
-
-        }
-        void RedasmDueToIndirects(bool confirm)
-        {
-            //Re dasm the bin file to include the indirect jump location that was probably overlooked on initial dasm
-            if (confirm)
-            {
-                DasmIndirectJumps += " " + intNextInstructionAddress.ToString("X4");
-                CreateAsmFileFromBin();
-                rtboxASMFile.Focus();
-                SelectLineInRichTextBox(rtboxASMFile, IndexOfInstructionAddressInArray(ASMFileArray, intNextInstructionAddress));
-            }
-        }
-
+        //---------------- Extra RAM and pointers ---------------------------------
         //Parse any possible ram addresses from a given string. Return true if a dot is found
         bool lookAheadForRamValues(int NextInstruction, int nextIndex, ref int Ram1, ref int Ram2, ref string opCode, ref bool wordValue)
         {
@@ -3272,7 +3350,7 @@ namespace ECU_Debugger
             }
             //Handle word RAM requests
             opCode = instructionLine.Substring(0, 5).Trim();
-            if (opCode == "L" || opCode == "ST" || opCode == "MOV" || opCode == "AND" || opCode == "XOR" || opCode == "CMP" || opCode == "XCHG" || opCode == "ADD" || opCode == "CMP")
+            if (opCode == "L" || opCode == "ST" || opCode == "MOV" || opCode == "AND" || opCode == "XOR" || opCode == "CMP" || opCode == "XCHG" || opCode == "ADD" || opCode == "ADD" || opCode == "SUB" || opCode == "MUL" || opCode == "DIV")
             {
                 wordValue = true;
             }
@@ -3286,6 +3364,7 @@ namespace ECU_Debugger
             return dotIndex;
 
         }
+        
         //Get register value for pointer from register indicated by string (DP ACC X1 X2)
         private int GetPointerFromReg(string register)
         {
@@ -3316,6 +3395,30 @@ namespace ECU_Debugger
                         PointerRegisterAddress = Convert.ToInt32(strPlain_ACC, 16);
                     }
                     break;
+                case "er0":
+                    if (strPlain_ACC != "")
+                    {
+                        PointerRegisterAddress = Convert.ToInt32(strPlain_er0, 16);
+                    }
+                    break;
+                case "er1":
+                    if (strPlain_ACC != "")
+                    {
+                        PointerRegisterAddress = Convert.ToInt32(strPlain_er1, 16);
+                    }
+                    break;
+                case "er2":
+                    if (strPlain_ACC != "")
+                    {
+                        PointerRegisterAddress = Convert.ToInt32(strPlain_er2, 16);
+                    }
+                    break;
+                case "er3":
+                    if (strPlain_ACC != "")
+                    {
+                        PointerRegisterAddress = Convert.ToInt32(strPlain_er3, 16);
+                    }
+                    break;
                 default:
                     PointerRegisterAddress = 0;
                     break;
@@ -3344,6 +3447,287 @@ namespace ECU_Debugger
             }
             return input;
         }
+
+        // Check upcoming instructions for the need to get RAM contents
+        void XRAMRequestHandler()
+        {
+            //Parse the next possible instruction to find any hex addresses for RAm lookup. Set DDflagcorrection for CMP CMPB DD errors
+            int LA1index = IndexOfInstructionAddressInArray(ASMFileArray, intNextInstructionAddress);
+            if (LA1index > 0)
+            {
+                dotFoundonNextInstruction = lookAheadForRamValues(intNextInstructionAddress, LA1index, ref XRAMBox1AddressRequested, ref XRAMBox2AddressRequested, ref strOpCode, ref XRAMWordRequestBox1and2);
+            }
+                //Parse possible branch instruction to find any hex addresses for RAm lookup
+
+            int BranchXramIndex;
+            int BranchAddress = intBranchAddress;
+            // Check branch instruction for RAM pointers 
+            if (intBranchAddress != 0)
+            {
+                BranchXramIndex = IndexOfInstructionAddressInArray(ASMFileArray, intBranchAddress);
+                dotFoundonBranchInstruction = lookAheadForRamValues(BranchAddress, BranchXramIndex, ref ALT_XRAMBox1AddressRequested, ref ALT_XRAMBox2AddressRequested, ref strOpCode, ref XRAMWordRequestBox1and2_ALT);
+            }
+
+            // Check inside calls for RAM pointers
+            if (cboxStepInto.Checked && intCallAddress != 0)
+            {
+                BranchAddress = intCallAddress;
+                BranchXramIndex = IndexOfInstructionAddressInArray(ASMFileArray, intCallAddress);
+                dotFoundonBranchInstruction = lookAheadForRamValues(BranchAddress, BranchXramIndex, ref ALT_XRAMBox1AddressRequested, ref ALT_XRAMBox2AddressRequested, ref strOpCode, ref XRAMWordRequestBox1and2_ALT);
+            }
+            useModifiedX1 = false;
+            useModifiedX2 = false;
+
+            writeExtraRamAddressesToEmulator();
+        }
+        
+        // Update variables from requested to expecetd
+        void UpdateXRAMVariables()
+        {
+            ExpectedRAMWatchAddress = RAMWatchAddressRequested;
+            strExpectedRAMWatchAddress = ExpectedRAMWatchAddress.ToString("X4") + "h";
+            lblRamWatch.Text = strExpectedRAMWatchAddress;
+            
+            
+            //Determine if we are going to show the next instruction RAM or the branch RAM
+            instructionBranched = true;
+            if (intCurrent_BP == intNextInstructionAddress)
+            {
+                instructionBranched = false;
+            }
+
+            //workaround x1 or x2 being changed on the line before a RAM lookup
+            //Since we are always working one instruction behind,(ahead?) The request for the [x1] pointer address will be invalid and too late to change it
+            //Only "real fix" would be to parse the lines manually to determine X1's value before the ECu changes it
+            string currentInst = ASMFileArray[CurrentASMIndex];
+
+            XRAMAddressForBox1 = XRAMBox1AddressRequested;
+            XRAMAddressForBox2 = XRAMBox2AddressRequested;
+            XRAMAddressForBox1_ALT = ALT_XRAMBox1AddressRequested;
+            XRAMAddressForBox2_ALT = ALT_XRAMBox2AddressRequested;
+            ExpectingXRAMForBox1 = RequestForXRAMBox1;
+            ExpectingXRAMForBox2 = RequestForXRAMBox2;
+            ExpectingXRAMForBox1_ALT = RequestForXRAMBox1_ALT;
+            ExpectingXRAMForBox2_ALT = RequestForXRAMBox2_ALT;
+            ExpectingWordforBox1and2 = XRAMWordRequestBox1and2;
+            ExpectingWordForBox1and2_ALT = XRAMWordRequestBox1and2_ALT;
+
+        }
+        
+        // Helper function to update code stub addresses
+        void writeExtraRamAddressesToEmulator()
+        {
+            RequestForXRAMBox1 = false;
+            RequestForXRAMBox2 = false;
+            RequestForXRAMBox1_ALT = false;
+            RequestForXRAMBox2_ALT = false;
+
+            // Update code stub to request bytes from [Address] and [Address + 1] for RAM box 1 (Bytes 1 and 2)
+            if (XRAMBox1AddressRequested != 0)
+            {
+                // Extra RAM byte 1 + 2
+                WriteXramAddressToCodeStub(ROMSettingsAndDebuggerCodeArray, intExtraRam1Offset, XRAMBox1AddressRequested);
+                WriteXramAddressToCodeStub(ROMSettingsAndDebuggerCodeArray, intExtraRam2Offset, XRAMBox1AddressRequested + 1);
+                RequestForXRAMBox1 = true;
+            }
+
+            // Update code stub to request bytes from [Address] and [Address + 1] for RAM box 2 (Bytes 3 and 4)
+            if (XRAMBox2AddressRequested != 0)
+            {
+                // Extra RAM byte 3 + 4
+                WriteXramAddressToCodeStub(ROMSettingsAndDebuggerCodeArray, intExtraRam3Offset, XRAMBox2AddressRequested);
+                WriteXramAddressToCodeStub(ROMSettingsAndDebuggerCodeArray, intExtraRam4Offset, XRAMBox2AddressRequested + 1);
+                RequestForXRAMBox2 = true;
+            }
+
+            // Update code stub to request bytes from [Address] and [Address + 1] for Alt RAM box 1 (Bytes 5 and 6)
+            if (ALT_XRAMBox1AddressRequested != 0)
+            {
+                // Extra RAM byte 5 + 6
+                WriteXramAddressToCodeStub(ROMSettingsAndDebuggerCodeArray, intExtraRam5Offset, ALT_XRAMBox1AddressRequested);
+                WriteXramAddressToCodeStub(ROMSettingsAndDebuggerCodeArray, intExtraRam6Offset, ALT_XRAMBox1AddressRequested +1);
+                RequestForXRAMBox1_ALT = true;
+            }
+
+            // Update code stub to request bytes from [Address] and [Address + 1] for Alt RAM box 2 (Bytes 7 and 8)
+            if (ALT_XRAMBox2AddressRequested != 0)
+            {
+                // Extra RAM byte 7 + 8
+                WriteXramAddressToCodeStub(ROMSettingsAndDebuggerCodeArray, intExtraRam7Offset, ALT_XRAMBox2AddressRequested);
+                WriteXramAddressToCodeStub(ROMSettingsAndDebuggerCodeArray, intExtraRam8Offset, ALT_XRAMBox2AddressRequested + 1);
+                RequestForXRAMBox2_ALT = true;
+            }
+
+
+            // Update code stub to get RAM watch WORD from address. (word address boundary adjusted) Bytes 9 and 10
+            RAMWatchAddressRequested = Convert.ToInt32(nudRAMWatch.Value) & 0xfffe;
+            WriteXramAddressToCodeStub(ROMSettingsAndDebuggerCodeArray, intExtraRam9Offset, RAMWatchAddressRequested);
+            WriteXramAddressToCodeStub(ROMSettingsAndDebuggerCodeArray, intExtraRam10Offset, RAMWatchAddressRequested + 1);
+
+            
+            // Write the code stub to emulator
+            int romstartaddy = intExtraRam1Offset + intCodeStubAddress;
+            int sourcestartaddy = intExtraRam1Offset;
+            byte copylength = (byte)((intExtraRam10Offset + 2) - intExtraRam1Offset);
+            Emulator.OstrichWriteSpecific_256Max(ROMSettingsAndDebuggerCodeArray, intCodeStubAddress + (intExtraRam1Offset - intDebuggerCodeStubSourceOffset), intExtraRam1Offset, (byte)copylength, true);
+        }
+        
+        // Handles what to do with incoming extra RAM bytes (RAM Watch or look ahead)
+        void XRAMReceivedHandler()
+        {
+
+            // Clear extra ram displays
+            lblXRAMbox1.Text = "";
+            lblXRAMbox2.Text = "";
+            tboxXRAM1.Text = "";
+            tboxXRAM2.Text = "";
+            strTrace_Xram1Addy = "Xram1";
+            strTrace_Xram2Addy = "Xram2";
+            strTrace_Xram1Conts = "    ";
+            strTrace_Xram2Conts = "    ";
+            lblXram1Binary.Text = "";
+            lblXram2Binary.Text = "";
+            int XRAM1Value = 0;
+            int XRAM2Value = 0;
+
+            // Instruction did not branch, use main XRAM requests
+            if (!instructionBranched)
+            {
+                // Expecting value for RAM box 1
+                if (ExpectingXRAMForBox1)
+                {
+
+                    // Update Address label and trace string
+                    lblXRAMbox1.Text = XRAMAddressForBox1.ToString("X4") + "h";
+                    strTrace_Xram1Addy = lblXRAMbox1.Text;
+
+                    // Get Byte Value, set trace string
+                    XRAM1Value = XRAMByte1;
+                    strTrace_Xram1Conts = XRAMByte1.ToString("X2");
+
+                    // Update value and string if word value
+                    if (ExpectingWordforBox1and2)
+                    {
+                        XRAM1Value += (XRAMByte2 << 8);
+                        strTrace_Xram1Conts = XRAM1Value.ToString("X4");
+                    }
+
+                    // Update RAM 1 text box
+                    tboxXRAM1.Text = strTrace_Xram1Conts;
+
+                }
+
+                // Expecting value for RAM box 2
+                if (ExpectingXRAMForBox2)
+                {
+
+                    // Update Address label and trace string
+                    lblXRAMbox2.Text = XRAMAddressForBox2.ToString("X4") + "h";
+                    strTrace_Xram2Addy = lblXRAMbox2.Text;
+
+                    // Get Byte Value, set trace string
+                    XRAM2Value = XRAMByte3;
+                    strTrace_Xram2Conts = XRAMByte3.ToString("X2");
+
+                    // Update value and string if word value
+                    if (ExpectingWordforBox1and2)
+                    {
+                        XRAM2Value += (XRAMByte4 << 8);
+                        strTrace_Xram2Conts = XRAM2Value.ToString("X4");
+                    }
+
+                    // Update RAM 1 text box
+                    tboxXRAM2.Text = strTrace_Xram2Conts;
+
+                }
+            }
+
+
+            // Instruction branched, use alt xram requests
+            if (instructionBranched)
+            {
+                if (ExpectingXRAMForBox1_ALT)
+                {
+                    // Update Address label and trace string
+                    lblXRAMbox1.Text = XRAMAddressForBox1_ALT.ToString("X4") + "h";
+                    strTrace_Xram1Addy = lblXRAMbox1.Text;
+
+                    // Get Byte Value, set trace string
+                    XRAM1Value = XRAMByte5;
+                    strTrace_Xram1Conts = XRAMByte5.ToString("X2");
+
+                    // Update value and string if word value
+                    if (ExpectingWordForBox1and2_ALT)
+                    {
+                        XRAM1Value += (XRAMByte6 << 8);
+                        strTrace_Xram1Conts = XRAM1Value.ToString("X4");
+                    }
+
+                    // Update RAM 1 text box
+                    tboxXRAM1.Text = strTrace_Xram1Conts;
+                }
+
+                
+                // Expecting value for RAM box 2
+                if (ExpectingXRAMForBox2_ALT)
+                {
+
+                    // Update Address label and trace string
+                    lblXRAMbox2.Text = XRAMAddressForBox2_ALT.ToString("X4") + "h";
+                    strTrace_Xram2Addy = lblXRAMbox2.Text;
+
+                    // Get Byte Value, set trace string
+                    XRAM2Value = XRAMByte7;
+                    strTrace_Xram2Conts = XRAMByte7.ToString("X2");
+
+                    // Update value and string if word value
+                    if (ExpectingWordForBox1and2_ALT)
+                    {
+                        XRAM2Value += (XRAMByte8 << 8);
+                        strTrace_Xram2Conts = XRAM2Value.ToString("X4");
+                    }
+
+                    // Update RAM 2 text box
+                    tboxXRAM2.Text = strTrace_Xram2Conts;
+
+                }
+            }
+
+            // Binary string
+            if (tboxXRAM1.Text != "")
+            {
+                string[] xram1Nibs = ConvertToBinaryNibbles(XRAM1Value);
+                lblXram1Binary.Text = xram1Nibs[2] + " " + xram1Nibs[3];
+            }
+
+            // Binary string
+            if (tboxXRAM2.Text != "")
+            {
+                string[] xram2Nibs = ConvertToBinaryNibbles(XRAM2Value);
+                lblXram2Binary.Text = xram2Nibs[2] + " " + xram2Nibs[3];
+            }
+
+            // Update RAM Watch values
+            intRamWatchValue = XRAMByte9 + (XRAMByte10 << 8);
+            strtrace_RamWatch = intRamWatchValue.ToString("X4");
+            tboxRamWatch.Text = intRamWatchValue.ToString("X4");
+            string[] RamWatchNibs = ConvertToBinaryNibbles(intRamWatchValue);
+            lblRamWatchBinary.Text = RamWatchNibs[0] + " " + RamWatchNibs[1] + "\n" + RamWatchNibs[2] + " " + RamWatchNibs[3];
+
+
+            // RAM watch unlocked, use Look ahead address 1 for its value
+            if (!cboxLockRamWatch.Checked && ExpectingXRAMForBox1)
+            {
+                nudRAMWatch.Value = XRAMAddressForBox1;
+            }
+
+        }
+        private void WriteXramAddressToCodeStub(byte[] codeStub, int offset, int address)
+        {
+            codeStub[offset] = (byte)(address & 0xff);  // low byte
+            codeStub[offset + 1] = (byte)(address >> 8); // High byte
+        }
+        //-------------------------------------------------------------------------
         
         
         //Auto-step timer
@@ -3376,50 +3760,17 @@ namespace ECU_Debugger
                 PreviousPacketNumber = intPacketsRecd;
             }
         }
-        
-        private void cboxAutoStep_CheckedChanged(object sender, EventArgs e)
-        {
-
-            if (!cboxAutoStep.Checked)
-            {
-                timer1.Enabled = false;
-            }
-        }
 
         private void cmboxRomType_SelectedIndexChanged(object sender, EventArgs e)
         {
-            LoadCodeFileSettings();
+            lblDebuggerCodeSize.Text = "0 Bytes";
+            getDebuggerSettingsForROM();
         }
 
-        //auto step changed. adjust the BPs accordingly
-        private void cboxStepInto_CheckedChanged(object sender, EventArgs e)
-        {
-            if (cboxStepInto.Checked && intCallAddress > 0)
-            {
-               //Write debugger call to the start of teh sub call
-                OstrichWriteSpecific(byteCodeStubCAll, intCallAddress);
-            }
-            else if(!cboxStepInto.Checked && intCallAddress > 0)
-            {
-                //Write orig code to sub call location and write debugger call to the next instruction
-                OstrichWriteSpecific(BinWithPatchesAndDebuggerCode, intCallAddress, intCallAddress,(byte)byteCodeStubCAll.Length);
-                OstrichWriteSpecific(byteCodeStubCAll, intNextInstructionAddress);
 
-            }
-        }
-
+        //------------------ Check box changes ------------------------------------
         //Enable manual load asm file button if auto dasm is disabled
-        private void cboxAutoDasmBin_CheckedChanged(object sender, EventArgs e)
-        {
-            if (!cboxAutoDasmBin.Checked)
-            {
-                btnLoadASMFile.Enabled = true;
-            }
-            else
-            {
-                btnLoadASMFile.Enabled = false;
-            }
-        }
+
         //Enable nud if checked
         private void cboxDebuggerLRB_CheckedChanged(object sender, EventArgs e)
         {
@@ -3456,6 +3807,47 @@ namespace ECU_Debugger
                 nudDebuggerIE.Enabled = true;
             }
         }
+        private void cboxMonitorBin_CheckedChanged(object sender, EventArgs e)
+        {
+            if (cboxMonitorBin.Checked)
+            {
+                binMonitorTimer.Enabled = true;
+                cboxQuietCompiler.Enabled = true;
+            }
+
+            else
+            {
+                binMonitorTimer.Enabled = false;
+                cboxQuietCompiler.Checked = false;
+                cboxQuietCompiler.Enabled = false;
+            }
+
+        }
+        private void cboxAutoStep_CheckedChanged(object sender, EventArgs e)
+        {
+
+            if (!cboxAutoStep.Checked)
+            {
+                timer1.Enabled = false;
+            }
+        }
+        //auto step changed. adjust the BPs accordingly
+        private void cboxStepInto_CheckedChanged(object sender, EventArgs e)
+        {
+            if (cboxStepInto.Checked && intCallAddress > 0)
+            {
+                //Write debugger call to the start of teh sub call
+                Emulator.OstrichWriteSpecific_256Max(byteCodeStubCAll, intCallAddress);
+            }
+            else if (!cboxStepInto.Checked && intCallAddress > 0)
+            {
+                //Write orig code to sub call location and write debugger call to the next instruction
+                Emulator.OstrichWriteSpecific_256Max(BinWithPatchesAndDebuggerCode, intCallAddress, intCallAddress, (byte)byteCodeStubCAll.Length);
+                Emulator.OstrichWriteSpecific_256Max(byteCodeStubCAll, intNextInstructionAddress);
+
+            }
+        }
+        //-------------------------------------------------------------------------
         //Send byte from serial text box
         private void btnSendByte_Click(object sender, EventArgs e)
         {
@@ -3485,15 +3877,45 @@ namespace ECU_Debugger
         //Load ROM specific settings apply manual overrides and upload to Ostrich
         private void btnReloadDebuggerCode_Click(object sender, EventArgs e)
         {
-            LoadCodeFileSettings();
+            uploadDebuggerCodeToEMU();
+            UpdateLRB_PSW_IE_Nuds();
+        }
+
+        private void uploadDebuggerCodeToEMU()
+        {
+            //Problem getting settings from code file or rom
+            if (!getDebuggerSettingsForROM())
+            {
+                return;
+            }
             AddPSW_LRB_IE_nudValuesToROMCode();
             intCodeStubAddress = Convert.ToInt32(nudROMCodeAddress.Value);
-            OstrichWriteSpecific(ROMSettingsAndDebuggerCodeArray, intCodeStubAddress, intDebuggerCodeStubSourceOffset, (byte)(ROMSettingsAndDebuggerCodeArray.Length - intDebuggerCodeStubSourceOffset), true);
+
+            int bytesToSend = ROMSettingsAndDebuggerCodeArray.Length - intDebuggerCodeStubSourceOffset;
+            
+            //If debugger code stub is larger than 255 bytes, make and send multiple packets
+            if (bytesToSend > 255)
+            {
+                int packetSize = 255;
+                int packetsToSend = (packetSize / 255) + 1;
+                int bytesWritten = 0;
+                while (bytesToSend > 0)
+                {
+                    Emulator.OstrichWriteSpecific_256Max(ROMSettingsAndDebuggerCodeArray, intCodeStubAddress + bytesWritten, intDebuggerCodeStubSourceOffset + bytesWritten, (byte)(packetSize), true);
+                    bytesWritten += packetSize;
+                    bytesToSend -= packetSize;
+                    packetSize = (byte)(bytesToSend);
+
+                }
+            }
+            else Emulator.OstrichWriteSpecific_256Max(ROMSettingsAndDebuggerCodeArray, intCodeStubAddress, intDebuggerCodeStubSourceOffset, (byte)(ROMSettingsAndDebuggerCodeArray.Length - intDebuggerCodeStubSourceOffset), true);
+            if(usingVCALreRoute) reRouteVCALinRomVectorTable(BinWithPatchesAndDebuggerCode, VCALVectorTableLoc, intCodeStubAddress, BinHasBeenUploadedSinceCreation);
+            ROMWhichLoopEquals1 = false;
         }
 
         private void btnResetOstrich_Click(object sender, EventArgs e)
         {
-            ResetOstrichVID();
+            Emulator.OstrichResetVID(Convert.ToByte(nudVIDNumber.Value));
         }
         //Enter pressed while in BP nud box. Set Breakpoint
         private void nudBPAddress_KeyDown(object sender, KeyEventArgs e)
@@ -3509,6 +3931,7 @@ namespace ECU_Debugger
                 Form2 frm = new Form2();
                 frm.Show();
         }
+        //---------------- Tool tips ----------------------------------------------
         //Get and set tool tip boxes containing pointer location contents
         private void tboxX1_TextChanged(object sender, EventArgs e)
         {
@@ -3517,47 +3940,118 @@ namespace ECU_Debugger
         //Get and set tool tip boxes containing pointer location contents
         private void tboxX2_TextChanged(object sender, EventArgs e)
         {
-            toolTip2.SetToolTip(tboxX2, GetPointerValuesFromPointerTextBox(tboxX2, "X2"));
+            toolTip1.SetToolTip(tboxX2, GetPointerValuesFromPointerTextBox(tboxX2, "X2"));
         }
         //Get and set tool tip boxes containing pointer location contents
         private void tboxDP_TextChanged(object sender, EventArgs e)
         {
-            toolTip3.SetToolTip(tboxDP, GetPointerValuesFromPointerTextBox(tboxDP, "DP"));
+            toolTip1.SetToolTip(tboxDP, GetPointerValuesFromPointerTextBox(tboxDP, "DP"));
         }
-
         private void tboxRamWatch_TextChanged(object sender, EventArgs e)
         {
-            string Addy1 = (intRAMWatchDisplayedAddy).ToString("X2").PadLeft(4, '0') + "h = ";
-            string Addy2 = (intRAMWatchDisplayedAddy + 1).ToString("X2").PadLeft(4, '0') + "h = ";
-            string value1 = (intRAMWatchByte1).ToString("X2");
-            string value2 = (intRAMWatchByte2).ToString("X2");
-            toolTip5.SetToolTip(tboxRamWatch, Addy1 + value1 + "\r\n" + Addy2 + value2);
+            string Addy1 = (ExpectedRAMWatchAddress).ToString("X4") + "h = ";
+            string Addy2 = (ExpectedRAMWatchAddress + 1).ToString("X4") + "h = ";
+            string value1 = (intRamWatchValue & 0xff).ToString("X2");
+            string value2 = (intRamWatchValue >> 8).ToString("X2");
+            toolTip1.SetToolTip(tboxRamWatch, Addy1 + value1 + "\r\n" + Addy2 + value2);
         }
 
-
-        //Show individual DP Contents Bytes
+        //Show individual DP Contents Bytes for ram
         private void tboxDPconts_TextChanged(object sender, EventArgs e)
         {
-            string Addy1 = (intDPAddress & 0xfffe).ToString("X2").PadLeft(4,'0') + "h = " ;
-            string Addy2 = ((intDPAddress & 0xfffe) + 1).ToString("X2").PadLeft(4, '0') + "h = ";
-            int contvalue1 = Convert.ToInt32(strPlain_DPconts, 16);
-            string value1 = (contvalue1 & 0xff).ToString("X2");
-            string value2 = (contvalue1 >> 8).ToString("X2");
-            toolTip4.SetToolTip(tboxDPconts, Addy1 + value1 + "\r\n" + Addy2 + value2);
+            if(tboxDPconts.Text != "")
+            {
+                string Addy1 = (intDPAddress & 0xfffe).ToString("X2").PadLeft(4, '0') + "h = ";
+                string Addy2 = ((intDPAddress & 0xfffe) + 1).ToString("X2").PadLeft(4, '0') + "h = ";
+                int contvalue1 = Convert.ToInt32(strPlain_DPconts, 16);
+                string value1 = (contvalue1 & 0xff).ToString("X2");
+                string value2 = (contvalue1 >> 8).ToString("X2");
+                toolTip1.SetToolTip(tboxDPconts, Addy1 + value1 + "\r\n" + Addy2 + value2);
+            }
+
         }
 
-        //Refresh dasm button clicked. Make a new dasm using the user supplied arguments
-        private void button1_Click(object sender, EventArgs e)
+        //Show individual DP Contents Bytes for ROM
+        private void tboxDPConts_ROM_TextChanged(object sender, EventArgs e)
         {
-            strIgnoreDasmArgs = " " + tboxDasmArgIgnore.Text;
-            strIgnoreDasmArgs = strIgnoreDasmArgs.Replace(" ", " D");
-            strForceDasmArgs = " " + tboxDasmArgForce.Text;
+            if(tboxDPConts_ROM.Text != "")
+            {
+                string Addy1 = (intDPAddress & 0xfffe).ToString("X2").PadLeft(4, '0') + "h = ";
+                string Addy2 = ((intDPAddress & 0xfffe) + 1).ToString("X2").PadLeft(4, '0') + "h = ";
+                int contvalue1 = Convert.ToInt32(tboxDPConts_ROM.Text, 16);
+                string value1 = (contvalue1 & 0xff).ToString("X2");
+                string value2 = (contvalue1 >> 8).ToString("X2");
+                toolTip1.SetToolTip(tboxDPConts_ROM, Addy1 + value1 + "\r\n" + Addy2 + value2);
+                
+            }
+            
+        }
 
-            UseUserDasmOptions = true;
-            CreateAsmFileFromBin();
+        private void setMiscToolTips()
+        {
+            toolTip1.SetToolTip(cboxMonitorBin,"Check this box to monitor the loaded BIN or ASM file for change.  \r\n" +
+                                                    "When change is detected, the file will be compiled and loaded to the emulator automatically.");
+            toolTip1.SetToolTip(cboxQuietCompiler, "Use this option to suppress compiler output when monitoring BIN or ASM files.");
+            toolTip1.SetToolTip(tboxDasmArgIgnore, "Enter 4 digit hex addresses, seperated by a space that want the decompiler to ignore.\r\n" +
+                                                  "Use this when false tbl_ and label_ references are appearing in the ASM.");
+            toolTip1.SetToolTip(tboxDasmArgForce, "Enter 4 digit hex addresses, seperated by a space that want the decompiler acknowledge.\r\n" +
+                                                   "Use this you want to decompile DB or DW areas of code caused by indirect or serial references.");
+            toolTip1.SetToolTip(nudROMCodeAddress, "Select an area of the ROM where you would like the debugger code to be stored.\r\n" +
+                                                   "Any unused code area or High cam fuel tables are a good place to work from.\r\n" +
+                                                   "Be careful not to overwrite functioning code.");
+            toolTip1.SetToolTip(btnLoadBinFile, "Select a BIN file that you would like to upload and debug");
+            toolTip1.SetToolTip(btnLoadASMFile, "Select an ASM file that you would like to compile and upload for debugging");
+            toolTip1.SetToolTip(cboxAutoUploadOnBINLoad, "Use this option to automatically upload the BIN to the emulator.");
+            toolTip1.SetToolTip(cboxSlowUpload ,"Use this option if you are having trouble with the emulator's bulk write function.");
+            toolTip1.SetToolTip(btnRefreshDasm , "Decompile the loaded BIN file using the Ignore and Force arguments.");
+            toolTip1.SetToolTip(btnOpenXMLFile , "Open an XML renaming file to rename references in the ASM.\r\n" +
+                                                 "Create one by using \"ASM Renamer\" or included renamer in the File menu.");
+            toolTip1.SetToolTip(btnApplyRenamingMask , "Rename the ASM references using the loaded XML.");
+            toolTip1.SetToolTip(btnSwap , "Switch between the original and renamed ASM file.");
+            toolTip1.SetToolTip(btnSaveRenamedASM , "Save the renamed ASM file.");
+            toolTip1.SetToolTip(cBoxCOMPORT , "Select the COM port settings for the device connected to the ECU's serial interface.\r\n" +
+                                              "Testing has shown that a baud of 39063 works best when the ECU is set to \r\n" +
+                                              "38400 Baud which is the default setting on predefined ECUs.");
+            toolTip1.SetToolTip(btnResetOstrich , "Use this to reset the ostrich Vendor ID.  \r\n" +
+                                                  "Sometimes useful if the Ostrich gets confused.");
+            toolTip1.SetToolTip(nudVIDNumber , "Ostrich vendor ID number to reset.");
+            toolTip1.SetToolTip(btnLoadBinToOstrich , "Upload loaded bin to emulator.");
+            toolTip1.SetToolTip(cboxRenameOnChange , "Use this option to automatically rename the ASM references everytime it is decompiled.\r\n" +
+                                                     "This can be slow if there are many items to rename in the XML file.");
+            toolTip1.SetToolTip(cboxLockRamWatch , "Use this option to watch the RAM address in the RAM watch box.\r\n" +
+                                                    "The default behavior is to watch the last address used in an operation.\r\n" +
+                                                    "Initial RAM watch address changes are always 1 instruction cycle behind.");
+            toolTip1.SetToolTip(cboxStepInto , "Use this option to have the debugger follow code into CAL, SCAL and VCAL instructions.");
+            toolTip1.SetToolTip(cboxLockBP , "Use this option to reset the ECU and stop on the user entered breakpoint on every \"Step\"");
+            toolTip1.SetToolTip(cboxAutoStep, "Use this option to automatically step through the code.\r\n" +
+                                              "To stop, uncheck the box.  It may take more than 1 click while the PC is auto-stepping");
+            toolTip1.SetToolTip(cboxVCALReRoute, "Use this option to \"Re-Route\" one of the VCAL subs so the debugger code can be called \r\n" +
+                                                 "using only 1 byte.  This will allow breakpoints on addresses that would otherwise crash the ECU\r\n" +
+                                                 "This adds a larger footprint to the ROM debugger code and adds some CPU time to the VCAL routine\r\n" +
+                                                 "that's being re-routed.  This shouldn't matter unless you are debugging very time sensitive issues.");
+                                                 
+        }
+        //-------------------------------------------------------------------------
+
+
+
+        //Refresh dasm button clicked. Make a new dasm using the user supplied arguments
+        private void refreshDasm_Click(object sender, EventArgs e)
+        {
+            refreshDasm();
+
+        }
+
+        // Refresh Dasm with current args
+        private void refreshDasm()
+        {
+            decompileBIN(strBINPath, CurrentASMPath, false, getDasmArgs());
+            LoadASMFileIntoArraysRenameIfNeededAndUpdateASMWindow();
+            int highlightTHis = Convert.ToInt32(nudBPAddress.Value);
+            if (intCurrent_BP > 0) highlightTHis = intCurrent_BP;
             rtboxASMFile.Focus();
-            SelectLineInRichTextBox(rtboxASMFile, CurrentASMIndex);
-
+            highlightAfterValidating(highlightTHis);
+            getVCALroutingInfoFromROM();
         }
 
         private void cboxLockBP_CheckedChanged(object sender, EventArgs e)
@@ -3582,5 +4076,379 @@ namespace ECU_Debugger
         }
 
 
+        //------------------ BIN CHange monitor -----------------------------------
+        //Timer that monitors BIN file for changes, then uploads and redasms when found
+        private void binMonitorTimer_Tick(object sender, EventArgs e)
+        {
+            
+            //return if a bin hasnt been uploaded yet
+            if(!BinHasBeenUploadedSinceCreation)
+            {
+                return;
+            }
+
+            //If using an asm file for source code, see if it changed then compile it.
+            if (usingASMFile)
+            {
+                readAllLinesInASM(ASMtoCompilePath, ref strAryNewASM);
+                
+                //If no changes to asm file, return;
+                if (ASMSourceCodeArray.SequenceEqual(strAryNewASM))
+                {
+                    return;
+                }
+                
+                //ASM was changed, update the source array and compile the ASM file
+                ASMSourceCodeArray = new string[strAryNewASM.Length];
+                Array.Copy(strAryNewASM, ASMSourceCodeArray, strAryNewASM.Length);
+                compileASMtoBIN(ASMtoCompilePath, Path.GetDirectoryName(strBINPath) + "\\" + Path.GetFileNameWithoutExtension(strBINPath), cboxQuietCompiler.Checked);
+
+            }
+            
+            //Read the original BIN file that was being monitored, or the newly compiled Bin from the ASM being monitored
+            readBINFile(strBINPath, ref newBinArray);          
+
+            //Return if the BIN size is not 32kb
+            if(newBinArray.Length != 0x8000)
+            {
+                MessageBox.Show("Bin monitor detected an Invalid Bin size");
+                return;
+            }
+
+            //return if bin hasn't changed
+            if (currentBINArray.SequenceEqual(newBinArray))
+            {
+                return;
+            }
+
+            //Bin has changed
+            lblChangedBytes.Text = "";
+            byte[] blockMap = new byte[128];
+            int[] changeRange = new int[256];
+            
+            //Map the changes and how many
+            int intChanges = compareAndMapBinChanges(currentBINArray, newBinArray, ref blockMap, ref changeRange);
+
+            //Update the current bin array, re-dasm and update the asm window
+            currentBINArray = new byte[newBinArray.Length];
+            Array.Copy(newBinArray, currentBINArray, newBinArray.Length);
+            CreateBINArraysDecompileBINandUpdateASMWindow();
+
+            //Update emu to reflect the new bin
+            updateBinChangesToEmu(newBinArray, blockMap, changeRange);
+
+            highlightAfterValidating(Convert.ToInt32(nudBPAddress.Value));
+            lblChangedBytes.Text = "Bytes Changed: " + intChanges;
+            //ReDasmBiN();
+
+            
+        }
+        private void readBINFile(string path, ref byte[] destArray)
+        {
+            int ioRetries = 3;
+            int retryDelay = 200;
+            for (int i = 0; i < ioRetries; i++)
+            {
+                try
+                {
+                    //newBinArray = System.IO.File.ReadAllBytes(strBINPath);
+                    using (FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    {
+                        int numBytesToRead = (int)stream.Length;
+                        destArray = new byte[numBytesToRead];
+                        int numBytesRead = 0;
+                        while (numBytesToRead > 0)
+                        {
+                            // Read may return anything from 0 to numBytesToRead.
+                            int n = stream.Read(destArray, numBytesRead, numBytesToRead);
+
+                            // Break when the end of the file is reached.
+                            if (n == 0)
+                                break;
+
+                            numBytesRead += n;
+                            numBytesToRead -= n;
+                        }
+                    }
+                }
+                catch (IOException) when (i < ioRetries)
+                {
+                    Thread.Sleep(retryDelay);
+                }
+            }
+        }
+        
+        //Compare new bin file to the previously read one and map out the changes 
+        //1 in blockMap = there is a change in this block
+        //changeRange is an array of address pairs
+        //changeRange[0] = First changed address in first block
+        //changeRange[1] = Last changed address in first block
+        private int compareAndMapBinChanges(byte[] prevBin, byte[] newBin, ref byte[] blockMap, ref int[] changeRange )
+        {
+            Array.Clear(blockMap, 0, blockMap.Length);
+            Array.Clear(changeRange, 0, changeRange.Length);
+            int changedByteCount = 0;
+            int blockCount = 0;
+            int prevBlockCount = 0;
+            bool isNewBlock = true;
+
+            //Loop through 2 bin arrays byte by byte
+            for (int i = 0; i < 0x8000; i++)
+            {
+                //split bin mapping into 256 byte blocks
+                prevBlockCount = blockCount;
+                blockCount = i / 256;
+                if(prevBlockCount != blockCount)
+                {
+                    isNewBlock = true;
+                }
+                
+                //Change detected
+                if (prevBin[i] != newBin[i])
+                {
+                    //Store address of the first change in the changeRange array
+                    if (isNewBlock)
+                    {
+                        changeRange[blockCount * 2] = i;
+                        isNewBlock = false;
+                    }
+                    //Store the last changed address in the changeRange array
+                    changeRange[(blockCount * 2) + 1] = i;
+                    
+                    //Mark block as changed
+                    blockMap[blockCount] = 1;
+                    
+                    changedByteCount++;
+                }
+
+            }
+            return changedByteCount;
+
+        }
+
+        //Update the ostrich as efficiently as possible
+        //Supply the new bin file,
+        //blocks array = the number of blocks that have changes in them (256 byte blocks x 128 blocks)
+        //range array  = the 1st and last address thats changed in each block (Array[256] = 2 addresses for each block) 
+        private void updateBinChangesToEmu (byte[] newBin, byte[] blocks, int[] range)
+        {
+            //Count how many blocks are changed. Write entire Bin to emu if over threshold
+            int changedBlocks = 0;
+            foreach  (byte block in blocks)
+            {
+                if (block == 1) changedBlocks++;
+            }
+            
+            //too many changes, re write the entire EMU
+            if(changedBlocks > 6)
+            {
+                //write entire bin then return
+                quietBulkWrite = true;
+                AddDebuggerCodeAndPatchesToRomAndUpload();
+                return;
+            }
+
+            //Write blocks individually
+            int blockNumber = 0;
+            foreach (byte block in blocks)
+            {
+                if (block == 1)
+                {
+                    Emulator.OstrichWriteSpecific_256Max(newBin, range[blockNumber * 2], range[blockNumber * 2], ((range[ (blockNumber * 2) + 1] - range[blockNumber * 2]) + 1), true);
+                }
+                blockNumber++;
+            }
+            
+            //Re upload debugger code, just incase the area where it was got modified
+            uploadDebuggerCodeToEMU();
+        }
+
+
+        //--------------- VCAL ReRoute --------------------------------------------
+
+
+        private void cboxVCALReRoute_CheckedChanged(object sender, EventArgs e)
+        {
+            //This will clear any current breakpoints and "wake" the ECU up, if a bin has been uploaded already
+            //Kind of sloppy because this assumes that the ostrich port is still open, but it may not be
+            if (BinHasBeenUploadedSinceCreation)
+            {
+                OstrichRestoreArrayAndRestoreDistantROMJumps();
+                stepDebugger();
+            }    
+                if (cboxVCALReRoute.Checked)
+                {
+
+                    usingVCALreRoute = true;
+                    CreateRomCallArraysBasedOnRomAddress(Convert.ToInt32(nudROMCodeAddress.Value));
+                    uploadDebuggerCodeToEMU();
+                    return;
+                }
+
+                usingVCALreRoute = false;
+                if (BinHasBeenUploadedSinceCreation)
+                {
+                    reRouteVCALinRomVectorTable(BinWithPatchesAndDebuggerCode, VCALVectorTableLoc, realVCALAddress, true);
+                }
+                CreateRomCallArraysBasedOnRomAddress(Convert.ToInt32(nudROMCodeAddress.Value));
+                uploadDebuggerCodeToEMU();
+            
+            //Remove the vcal labels from sight
+            lblSizeWithVCAL.Text = "";
+            lblVCALbyteSize.Text = "";
+            lblVCALnumber.Text = "";
+
+        }
+
+        private void getVCALroutingInfoFromROM()
+        {
+            ImportVCAlvectorTable(currentBINArray, ref VCALvectorTable);
+            FindBestVCAltoUse(ASMFileArray, VCALvectorTable, ref VCALNumber, ref VCALcallCount);
+            realVCALAddress = VCALvectorTable[VCALNumber];
+            VCALVectorTableLoc = BEGIN_VCAL_VECTOR_TABLE + (VCALNumber * 2); 
+            CreateVCALwhiteList(ASMFileArray, VCALvectorTable, VCALNumber,VCALWhiteList);
+            UpdateVCALLabels();
+
+        }
+        
+        //Import the VCAL table addresses into an array. VCAL 0-7 from ROM address 28-37
+        private void ImportVCAlvectorTable(byte[] binArray, ref int[] vTable)
+        {
+            int vcalTableStart = 0x28;
+            int loByte;
+            int hiByte;
+            for (int i = 0; i < vTable.Length; i++)
+            {
+                hiByte = binArray[(i * 2) + vcalTableStart + 1];
+                loByte = binArray[(i * 2) + vcalTableStart];
+                vTable[i] = (hiByte << 8) + loByte;
+            }
+        }
+
+        //Check every line in the asm to see if it contains the vcal addresses in the vector table
+        //Count the references for each and compare to find the index of the (first) lowest VCAL count
+        //Vcalnum and callCOunt = the vcal with the lowest references and callCount is the number of references (less 1 for the vcal address)
+        private void FindBestVCAltoUse(string[] dasm, int[] vTable, ref int VCALnum, ref int callCount)
+        {
+            //Count how many times each vcal is called and return which one is the lowest
+            string strvcalAddress;
+            VCALnum = 0;
+            int[] individualCallCount = new int[vTable.Length];
+            
+            //Get ref count for each vcal address
+            for (int i = 0; i < vTable.Length; i++)
+            {
+                strvcalAddress = "; " + vTable[i].ToString("X4");
+                foreach (string line in dasm)
+                {
+                    if (line.Contains(strvcalAddress)) individualCallCount[i]++;
+                }
+                //remove one reference for the actual vcal address
+                individualCallCount[i]--;
+            }
+            
+            //find the index for the lowest call count (first index of the lowest count if more than one)
+            for (int j = 0; j < vTable.Length; j++)
+            {
+                if (individualCallCount[j] < individualCallCount[VCALnum]) VCALnum = j;
+            }
+            callCount = individualCallCount[VCALnum];
+        }
+        
+        private void UpdateVCALLabels()
+        {
+            if (!cboxVCALReRoute.Checked) return;
+            if (BINOpened && codeFileHasBeenOpened )
+            {
+                lblVCALnumber.Text = "VCAL: " + VCALNumber.ToString();
+                lblSizeWithVCAL.Text = "Size using VCAL:";
+                lblVCALbyteSize.Text = (ROMSettingsAndDebuggerCodeArray.Length - intDebuggerCodeStubSourceOffset).ToString() + " Bytes";
+                return;
+            }
+                lblSizeWithVCAL.Text = "Size using VCAL:";
+                lblVCALbyteSize.Text = "Open BIN";
+                lblVCALnumber.Text = "VCAL: #";
+ 
+        }
+        
+        //Create a white list of all the addresses that are calling the VCAL in the rom code
+        private void CreateVCALwhiteList (string[] dasm, int[] vTable, int VCALnum, List <int> whiteList)
+        {
+                whiteList.Clear();
+                string strvcalAddress = "; " + vTable[VCALnum].ToString("X4");
+                string caller;
+                foreach (string line in dasm)
+                {
+                    if (line.Contains(strvcalAddress) && line.Contains("from"))
+                    {
+                        caller = line.Substring(line.IndexOf("from") + 5, 4);
+                        whiteList.Add(Convert.ToInt32(caller, 16));
+                    }
+                }
+                //0 for ECU to ID the end of the list
+                whiteList.Add(0);
+        }
+
+        //check to see if the requested BP is on the white list
+        private bool CheckListForItem(int address, List <int> list)            
+        {
+            if (address == 0) return false;
+            int ind = list.FindIndex(a => list.Contains(address));
+            if (ind >= 0) return true;
+            return false;
+
+            
+        }
+
+        private void reRouteVCALinRomVectorTable(byte[] romArray, int tableLocation, int newAddress, bool writeNow = false)
+        {
+            if (BINOpened)
+            {
+                romArray[tableLocation] = (byte)(newAddress & 0xff);
+                romArray[tableLocation + 1] = (byte)(newAddress >> 8);
+                if (writeNow) Emulator.OstrichWriteSpecific_256Max(romArray, tableLocation, tableLocation, 2, true);
+            }
+
+        }
+
+        private void addVCALcodeToDebuggerCode()
+        {
+            //Add whitelist to the tail of the debugger code
+            for (int i = 0; i < VCALWhiteList.Count; i++)
+            {
+                int listOffset = i * 2;
+                int wlAddress = VCALWhiteList[i] & 0xffff;
+                ROMSettingsAndDebuggerCodeArray[romOffsetWhiteList + listOffset] = (byte)(wlAddress & 0xff);
+                ROMSettingsAndDebuggerCodeArray[romOffsetWhiteList + listOffset + 1] = (byte)(wlAddress >> 8);
+            }
+            //Add the original location of the now re-routed VCAL routine to the debugger code
+            //This allows the ECU to execute the VCAL function normally when a caller from the whitelist calls it
+           
+            ROMSettingsAndDebuggerCodeArray[romOffsetRealVcalSub] = (byte)(realVCALAddress & 0xff);
+            ROMSettingsAndDebuggerCodeArray[romOffsetRealVcalSub + 1] = (byte)(realVCALAddress >> 8);
+            UpdateVCALLabels();
+        }
+
+        private void UpdateWhiteListOnRom(List <int> whtList)
+        {
+            byte[] ROMwhiteList = new byte[whtList.Count * 2];
+            
+            //Add whitelist to the tail of the debugger code
+            for (int i = 0; i < whtList.Count; i++)
+            {
+                int listOffset = i * 2;
+                int wlAddress = VCALWhiteList[i] & 0xffff;
+                ROMwhiteList[listOffset] = (byte)(wlAddress & 0xff);
+                ROMwhiteList[listOffset + 1] = (byte)(wlAddress >> 8);
+            }
+            int RomWhiteListLocation = (intCodeStubAddress + romOffsetWhiteList) - intDebuggerCodeStubSourceOffset;
+            Emulator.OstrichWriteSpecific_256Max(ROMwhiteList, RomWhiteListLocation , 0, ROMwhiteList.Length, true);
+            
+        }
+
+        private void btnDumpROM_Click(object sender, EventArgs e)
+        {
+            Emulator.OstrichBulkReadEntire(true);
+        }
     }
 }

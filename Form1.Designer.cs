@@ -35,7 +35,6 @@
             this.btnSendByte = new System.Windows.Forms.Button();
             this.btnCloseCOMPort = new System.Windows.Forms.Button();
             this.btnOpenCOMPort = new System.Windows.Forms.Button();
-            this.chboxChecksum = new System.Windows.Forms.CheckBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.label5 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
@@ -56,19 +55,46 @@
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1 = new System.Windows.Forms.Panel();
             this.groupBox11 = new System.Windows.Forms.GroupBox();
-            this.button1 = new System.Windows.Forms.Button();
+            this.btnRefreshDasm = new System.Windows.Forms.Button();
             this.label43 = new System.Windows.Forms.Label();
             this.tboxDasmArgForce = new System.Windows.Forms.TextBox();
             this.label42 = new System.Windows.Forms.Label();
             this.tboxDasmArgIgnore = new System.Windows.Forms.TextBox();
-            this.nudVIDNumber = new System.Windows.Forms.NumericUpDown();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
+            this.lblVCALnumber = new System.Windows.Forms.Label();
+            this.cboxVCALReRoute = new System.Windows.Forms.CheckBox();
+            this.lblVCALbyteSize = new System.Windows.Forms.Label();
+            this.lblSizeWithVCAL = new System.Windows.Forms.Label();
+            this.lblDebuggerCodeSize = new System.Windows.Forms.Label();
+            this.label50 = new System.Windows.Forms.Label();
             this.cmboxRomType = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
             this.nudROMCodeAddress = new System.Windows.Forms.NumericUpDown();
-            this.cboxAddCodeToRom = new System.Windows.Forms.CheckBox();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
+            this.groupBox14 = new System.Windows.Forms.GroupBox();
+            this.tboxXRAM2 = new System.Windows.Forms.TextBox();
+            this.tboxXRAM1 = new System.Windows.Forms.TextBox();
+            this.lblRamWatchBinary = new System.Windows.Forms.Label();
+            this.lblXRAMbox1 = new System.Windows.Forms.Label();
+            this.lblRamWatch = new System.Windows.Forms.Label();
+            this.lblXRAMbox2 = new System.Windows.Forms.Label();
+            this.tboxRamWatch = new System.Windows.Forms.TextBox();
+            this.lblXram1Binary = new System.Windows.Forms.Label();
+            this.lblXram2Binary = new System.Windows.Forms.Label();
+            this.groupBox13 = new System.Windows.Forms.GroupBox();
+            this.tboxStackPointer = new System.Windows.Forms.TextBox();
+            this.tboxStack1 = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.tboxStack2 = new System.Windows.Forms.TextBox();
+            this.tboxStack3 = new System.Windows.Forms.TextBox();
+            this.tboxStack4 = new System.Windows.Forms.TextBox();
+            this.tboxStack5 = new System.Windows.Forms.TextBox();
+            this.label44 = new System.Windows.Forms.Label();
             this.groupBox10 = new System.Windows.Forms.GroupBox();
+            this.lblDebuggerPointerRam = new System.Windows.Forms.Label();
+            this.lblDebuggerExtRegRam = new System.Windows.Forms.Label();
+            this.label52 = new System.Windows.Forms.Label();
+            this.label51 = new System.Windows.Forms.Label();
             this.btnReloadDebuggerCode = new System.Windows.Forms.Button();
             this.label8 = new System.Windows.Forms.Label();
             this.cboxDebuggerLRB = new System.Windows.Forms.CheckBox();
@@ -78,16 +104,23 @@
             this.nudDebuggerIE = new System.Windows.Forms.NumericUpDown();
             this.nudDebuggerPSW = new System.Windows.Forms.NumericUpDown();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.tboxECUReturnAddress = new System.Windows.Forms.TextBox();
+            this.tboxBreakPoint = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.label49 = new System.Windows.Forms.Label();
+            this.label48 = new System.Windows.Forms.Label();
+            this.tboxDPConts_ROM = new System.Windows.Forms.TextBox();
+            this.label47 = new System.Windows.Forms.Label();
             this.label39 = new System.Windows.Forms.Label();
             this.label35 = new System.Windows.Forms.Label();
             this.label34 = new System.Windows.Forms.Label();
+            this.lblDPContsBinary = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.label38 = new System.Windows.Forms.Label();
             this.tboxDP = new System.Windows.Forms.TextBox();
             this.label13 = new System.Windows.Forms.Label();
+            this.tboxDPconts = new System.Windows.Forms.TextBox();
+            this.lblDPContents = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
             this.label14 = new System.Windows.Forms.Label();
             this.label25 = new System.Windows.Forms.Label();
@@ -112,32 +145,11 @@
             this.tboxR5 = new System.Windows.Forms.TextBox();
             this.tboxR4 = new System.Windows.Forms.TextBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.lblRamWatchBinary = new System.Windows.Forms.Label();
-            this.lblRamWatch = new System.Windows.Forms.Label();
-            this.tboxRamWatch = new System.Windows.Forms.TextBox();
-            this.lblDPContsBinary = new System.Windows.Forms.Label();
-            this.lblXram2Binary = new System.Windows.Forms.Label();
-            this.lblXram1Binary = new System.Windows.Forms.Label();
-            this.lblRomRam = new System.Windows.Forms.Label();
-            this.lblDPContents = new System.Windows.Forms.Label();
-            this.tboxDPconts = new System.Windows.Forms.TextBox();
-            this.lblLA12 = new System.Windows.Forms.Label();
-            this.tboxLA1_2 = new System.Windows.Forms.TextBox();
-            this.lblLA11 = new System.Windows.Forms.Label();
-            this.tboxLA1_1 = new System.Windows.Forms.TextBox();
-            this.label44 = new System.Windows.Forms.Label();
-            this.tboxStackPointer = new System.Windows.Forms.TextBox();
-            this.tboxStack5 = new System.Windows.Forms.TextBox();
-            this.tboxStack4 = new System.Windows.Forms.TextBox();
-            this.tboxStack3 = new System.Windows.Forms.TextBox();
-            this.tboxStack2 = new System.Windows.Forms.TextBox();
             this.label41 = new System.Windows.Forms.Label();
             this.tboxPSWL5 = new System.Windows.Forms.TextBox();
             this.label40 = new System.Windows.Forms.Label();
             this.tboxPSWL4 = new System.Windows.Forms.TextBox();
-            this.label7 = new System.Windows.Forms.Label();
             this.label24 = new System.Windows.Forms.Label();
-            this.tboxStack1 = new System.Windows.Forms.TextBox();
             this.tboxPSWL = new System.Windows.Forms.TextBox();
             this.label23 = new System.Windows.Forms.Label();
             this.tboxPSWH = new System.Windows.Forms.TextBox();
@@ -172,16 +184,20 @@
             this.btnSetBreakpoint = new System.Windows.Forms.Button();
             this.label9 = new System.Windows.Forms.Label();
             this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.lblChangedBytes = new System.Windows.Forms.Label();
+            this.cboxQuietCompiler = new System.Windows.Forms.CheckBox();
+            this.label46 = new System.Windows.Forms.Label();
+            this.cboxMonitorBin = new System.Windows.Forms.CheckBox();
             this.cboxSlowUpload = new System.Windows.Forms.CheckBox();
             this.cboxAutoUploadOnBINLoad = new System.Windows.Forms.CheckBox();
-            this.cboxAutoDasmBin = new System.Windows.Forms.CheckBox();
             this.btnLoadBinToOstrich = new System.Windows.Forms.Button();
-            this.tboxASMSimpleName = new System.Windows.Forms.TextBox();
             this.btnLoadASMFile = new System.Windows.Forms.Button();
-            this.tboxBinSimpleName = new System.Windows.Forms.TextBox();
+            this.tboxOpenFileSimpleName = new System.Windows.Forms.TextBox();
             this.btnLoadBinFile = new System.Windows.Forms.Button();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.btnDumpROM = new System.Windows.Forms.Button();
             this.btnResetOstrich = new System.Windows.Forms.Button();
+            this.nudVIDNumber = new System.Windows.Forms.NumericUpDown();
             this.label37 = new System.Windows.Forms.Label();
             this.progressBar2 = new System.Windows.Forms.ProgressBar();
             this.tboxOstrichSerialNumber = new System.Windows.Forms.TextBox();
@@ -191,9 +207,10 @@
             this.cboxOstrichComPortNumber = new System.Windows.Forms.ComboBox();
             this.rtboxASMFile = new System.Windows.Forms.RichTextBox();
             this.groupBox12 = new System.Windows.Forms.GroupBox();
+            this.cboxRenameOnChange = new System.Windows.Forms.CheckBox();
             this.progressBar3 = new System.Windows.Forms.ProgressBar();
             this.btnSaveRenamedASM = new System.Windows.Forms.Button();
-            this.btnRestore = new System.Windows.Forms.Button();
+            this.btnSwap = new System.Windows.Forms.Button();
             this.btnOpenXMLFile = new System.Windows.Forms.Button();
             this.btnApplyRenamingMask = new System.Windows.Forms.Button();
             this.cboxSaveTrace = new System.Windows.Forms.CheckBox();
@@ -202,18 +219,17 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.serialPort2 = new System.IO.Ports.SerialPort(this.components);
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.toolTip2 = new System.Windows.Forms.ToolTip(this.components);
-            this.toolTip3 = new System.Windows.Forms.ToolTip(this.components);
-            this.toolTip4 = new System.Windows.Forms.ToolTip(this.components);
-            this.toolTip5 = new System.Windows.Forms.ToolTip(this.components);
+            this.binMonitorTimer = new System.Windows.Forms.Timer(this.components);
+            this.cbox_QuietTimeOuts = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.groupBox11.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.nudVIDNumber)).BeginInit();
             this.groupBox9.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudROMCodeAddress)).BeginInit();
             this.groupBox6.SuspendLayout();
+            this.groupBox14.SuspendLayout();
+            this.groupBox13.SuspendLayout();
             this.groupBox10.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudDebuggerLRB)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudDebuggerIE)).BeginInit();
@@ -226,16 +242,17 @@
             ((System.ComponentModel.ISupportInitialize)(this.nudBPAddress)).BeginInit();
             this.groupBox8.SuspendLayout();
             this.groupBox7.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudVIDNumber)).BeginInit();
             this.groupBox12.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.cbox_QuietTimeOuts);
             this.groupBox1.Controls.Add(this.tboxHexToSend);
             this.groupBox1.Controls.Add(this.btnSendByte);
             this.groupBox1.Controls.Add(this.btnCloseCOMPort);
             this.groupBox1.Controls.Add(this.btnOpenCOMPort);
-            this.groupBox1.Controls.Add(this.chboxChecksum);
             this.groupBox1.Controls.Add(this.progressBar1);
             this.groupBox1.Controls.Add(this.label5);
             this.groupBox1.Controls.Add(this.label4);
@@ -249,14 +266,14 @@
             this.groupBox1.Controls.Add(this.cBoxCOMPORT);
             this.groupBox1.Location = new System.Drawing.Point(3, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(200, 263);
+            this.groupBox1.Size = new System.Drawing.Size(200, 246);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "COM PORT SETTINGS";
+            this.groupBox1.Text = "ECU Serial";
             // 
             // tboxHexToSend
             // 
-            this.tboxHexToSend.Location = new System.Drawing.Point(12, 215);
+            this.tboxHexToSend.Location = new System.Drawing.Point(12, 194);
             this.tboxHexToSend.Name = "tboxHexToSend";
             this.tboxHexToSend.Size = new System.Drawing.Size(165, 20);
             this.tboxHexToSend.TabIndex = 26;
@@ -265,7 +282,7 @@
             // 
             // btnSendByte
             // 
-            this.btnSendByte.Location = new System.Drawing.Point(114, 238);
+            this.btnSendByte.Location = new System.Drawing.Point(114, 217);
             this.btnSendByte.Name = "btnSendByte";
             this.btnSendByte.Size = new System.Drawing.Size(63, 23);
             this.btnSendByte.TabIndex = 25;
@@ -275,7 +292,7 @@
             // 
             // btnCloseCOMPort
             // 
-            this.btnCloseCOMPort.Location = new System.Drawing.Point(102, 190);
+            this.btnCloseCOMPort.Location = new System.Drawing.Point(102, 169);
             this.btnCloseCOMPort.Name = "btnCloseCOMPort";
             this.btnCloseCOMPort.Size = new System.Drawing.Size(75, 21);
             this.btnCloseCOMPort.TabIndex = 13;
@@ -285,7 +302,7 @@
             // 
             // btnOpenCOMPort
             // 
-            this.btnOpenCOMPort.Location = new System.Drawing.Point(12, 190);
+            this.btnOpenCOMPort.Location = new System.Drawing.Point(12, 169);
             this.btnOpenCOMPort.Name = "btnOpenCOMPort";
             this.btnOpenCOMPort.Size = new System.Drawing.Size(75, 21);
             this.btnOpenCOMPort.TabIndex = 12;
@@ -293,21 +310,11 @@
             this.btnOpenCOMPort.UseVisualStyleBackColor = true;
             this.btnOpenCOMPort.Click += new System.EventHandler(this.btnOpenCOMPort_Click);
             // 
-            // chboxChecksum
-            // 
-            this.chboxChecksum.AutoSize = true;
-            this.chboxChecksum.Location = new System.Drawing.Point(11, 153);
-            this.chboxChecksum.Name = "chboxChecksum";
-            this.chboxChecksum.Size = new System.Drawing.Size(112, 17);
-            this.chboxChecksum.TabIndex = 24;
-            this.chboxChecksum.Text = "Enable Checksum";
-            this.chboxChecksum.UseVisualStyleBackColor = true;
-            // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(5, 176);
+            this.progressBar1.Location = new System.Drawing.Point(12, 155);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(187, 10);
+            this.progressBar1.Size = new System.Drawing.Size(164, 10);
             this.progressBar1.TabIndex = 2;
             // 
             // label5
@@ -422,7 +429,7 @@
             this.serialPort1.BaudRate = 38400;
             this.serialPort1.ReadBufferSize = 200;
             this.serialPort1.ReceivedBytesThreshold = 28;
-            this.serialPort1.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(this.serialPort1_DataReceived);
+            this.serialPort1.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(this.SerialPort1_DataReceived);
             // 
             // menuStrip1
             // 
@@ -443,39 +450,38 @@
             this.tsOpenRenamingForm,
             this.exitToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(40, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(39, 20);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(160, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(158, 6);
             // 
             // tsOpenRenamingForm
             // 
             this.tsOpenRenamingForm.Name = "tsOpenRenamingForm";
-            this.tsOpenRenamingForm.Size = new System.Drawing.Size(163, 22);
+            this.tsOpenRenamingForm.Size = new System.Drawing.Size(161, 22);
             this.tsOpenRenamingForm.Text = "ASM Renaming";
             this.tsOpenRenamingForm.Click += new System.EventHandler(this.tsOpenRenamingForm_Click);
             // 
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(161, 22);
             this.exitToolStripMenuItem.Text = "Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(53, 20);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(52, 20);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
             // panel1
             // 
             this.panel1.Controls.Add(this.groupBox11);
-            this.panel1.Controls.Add(this.nudVIDNumber);
             this.panel1.Controls.Add(this.groupBox9);
             this.panel1.Controls.Add(this.groupBox6);
             this.panel1.Controls.Add(this.groupBox8);
@@ -485,31 +491,31 @@
             this.panel1.Controls.Add(this.groupBox12);
             this.panel1.Location = new System.Drawing.Point(0, 24);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1322, 787);
+            this.panel1.Size = new System.Drawing.Size(1322, 825);
             this.panel1.TabIndex = 8;
             // 
             // groupBox11
             // 
-            this.groupBox11.Controls.Add(this.button1);
+            this.groupBox11.Controls.Add(this.btnRefreshDasm);
             this.groupBox11.Controls.Add(this.label43);
             this.groupBox11.Controls.Add(this.tboxDasmArgForce);
             this.groupBox11.Controls.Add(this.label42);
             this.groupBox11.Controls.Add(this.tboxDasmArgIgnore);
-            this.groupBox11.Location = new System.Drawing.Point(3, 733);
+            this.groupBox11.Location = new System.Drawing.Point(3, 783);
             this.groupBox11.Name = "groupBox11";
             this.groupBox11.Size = new System.Drawing.Size(923, 36);
             this.groupBox11.TabIndex = 41;
             this.groupBox11.TabStop = false;
             // 
-            // button1
+            // btnRefreshDasm
             // 
-            this.button1.Location = new System.Drawing.Point(753, 12);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(161, 23);
-            this.button1.TabIndex = 39;
-            this.button1.Text = "Refresh Dasm with Args";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.btnRefreshDasm.Location = new System.Drawing.Point(753, 10);
+            this.btnRefreshDasm.Name = "btnRefreshDasm";
+            this.btnRefreshDasm.Size = new System.Drawing.Size(161, 23);
+            this.btnRefreshDasm.TabIndex = 39;
+            this.btnRefreshDasm.Text = "Refresh Dasm with Args";
+            this.btnRefreshDasm.UseVisualStyleBackColor = true;
+            this.btnRefreshDasm.Click += new System.EventHandler(this.refreshDasm_Click);
             // 
             // label43
             // 
@@ -543,30 +549,81 @@
             this.tboxDasmArgIgnore.Size = new System.Drawing.Size(201, 20);
             this.tboxDasmArgIgnore.TabIndex = 38;
             // 
-            // nudVIDNumber
-            // 
-            this.nudVIDNumber.Hexadecimal = true;
-            this.nudVIDNumber.Location = new System.Drawing.Point(170, 366);
-            this.nudVIDNumber.Maximum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.nudVIDNumber.Name = "nudVIDNumber";
-            this.nudVIDNumber.Size = new System.Drawing.Size(30, 20);
-            this.nudVIDNumber.TabIndex = 30;
-            // 
             // groupBox9
             // 
+            this.groupBox9.Controls.Add(this.lblVCALnumber);
+            this.groupBox9.Controls.Add(this.cboxVCALReRoute);
+            this.groupBox9.Controls.Add(this.lblVCALbyteSize);
+            this.groupBox9.Controls.Add(this.lblSizeWithVCAL);
+            this.groupBox9.Controls.Add(this.lblDebuggerCodeSize);
+            this.groupBox9.Controls.Add(this.label50);
             this.groupBox9.Controls.Add(this.cmboxRomType);
             this.groupBox9.Controls.Add(this.label6);
             this.groupBox9.Controls.Add(this.nudROMCodeAddress);
-            this.groupBox9.Controls.Add(this.cboxAddCodeToRom);
-            this.groupBox9.Location = new System.Drawing.Point(3, 403);
+            this.groupBox9.Location = new System.Drawing.Point(3, 422);
             this.groupBox9.Name = "groupBox9";
-            this.groupBox9.Size = new System.Drawing.Size(199, 110);
+            this.groupBox9.Size = new System.Drawing.Size(199, 145);
             this.groupBox9.TabIndex = 34;
             this.groupBox9.TabStop = false;
+            this.groupBox9.Text = "ECU type";
+            // 
+            // lblVCALnumber
+            // 
+            this.lblVCALnumber.AutoSize = true;
+            this.lblVCALnumber.Location = new System.Drawing.Point(135, 41);
+            this.lblVCALnumber.Name = "lblVCALnumber";
+            this.lblVCALnumber.Size = new System.Drawing.Size(50, 13);
+            this.lblVCALnumber.TabIndex = 41;
+            this.lblVCALnumber.Text = "VCAL:  #";
+            // 
+            // cboxVCALReRoute
+            // 
+            this.cboxVCALReRoute.AutoSize = true;
+            this.cboxVCALReRoute.Checked = true;
+            this.cboxVCALReRoute.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cboxVCALReRoute.Location = new System.Drawing.Point(6, 40);
+            this.cboxVCALReRoute.Name = "cboxVCALReRoute";
+            this.cboxVCALReRoute.Size = new System.Drawing.Size(124, 17);
+            this.cboxVCALReRoute.TabIndex = 40;
+            this.cboxVCALReRoute.Text = "Use VCAL Re-Route";
+            this.cboxVCALReRoute.UseVisualStyleBackColor = true;
+            this.cboxVCALReRoute.CheckedChanged += new System.EventHandler(this.cboxVCALReRoute_CheckedChanged);
+            // 
+            // lblVCALbyteSize
+            // 
+            this.lblVCALbyteSize.AutoSize = true;
+            this.lblVCALbyteSize.Location = new System.Drawing.Point(119, 121);
+            this.lblVCALbyteSize.Name = "lblVCALbyteSize";
+            this.lblVCALbyteSize.Size = new System.Drawing.Size(42, 13);
+            this.lblVCALbyteSize.TabIndex = 39;
+            this.lblVCALbyteSize.Text = "0 Bytes";
+            // 
+            // lblSizeWithVCAL
+            // 
+            this.lblSizeWithVCAL.AutoSize = true;
+            this.lblSizeWithVCAL.Location = new System.Drawing.Point(26, 121);
+            this.lblSizeWithVCAL.Name = "lblSizeWithVCAL";
+            this.lblSizeWithVCAL.Size = new System.Drawing.Size(88, 13);
+            this.lblSizeWithVCAL.TabIndex = 38;
+            this.lblSizeWithVCAL.Text = "Size using VCAL:";
+            // 
+            // lblDebuggerCodeSize
+            // 
+            this.lblDebuggerCodeSize.AutoSize = true;
+            this.lblDebuggerCodeSize.Location = new System.Drawing.Point(119, 103);
+            this.lblDebuggerCodeSize.Name = "lblDebuggerCodeSize";
+            this.lblDebuggerCodeSize.Size = new System.Drawing.Size(42, 13);
+            this.lblDebuggerCodeSize.TabIndex = 37;
+            this.lblDebuggerCodeSize.Text = "0 Bytes";
+            // 
+            // label50
+            // 
+            this.label50.AutoSize = true;
+            this.label50.Location = new System.Drawing.Point(7, 103);
+            this.label50.Name = "label50";
+            this.label50.Size = new System.Drawing.Size(108, 13);
+            this.label50.TabIndex = 36;
+            this.label50.Text = "Debugger Code Size:";
             // 
             // cmboxRomType
             // 
@@ -588,7 +645,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(13, 63);
+            this.label6.Location = new System.Drawing.Point(13, 59);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(151, 13);
             this.label6.TabIndex = 35;
@@ -597,7 +654,7 @@
             // nudROMCodeAddress
             // 
             this.nudROMCodeAddress.Hexadecimal = true;
-            this.nudROMCodeAddress.Location = new System.Drawing.Point(35, 79);
+            this.nudROMCodeAddress.Location = new System.Drawing.Point(35, 75);
             this.nudROMCodeAddress.Maximum = new decimal(new int[] {
             32768,
             0,
@@ -607,18 +664,10 @@
             this.nudROMCodeAddress.Size = new System.Drawing.Size(92, 20);
             this.nudROMCodeAddress.TabIndex = 34;
             // 
-            // cboxAddCodeToRom
-            // 
-            this.cboxAddCodeToRom.AutoSize = true;
-            this.cboxAddCodeToRom.Location = new System.Drawing.Point(5, 44);
-            this.cboxAddCodeToRom.Name = "cboxAddCodeToRom";
-            this.cboxAddCodeToRom.Size = new System.Drawing.Size(163, 17);
-            this.cboxAddCodeToRom.TabIndex = 30;
-            this.cboxAddCodeToRom.Text = "Add Debugger Code to ROM";
-            this.cboxAddCodeToRom.UseVisualStyleBackColor = true;
-            // 
             // groupBox6
             // 
+            this.groupBox6.Controls.Add(this.groupBox14);
+            this.groupBox6.Controls.Add(this.groupBox13);
             this.groupBox6.Controls.Add(this.groupBox10);
             this.groupBox6.Controls.Add(this.groupBox3);
             this.groupBox6.Controls.Add(this.groupBox5);
@@ -626,12 +675,196 @@
             this.groupBox6.Controls.Add(this.groupBox2);
             this.groupBox6.Location = new System.Drawing.Point(932, 6);
             this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Size = new System.Drawing.Size(375, 723);
+            this.groupBox6.Size = new System.Drawing.Size(375, 813);
             this.groupBox6.TabIndex = 17;
             this.groupBox6.TabStop = false;
             // 
+            // groupBox14
+            // 
+            this.groupBox14.Controls.Add(this.tboxXRAM2);
+            this.groupBox14.Controls.Add(this.tboxXRAM1);
+            this.groupBox14.Controls.Add(this.lblRamWatchBinary);
+            this.groupBox14.Controls.Add(this.lblXRAMbox1);
+            this.groupBox14.Controls.Add(this.lblRamWatch);
+            this.groupBox14.Controls.Add(this.lblXRAMbox2);
+            this.groupBox14.Controls.Add(this.tboxRamWatch);
+            this.groupBox14.Controls.Add(this.lblXram1Binary);
+            this.groupBox14.Controls.Add(this.lblXram2Binary);
+            this.groupBox14.Location = new System.Drawing.Point(155, 199);
+            this.groupBox14.Name = "groupBox14";
+            this.groupBox14.Size = new System.Drawing.Size(102, 250);
+            this.groupBox14.TabIndex = 61;
+            this.groupBox14.TabStop = false;
+            this.groupBox14.Text = "RAM";
+            // 
+            // tboxXRAM2
+            // 
+            this.tboxXRAM2.Location = new System.Drawing.Point(32, 114);
+            this.tboxXRAM2.Name = "tboxXRAM2";
+            this.tboxXRAM2.ReadOnly = true;
+            this.tboxXRAM2.Size = new System.Drawing.Size(42, 20);
+            this.tboxXRAM2.TabIndex = 45;
+            // 
+            // tboxXRAM1
+            // 
+            this.tboxXRAM1.Location = new System.Drawing.Point(32, 39);
+            this.tboxXRAM1.Name = "tboxXRAM1";
+            this.tboxXRAM1.ReadOnly = true;
+            this.tboxXRAM1.Size = new System.Drawing.Size(42, 20);
+            this.tboxXRAM1.TabIndex = 43;
+            // 
+            // lblRamWatchBinary
+            // 
+            this.lblRamWatchBinary.AutoSize = true;
+            this.lblRamWatchBinary.Location = new System.Drawing.Point(24, 217);
+            this.lblRamWatchBinary.Name = "lblRamWatchBinary";
+            this.lblRamWatchBinary.Size = new System.Drawing.Size(58, 13);
+            this.lblRamWatchBinary.TabIndex = 59;
+            this.lblRamWatchBinary.Text = "1111 0000";
+            // 
+            // lblXRAMbox1
+            // 
+            this.lblXRAMbox1.AutoSize = true;
+            this.lblXRAMbox1.Location = new System.Drawing.Point(32, 22);
+            this.lblXRAMbox1.Name = "lblXRAMbox1";
+            this.lblXRAMbox1.Size = new System.Drawing.Size(40, 13);
+            this.lblXRAMbox1.TabIndex = 44;
+            this.lblXRAMbox1.Text = "RAM 1";
+            // 
+            // lblRamWatch
+            // 
+            this.lblRamWatch.AutoSize = true;
+            this.lblRamWatch.Location = new System.Drawing.Point(23, 177);
+            this.lblRamWatch.Name = "lblRamWatch";
+            this.lblRamWatch.Size = new System.Drawing.Size(66, 13);
+            this.lblRamWatch.TabIndex = 58;
+            this.lblRamWatch.Text = "RAM Watch";
+            // 
+            // lblXRAMbox2
+            // 
+            this.lblXRAMbox2.AutoSize = true;
+            this.lblXRAMbox2.Location = new System.Drawing.Point(31, 97);
+            this.lblXRAMbox2.Name = "lblXRAMbox2";
+            this.lblXRAMbox2.Size = new System.Drawing.Size(40, 13);
+            this.lblXRAMbox2.TabIndex = 46;
+            this.lblXRAMbox2.Text = "RAM 2";
+            // 
+            // tboxRamWatch
+            // 
+            this.tboxRamWatch.Location = new System.Drawing.Point(32, 194);
+            this.tboxRamWatch.Name = "tboxRamWatch";
+            this.tboxRamWatch.ReadOnly = true;
+            this.tboxRamWatch.Size = new System.Drawing.Size(42, 20);
+            this.tboxRamWatch.TabIndex = 57;
+            this.tboxRamWatch.TextChanged += new System.EventHandler(this.tboxRamWatch_TextChanged);
+            // 
+            // lblXram1Binary
+            // 
+            this.lblXram1Binary.AutoSize = true;
+            this.lblXram1Binary.Location = new System.Drawing.Point(24, 62);
+            this.lblXram1Binary.Name = "lblXram1Binary";
+            this.lblXram1Binary.Size = new System.Drawing.Size(58, 13);
+            this.lblXram1Binary.TabIndex = 54;
+            this.lblXram1Binary.Text = "1111 0000";
+            // 
+            // lblXram2Binary
+            // 
+            this.lblXram2Binary.AutoSize = true;
+            this.lblXram2Binary.Location = new System.Drawing.Point(24, 137);
+            this.lblXram2Binary.Name = "lblXram2Binary";
+            this.lblXram2Binary.Size = new System.Drawing.Size(58, 13);
+            this.lblXram2Binary.TabIndex = 55;
+            this.lblXram2Binary.Text = "1111 0000";
+            // 
+            // groupBox13
+            // 
+            this.groupBox13.Controls.Add(this.tboxStackPointer);
+            this.groupBox13.Controls.Add(this.tboxStack1);
+            this.groupBox13.Controls.Add(this.label7);
+            this.groupBox13.Controls.Add(this.tboxStack2);
+            this.groupBox13.Controls.Add(this.tboxStack3);
+            this.groupBox13.Controls.Add(this.tboxStack4);
+            this.groupBox13.Controls.Add(this.tboxStack5);
+            this.groupBox13.Controls.Add(this.label44);
+            this.groupBox13.Location = new System.Drawing.Point(263, 198);
+            this.groupBox13.Name = "groupBox13";
+            this.groupBox13.Size = new System.Drawing.Size(106, 251);
+            this.groupBox13.TabIndex = 60;
+            this.groupBox13.TabStop = false;
+            this.groupBox13.Text = "Stack";
+            // 
+            // tboxStackPointer
+            // 
+            this.tboxStackPointer.Location = new System.Drawing.Point(31, 40);
+            this.tboxStackPointer.Name = "tboxStackPointer";
+            this.tboxStackPointer.ReadOnly = true;
+            this.tboxStackPointer.Size = new System.Drawing.Size(42, 20);
+            this.tboxStackPointer.TabIndex = 41;
+            // 
+            // tboxStack1
+            // 
+            this.tboxStack1.Location = new System.Drawing.Point(31, 85);
+            this.tboxStack1.Name = "tboxStack1";
+            this.tboxStack1.ReadOnly = true;
+            this.tboxStack1.Size = new System.Drawing.Size(42, 20);
+            this.tboxStack1.TabIndex = 31;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(28, 69);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(49, 13);
+            this.label7.TabIndex = 32;
+            this.label7.Text = "Contents";
+            // 
+            // tboxStack2
+            // 
+            this.tboxStack2.Location = new System.Drawing.Point(31, 111);
+            this.tboxStack2.Name = "tboxStack2";
+            this.tboxStack2.ReadOnly = true;
+            this.tboxStack2.Size = new System.Drawing.Size(42, 20);
+            this.tboxStack2.TabIndex = 37;
+            // 
+            // tboxStack3
+            // 
+            this.tboxStack3.Location = new System.Drawing.Point(31, 136);
+            this.tboxStack3.Name = "tboxStack3";
+            this.tboxStack3.ReadOnly = true;
+            this.tboxStack3.Size = new System.Drawing.Size(42, 20);
+            this.tboxStack3.TabIndex = 38;
+            // 
+            // tboxStack4
+            // 
+            this.tboxStack4.Location = new System.Drawing.Point(31, 162);
+            this.tboxStack4.Name = "tboxStack4";
+            this.tboxStack4.ReadOnly = true;
+            this.tboxStack4.Size = new System.Drawing.Size(42, 20);
+            this.tboxStack4.TabIndex = 39;
+            // 
+            // tboxStack5
+            // 
+            this.tboxStack5.Location = new System.Drawing.Point(31, 188);
+            this.tboxStack5.Name = "tboxStack5";
+            this.tboxStack5.ReadOnly = true;
+            this.tboxStack5.Size = new System.Drawing.Size(42, 20);
+            this.tboxStack5.TabIndex = 40;
+            // 
+            // label44
+            // 
+            this.label44.AutoSize = true;
+            this.label44.Location = new System.Drawing.Point(37, 24);
+            this.label44.Name = "label44";
+            this.label44.Size = new System.Drawing.Size(28, 13);
+            this.label44.TabIndex = 42;
+            this.label44.Text = "SSP";
+            // 
             // groupBox10
             // 
+            this.groupBox10.Controls.Add(this.lblDebuggerPointerRam);
+            this.groupBox10.Controls.Add(this.lblDebuggerExtRegRam);
+            this.groupBox10.Controls.Add(this.label52);
+            this.groupBox10.Controls.Add(this.label51);
             this.groupBox10.Controls.Add(this.btnReloadDebuggerCode);
             this.groupBox10.Controls.Add(this.label8);
             this.groupBox10.Controls.Add(this.cboxDebuggerLRB);
@@ -640,16 +873,52 @@
             this.groupBox10.Controls.Add(this.nudDebuggerLRB);
             this.groupBox10.Controls.Add(this.nudDebuggerIE);
             this.groupBox10.Controls.Add(this.nudDebuggerPSW);
-            this.groupBox10.Location = new System.Drawing.Point(6, 569);
+            this.groupBox10.Location = new System.Drawing.Point(6, 615);
             this.groupBox10.Name = "groupBox10";
-            this.groupBox10.Size = new System.Drawing.Size(255, 143);
+            this.groupBox10.Size = new System.Drawing.Size(363, 181);
             this.groupBox10.TabIndex = 32;
             this.groupBox10.TabStop = false;
             this.groupBox10.Text = "Advanced ROM Debugger Options";
             // 
+            // lblDebuggerPointerRam
+            // 
+            this.lblDebuggerPointerRam.AutoSize = true;
+            this.lblDebuggerPointerRam.Location = new System.Drawing.Point(167, 153);
+            this.lblDebuggerPointerRam.Name = "lblDebuggerPointerRam";
+            this.lblDebuggerPointerRam.Size = new System.Drawing.Size(88, 13);
+            this.lblDebuggerPointerRam.TabIndex = 42;
+            this.lblDebuggerPointerRam.Text = "00000h - 00000h";
+            // 
+            // lblDebuggerExtRegRam
+            // 
+            this.lblDebuggerExtRegRam.AutoSize = true;
+            this.lblDebuggerExtRegRam.Location = new System.Drawing.Point(167, 140);
+            this.lblDebuggerExtRegRam.Name = "lblDebuggerExtRegRam";
+            this.lblDebuggerExtRegRam.Size = new System.Drawing.Size(88, 13);
+            this.lblDebuggerExtRegRam.TabIndex = 41;
+            this.lblDebuggerExtRegRam.Text = "00000h - 00000h";
+            // 
+            // label52
+            // 
+            this.label52.AutoSize = true;
+            this.label52.Location = new System.Drawing.Point(9, 156);
+            this.label52.Name = "label52";
+            this.label52.Size = new System.Drawing.Size(140, 13);
+            this.label52.TabIndex = 40;
+            this.label52.Text = "Debugger Pointer Registers:";
+            // 
+            // label51
+            // 
+            this.label51.AutoSize = true;
+            this.label51.Location = new System.Drawing.Point(9, 140);
+            this.label51.Name = "label51";
+            this.label51.Size = new System.Drawing.Size(152, 13);
+            this.label51.TabIndex = 39;
+            this.label51.Text = "Debugger Extended Registers:";
+            // 
             // btnReloadDebuggerCode
             // 
-            this.btnReloadDebuggerCode.Location = new System.Drawing.Point(34, 94);
+            this.btnReloadDebuggerCode.Location = new System.Drawing.Point(90, 94);
             this.btnReloadDebuggerCode.Name = "btnReloadDebuggerCode";
             this.btnReloadDebuggerCode.Size = new System.Drawing.Size(161, 23);
             this.btnReloadDebuggerCode.TabIndex = 38;
@@ -660,7 +929,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(14, 121);
+            this.label8.Location = new System.Drawing.Point(70, 121);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(224, 13);
             this.label8.TabIndex = 37;
@@ -669,7 +938,7 @@
             // cboxDebuggerLRB
             // 
             this.cboxDebuggerLRB.AutoSize = true;
-            this.cboxDebuggerLRB.Location = new System.Drawing.Point(17, 21);
+            this.cboxDebuggerLRB.Location = new System.Drawing.Point(73, 21);
             this.cboxDebuggerLRB.Name = "cboxDebuggerLRB";
             this.cboxDebuggerLRB.Size = new System.Drawing.Size(97, 17);
             this.cboxDebuggerLRB.TabIndex = 36;
@@ -680,7 +949,7 @@
             // cboxDebuggerIE
             // 
             this.cboxDebuggerIE.AutoSize = true;
-            this.cboxDebuggerIE.Location = new System.Drawing.Point(17, 71);
+            this.cboxDebuggerIE.Location = new System.Drawing.Point(73, 71);
             this.cboxDebuggerIE.Name = "cboxDebuggerIE";
             this.cboxDebuggerIE.Size = new System.Drawing.Size(86, 17);
             this.cboxDebuggerIE.TabIndex = 35;
@@ -691,18 +960,18 @@
             // cboxDebuggerPSW
             // 
             this.cboxDebuggerPSW.AutoSize = true;
-            this.cboxDebuggerPSW.Location = new System.Drawing.Point(17, 46);
+            this.cboxDebuggerPSW.Location = new System.Drawing.Point(73, 46);
             this.cboxDebuggerPSW.Name = "cboxDebuggerPSW";
-            this.cboxDebuggerPSW.Size = new System.Drawing.Size(101, 17);
+            this.cboxDebuggerPSW.Size = new System.Drawing.Size(97, 17);
             this.cboxDebuggerPSW.TabIndex = 34;
-            this.cboxDebuggerPSW.Text = "Debugger PSW";
+            this.cboxDebuggerPSW.Text = "Debugger SCB";
             this.cboxDebuggerPSW.UseVisualStyleBackColor = true;
             this.cboxDebuggerPSW.CheckedChanged += new System.EventHandler(this.cboxDebuggerPSW_CheckedChanged);
             // 
             // nudDebuggerLRB
             // 
             this.nudDebuggerLRB.Hexadecimal = true;
-            this.nudDebuggerLRB.Location = new System.Drawing.Point(126, 20);
+            this.nudDebuggerLRB.Location = new System.Drawing.Point(182, 20);
             this.nudDebuggerLRB.Maximum = new decimal(new int[] {
             65535,
             0,
@@ -715,7 +984,7 @@
             // nudDebuggerIE
             // 
             this.nudDebuggerIE.Hexadecimal = true;
-            this.nudDebuggerIE.Location = new System.Drawing.Point(126, 71);
+            this.nudDebuggerIE.Location = new System.Drawing.Point(182, 71);
             this.nudDebuggerIE.Maximum = new decimal(new int[] {
             65535,
             0,
@@ -728,9 +997,9 @@
             // nudDebuggerPSW
             // 
             this.nudDebuggerPSW.Hexadecimal = true;
-            this.nudDebuggerPSW.Location = new System.Drawing.Point(126, 46);
+            this.nudDebuggerPSW.Location = new System.Drawing.Point(182, 46);
             this.nudDebuggerPSW.Maximum = new decimal(new int[] {
-            65535,
+            7,
             0,
             0,
             0});
@@ -741,7 +1010,7 @@
             // groupBox3
             // 
             this.groupBox3.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.groupBox3.Controls.Add(this.tboxECUReturnAddress);
+            this.groupBox3.Controls.Add(this.tboxBreakPoint);
             this.groupBox3.Controls.Add(this.label11);
             this.groupBox3.Location = new System.Drawing.Point(7, 11);
             this.groupBox3.Name = "groupBox3";
@@ -749,13 +1018,14 @@
             this.groupBox3.TabIndex = 28;
             this.groupBox3.TabStop = false;
             // 
-            // tboxECUReturnAddress
+            // tboxBreakPoint
             // 
-            this.tboxECUReturnAddress.Location = new System.Drawing.Point(70, 9);
-            this.tboxECUReturnAddress.Name = "tboxECUReturnAddress";
-            this.tboxECUReturnAddress.ReadOnly = true;
-            this.tboxECUReturnAddress.Size = new System.Drawing.Size(65, 20);
-            this.tboxECUReturnAddress.TabIndex = 2;
+            this.tboxBreakPoint.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tboxBreakPoint.Location = new System.Drawing.Point(70, 9);
+            this.tboxBreakPoint.Name = "tboxBreakPoint";
+            this.tboxBreakPoint.ReadOnly = true;
+            this.tboxBreakPoint.Size = new System.Drawing.Size(65, 20);
+            this.tboxBreakPoint.TabIndex = 2;
             // 
             // label11
             // 
@@ -768,13 +1038,20 @@
             // 
             // groupBox5
             // 
+            this.groupBox5.Controls.Add(this.label49);
+            this.groupBox5.Controls.Add(this.label48);
+            this.groupBox5.Controls.Add(this.tboxDPConts_ROM);
+            this.groupBox5.Controls.Add(this.label47);
             this.groupBox5.Controls.Add(this.label39);
             this.groupBox5.Controls.Add(this.label35);
             this.groupBox5.Controls.Add(this.label34);
+            this.groupBox5.Controls.Add(this.lblDPContsBinary);
             this.groupBox5.Controls.Add(this.label10);
             this.groupBox5.Controls.Add(this.label38);
             this.groupBox5.Controls.Add(this.tboxDP);
             this.groupBox5.Controls.Add(this.label13);
+            this.groupBox5.Controls.Add(this.tboxDPconts);
+            this.groupBox5.Controls.Add(this.lblDPContents);
             this.groupBox5.Controls.Add(this.label12);
             this.groupBox5.Controls.Add(this.label14);
             this.groupBox5.Controls.Add(this.label25);
@@ -800,16 +1077,52 @@
             this.groupBox5.Controls.Add(this.tboxR4);
             this.groupBox5.Location = new System.Drawing.Point(6, 49);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(143, 369);
+            this.groupBox5.Size = new System.Drawing.Size(143, 400);
             this.groupBox5.TabIndex = 26;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Registers";
+            // 
+            // label49
+            // 
+            this.label49.AutoSize = true;
+            this.label49.Location = new System.Drawing.Point(104, 308);
+            this.label49.Name = "label49";
+            this.label49.Size = new System.Drawing.Size(38, 13);
+            this.label49.TabIndex = 59;
+            this.label49.Text = "(ROM)";
+            // 
+            // label48
+            // 
+            this.label48.AutoSize = true;
+            this.label48.Location = new System.Drawing.Point(105, 335);
+            this.label48.Name = "label48";
+            this.label48.Size = new System.Drawing.Size(37, 13);
+            this.label48.TabIndex = 43;
+            this.label48.Text = "(RAM)";
+            // 
+            // tboxDPConts_ROM
+            // 
+            this.tboxDPConts_ROM.Location = new System.Drawing.Point(46, 304);
+            this.tboxDPConts_ROM.Name = "tboxDPConts_ROM";
+            this.tboxDPConts_ROM.ReadOnly = true;
+            this.tboxDPConts_ROM.Size = new System.Drawing.Size(53, 20);
+            this.tboxDPConts_ROM.TabIndex = 57;
+            this.tboxDPConts_ROM.TextChanged += new System.EventHandler(this.tboxDPConts_ROM_TextChanged);
+            // 
+            // label47
+            // 
+            this.label47.AutoSize = true;
+            this.label47.Location = new System.Drawing.Point(12, 334);
+            this.label47.Name = "label47";
+            this.label47.Size = new System.Drawing.Size(28, 13);
+            this.label47.TabIndex = 58;
+            this.label47.Text = "[DP]";
             // 
             // label39
             // 
             this.label39.AutoSize = true;
             this.label39.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label39.Location = new System.Drawing.Point(59, 198);
+            this.label39.Location = new System.Drawing.Point(59, 157);
             this.label39.Name = "label39";
             this.label39.Size = new System.Drawing.Size(25, 13);
             this.label39.TabIndex = 34;
@@ -819,7 +1132,7 @@
             // 
             this.label35.AutoSize = true;
             this.label35.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label35.Location = new System.Drawing.Point(59, 96);
+            this.label35.Location = new System.Drawing.Point(59, 80);
             this.label35.Name = "label35";
             this.label35.Size = new System.Drawing.Size(25, 13);
             this.label35.TabIndex = 33;
@@ -829,17 +1142,26 @@
             // 
             this.label34.AutoSize = true;
             this.label34.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label34.Location = new System.Drawing.Point(59, 153);
+            this.label34.Location = new System.Drawing.Point(59, 118);
             this.label34.Name = "label34";
             this.label34.Size = new System.Drawing.Size(25, 13);
             this.label34.TabIndex = 32;
             this.label34.Text = "er2";
             // 
+            // lblDPContsBinary
+            // 
+            this.lblDPContsBinary.AutoSize = true;
+            this.lblDPContsBinary.Location = new System.Drawing.Point(43, 351);
+            this.lblDPContsBinary.Name = "lblDPContsBinary";
+            this.lblDPContsBinary.Size = new System.Drawing.Size(58, 13);
+            this.lblDPContsBinary.TabIndex = 56;
+            this.lblDPContsBinary.Text = "1111 0000";
+            // 
             // label10
             // 
             this.label10.AutoSize = true;
             this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label10.Location = new System.Drawing.Point(59, 43);
+            this.label10.Location = new System.Drawing.Point(59, 41);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(25, 13);
             this.label10.TabIndex = 31;
@@ -848,7 +1170,7 @@
             // label38
             // 
             this.label38.AutoSize = true;
-            this.label38.Location = new System.Drawing.Point(9, 336);
+            this.label38.Location = new System.Drawing.Point(12, 281);
             this.label38.Name = "label38";
             this.label38.Size = new System.Drawing.Size(22, 13);
             this.label38.TabIndex = 30;
@@ -856,26 +1178,44 @@
             // 
             // tboxDP
             // 
-            this.tboxDP.Location = new System.Drawing.Point(46, 333);
+            this.tboxDP.Location = new System.Drawing.Point(46, 278);
             this.tboxDP.Name = "tboxDP";
             this.tboxDP.ReadOnly = true;
-            this.tboxDP.Size = new System.Drawing.Size(65, 20);
+            this.tboxDP.Size = new System.Drawing.Size(53, 20);
             this.tboxDP.TabIndex = 29;
             this.tboxDP.TextChanged += new System.EventHandler(this.tboxDP_TextChanged);
             // 
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(9, 310);
+            this.label13.Location = new System.Drawing.Point(12, 255);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(28, 13);
             this.label13.TabIndex = 28;
             this.label13.Text = "LRB";
             // 
+            // tboxDPconts
+            // 
+            this.tboxDPconts.Location = new System.Drawing.Point(46, 330);
+            this.tboxDPconts.Name = "tboxDPconts";
+            this.tboxDPconts.ReadOnly = true;
+            this.tboxDPconts.Size = new System.Drawing.Size(53, 20);
+            this.tboxDPconts.TabIndex = 51;
+            this.tboxDPconts.TextChanged += new System.EventHandler(this.tboxDPconts_TextChanged);
+            // 
+            // lblDPContents
+            // 
+            this.lblDPContents.AutoSize = true;
+            this.lblDPContents.Location = new System.Drawing.Point(12, 308);
+            this.lblDPContents.Name = "lblDPContents";
+            this.lblDPContents.Size = new System.Drawing.Size(28, 13);
+            this.lblDPContents.TabIndex = 52;
+            this.lblDPContents.Text = "[DP]";
+            // 
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(9, 284);
+            this.label12.Location = new System.Drawing.Point(12, 229);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(20, 13);
             this.label12.TabIndex = 27;
@@ -884,7 +1224,7 @@
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(9, 258);
+            this.label14.Location = new System.Drawing.Point(12, 203);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(20, 13);
             this.label14.TabIndex = 26;
@@ -893,7 +1233,7 @@
             // label25
             // 
             this.label25.AutoSize = true;
-            this.label25.Location = new System.Drawing.Point(22, 224);
+            this.label25.Location = new System.Drawing.Point(12, 177);
             this.label25.Name = "label25";
             this.label25.Size = new System.Drawing.Size(21, 13);
             this.label25.TabIndex = 25;
@@ -902,7 +1242,7 @@
             // label26
             // 
             this.label26.AutoSize = true;
-            this.label26.Location = new System.Drawing.Point(101, 224);
+            this.label26.Location = new System.Drawing.Point(101, 177);
             this.label26.Name = "label26";
             this.label26.Size = new System.Drawing.Size(21, 13);
             this.label26.TabIndex = 24;
@@ -911,7 +1251,7 @@
             // label27
             // 
             this.label27.AutoSize = true;
-            this.label27.Location = new System.Drawing.Point(22, 172);
+            this.label27.Location = new System.Drawing.Point(12, 137);
             this.label27.Name = "label27";
             this.label27.Size = new System.Drawing.Size(21, 13);
             this.label27.TabIndex = 23;
@@ -920,7 +1260,7 @@
             // label28
             // 
             this.label28.AutoSize = true;
-            this.label28.Location = new System.Drawing.Point(101, 172);
+            this.label28.Location = new System.Drawing.Point(101, 137);
             this.label28.Name = "label28";
             this.label28.Size = new System.Drawing.Size(21, 13);
             this.label28.TabIndex = 22;
@@ -929,7 +1269,7 @@
             // label29
             // 
             this.label29.AutoSize = true;
-            this.label29.Location = new System.Drawing.Point(22, 120);
+            this.label29.Location = new System.Drawing.Point(12, 98);
             this.label29.Name = "label29";
             this.label29.Size = new System.Drawing.Size(21, 13);
             this.label29.TabIndex = 21;
@@ -938,7 +1278,7 @@
             // label30
             // 
             this.label30.AutoSize = true;
-            this.label30.Location = new System.Drawing.Point(101, 120);
+            this.label30.Location = new System.Drawing.Point(101, 98);
             this.label30.Name = "label30";
             this.label30.Size = new System.Drawing.Size(21, 13);
             this.label30.TabIndex = 20;
@@ -947,7 +1287,7 @@
             // label31
             // 
             this.label31.AutoSize = true;
-            this.label31.Location = new System.Drawing.Point(22, 68);
+            this.label31.Location = new System.Drawing.Point(12, 60);
             this.label31.Name = "label31";
             this.label31.Size = new System.Drawing.Size(21, 13);
             this.label31.TabIndex = 19;
@@ -956,7 +1296,7 @@
             // label32
             // 
             this.label32.AutoSize = true;
-            this.label32.Location = new System.Drawing.Point(101, 68);
+            this.label32.Location = new System.Drawing.Point(101, 60);
             this.label32.Name = "label32";
             this.label32.Size = new System.Drawing.Size(21, 13);
             this.label32.TabIndex = 18;
@@ -973,32 +1313,32 @@
             // 
             // tboxLRB
             // 
-            this.tboxLRB.Location = new System.Drawing.Point(46, 307);
+            this.tboxLRB.Location = new System.Drawing.Point(46, 252);
             this.tboxLRB.Name = "tboxLRB";
             this.tboxLRB.ReadOnly = true;
-            this.tboxLRB.Size = new System.Drawing.Size(65, 20);
+            this.tboxLRB.Size = new System.Drawing.Size(53, 20);
             this.tboxLRB.TabIndex = 14;
             // 
             // tboxACC
             // 
-            this.tboxACC.Location = new System.Drawing.Point(39, 18);
+            this.tboxACC.Location = new System.Drawing.Point(46, 18);
             this.tboxACC.Name = "tboxACC";
             this.tboxACC.ReadOnly = true;
-            this.tboxACC.Size = new System.Drawing.Size(65, 20);
+            this.tboxACC.Size = new System.Drawing.Size(53, 20);
             this.tboxACC.TabIndex = 3;
             // 
             // tboxX2
             // 
-            this.tboxX2.Location = new System.Drawing.Point(46, 281);
+            this.tboxX2.Location = new System.Drawing.Point(46, 226);
             this.tboxX2.Name = "tboxX2";
             this.tboxX2.ReadOnly = true;
-            this.tboxX2.Size = new System.Drawing.Size(65, 20);
+            this.tboxX2.Size = new System.Drawing.Size(53, 20);
             this.tboxX2.TabIndex = 13;
             this.tboxX2.TextChanged += new System.EventHandler(this.tboxX2_TextChanged);
             // 
             // tboxR0
             // 
-            this.tboxR0.Location = new System.Drawing.Point(73, 65);
+            this.tboxR0.Location = new System.Drawing.Point(73, 57);
             this.tboxR0.Name = "tboxR0";
             this.tboxR0.ReadOnly = true;
             this.tboxR0.Size = new System.Drawing.Size(26, 20);
@@ -1006,17 +1346,17 @@
             // 
             // tboxX1
             // 
-            this.tboxX1.Location = new System.Drawing.Point(46, 255);
+            this.tboxX1.Location = new System.Drawing.Point(46, 200);
             this.tboxX1.Name = "tboxX1";
             this.tboxX1.ReadOnly = true;
-            this.tboxX1.Size = new System.Drawing.Size(65, 20);
+            this.tboxX1.Size = new System.Drawing.Size(53, 20);
             this.tboxX1.TabIndex = 12;
             this.toolTip1.SetToolTip(this.tboxX1, "X1 Contents");
             this.tboxX1.TextChanged += new System.EventHandler(this.tboxX1_TextChanged);
             // 
             // tboxR1
             // 
-            this.tboxR1.Location = new System.Drawing.Point(46, 65);
+            this.tboxR1.Location = new System.Drawing.Point(46, 57);
             this.tboxR1.Name = "tboxR1";
             this.tboxR1.ReadOnly = true;
             this.tboxR1.Size = new System.Drawing.Size(26, 20);
@@ -1024,7 +1364,7 @@
             // 
             // tboxR7
             // 
-            this.tboxR7.Location = new System.Drawing.Point(46, 221);
+            this.tboxR7.Location = new System.Drawing.Point(46, 174);
             this.tboxR7.Name = "tboxR7";
             this.tboxR7.ReadOnly = true;
             this.tboxR7.Size = new System.Drawing.Size(26, 20);
@@ -1032,7 +1372,7 @@
             // 
             // tboxR2
             // 
-            this.tboxR2.Location = new System.Drawing.Point(73, 117);
+            this.tboxR2.Location = new System.Drawing.Point(73, 95);
             this.tboxR2.Name = "tboxR2";
             this.tboxR2.ReadOnly = true;
             this.tboxR2.Size = new System.Drawing.Size(26, 20);
@@ -1040,7 +1380,7 @@
             // 
             // tboxR6
             // 
-            this.tboxR6.Location = new System.Drawing.Point(73, 221);
+            this.tboxR6.Location = new System.Drawing.Point(73, 174);
             this.tboxR6.Name = "tboxR6";
             this.tboxR6.ReadOnly = true;
             this.tboxR6.Size = new System.Drawing.Size(26, 20);
@@ -1048,7 +1388,7 @@
             // 
             // tboxR3
             // 
-            this.tboxR3.Location = new System.Drawing.Point(46, 117);
+            this.tboxR3.Location = new System.Drawing.Point(46, 95);
             this.tboxR3.Name = "tboxR3";
             this.tboxR3.ReadOnly = true;
             this.tboxR3.Size = new System.Drawing.Size(26, 20);
@@ -1056,7 +1396,7 @@
             // 
             // tboxR5
             // 
-            this.tboxR5.Location = new System.Drawing.Point(46, 169);
+            this.tboxR5.Location = new System.Drawing.Point(46, 134);
             this.tboxR5.Name = "tboxR5";
             this.tboxR5.ReadOnly = true;
             this.tboxR5.Size = new System.Drawing.Size(26, 20);
@@ -1064,7 +1404,7 @@
             // 
             // tboxR4
             // 
-            this.tboxR4.Location = new System.Drawing.Point(73, 169);
+            this.tboxR4.Location = new System.Drawing.Point(73, 134);
             this.tboxR4.Name = "tboxR4";
             this.tboxR4.ReadOnly = true;
             this.tboxR4.Size = new System.Drawing.Size(26, 20);
@@ -1072,32 +1412,11 @@
             // 
             // groupBox4
             // 
-            this.groupBox4.Controls.Add(this.lblRamWatchBinary);
-            this.groupBox4.Controls.Add(this.lblRamWatch);
-            this.groupBox4.Controls.Add(this.tboxRamWatch);
-            this.groupBox4.Controls.Add(this.lblDPContsBinary);
-            this.groupBox4.Controls.Add(this.lblXram2Binary);
-            this.groupBox4.Controls.Add(this.lblXram1Binary);
-            this.groupBox4.Controls.Add(this.lblRomRam);
-            this.groupBox4.Controls.Add(this.lblDPContents);
-            this.groupBox4.Controls.Add(this.tboxDPconts);
-            this.groupBox4.Controls.Add(this.lblLA12);
-            this.groupBox4.Controls.Add(this.tboxLA1_2);
-            this.groupBox4.Controls.Add(this.lblLA11);
-            this.groupBox4.Controls.Add(this.tboxLA1_1);
-            this.groupBox4.Controls.Add(this.label44);
-            this.groupBox4.Controls.Add(this.tboxStackPointer);
-            this.groupBox4.Controls.Add(this.tboxStack5);
-            this.groupBox4.Controls.Add(this.tboxStack4);
-            this.groupBox4.Controls.Add(this.tboxStack3);
-            this.groupBox4.Controls.Add(this.tboxStack2);
             this.groupBox4.Controls.Add(this.label41);
             this.groupBox4.Controls.Add(this.tboxPSWL5);
             this.groupBox4.Controls.Add(this.label40);
             this.groupBox4.Controls.Add(this.tboxPSWL4);
-            this.groupBox4.Controls.Add(this.label7);
             this.groupBox4.Controls.Add(this.label24);
-            this.groupBox4.Controls.Add(this.tboxStack1);
             this.groupBox4.Controls.Add(this.tboxPSWL);
             this.groupBox4.Controls.Add(this.label23);
             this.groupBox4.Controls.Add(this.tboxPSWH);
@@ -1119,175 +1438,10 @@
             this.groupBox4.Controls.Add(this.tboxCF);
             this.groupBox4.Location = new System.Drawing.Point(155, 16);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(214, 402);
+            this.groupBox4.Size = new System.Drawing.Size(214, 177);
             this.groupBox4.TabIndex = 27;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "PSW";
-            // 
-            // lblRamWatchBinary
-            // 
-            this.lblRamWatchBinary.AutoSize = true;
-            this.lblRamWatchBinary.Location = new System.Drawing.Point(66, 240);
-            this.lblRamWatchBinary.Name = "lblRamWatchBinary";
-            this.lblRamWatchBinary.Size = new System.Drawing.Size(58, 13);
-            this.lblRamWatchBinary.TabIndex = 59;
-            this.lblRamWatchBinary.Text = "1111 0000";
-            // 
-            // lblRamWatch
-            // 
-            this.lblRamWatch.AutoSize = true;
-            this.lblRamWatch.Location = new System.Drawing.Point(71, 200);
-            this.lblRamWatch.Name = "lblRamWatch";
-            this.lblRamWatch.Size = new System.Drawing.Size(66, 13);
-            this.lblRamWatch.TabIndex = 58;
-            this.lblRamWatch.Text = "RAM Watch";
-            // 
-            // tboxRamWatch
-            // 
-            this.tboxRamWatch.Location = new System.Drawing.Point(74, 217);
-            this.tboxRamWatch.Name = "tboxRamWatch";
-            this.tboxRamWatch.ReadOnly = true;
-            this.tboxRamWatch.Size = new System.Drawing.Size(42, 20);
-            this.tboxRamWatch.TabIndex = 57;
-            this.tboxRamWatch.TextChanged += new System.EventHandler(this.tboxRamWatch_TextChanged);
-            // 
-            // lblDPContsBinary
-            // 
-            this.lblDPContsBinary.AutoSize = true;
-            this.lblDPContsBinary.Location = new System.Drawing.Point(1, 381);
-            this.lblDPContsBinary.Name = "lblDPContsBinary";
-            this.lblDPContsBinary.Size = new System.Drawing.Size(58, 13);
-            this.lblDPContsBinary.TabIndex = 56;
-            this.lblDPContsBinary.Text = "1111 0000";
-            // 
-            // lblXram2Binary
-            // 
-            this.lblXram2Binary.AutoSize = true;
-            this.lblXram2Binary.Location = new System.Drawing.Point(1, 305);
-            this.lblXram2Binary.Name = "lblXram2Binary";
-            this.lblXram2Binary.Size = new System.Drawing.Size(58, 13);
-            this.lblXram2Binary.TabIndex = 55;
-            this.lblXram2Binary.Text = "1111 0000";
-            // 
-            // lblXram1Binary
-            // 
-            this.lblXram1Binary.AutoSize = true;
-            this.lblXram1Binary.Location = new System.Drawing.Point(1, 240);
-            this.lblXram1Binary.Name = "lblXram1Binary";
-            this.lblXram1Binary.Size = new System.Drawing.Size(58, 13);
-            this.lblXram1Binary.TabIndex = 54;
-            this.lblXram1Binary.Text = "1111 0000";
-            // 
-            // lblRomRam
-            // 
-            this.lblRomRam.AutoSize = true;
-            this.lblRomRam.Location = new System.Drawing.Point(10, 365);
-            this.lblRomRam.Name = "lblRomRam";
-            this.lblRomRam.Size = new System.Drawing.Size(61, 13);
-            this.lblRomRam.TabIndex = 53;
-            this.lblRomRam.Text = "ROM/RAM";
-            this.lblRomRam.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            // 
-            // lblDPContents
-            // 
-            this.lblDPContents.AutoSize = true;
-            this.lblDPContents.Location = new System.Drawing.Point(1, 328);
-            this.lblDPContents.Name = "lblDPContents";
-            this.lblDPContents.Size = new System.Drawing.Size(28, 13);
-            this.lblDPContents.TabIndex = 52;
-            this.lblDPContents.Text = "[DP]";
-            // 
-            // tboxDPconts
-            // 
-            this.tboxDPconts.Location = new System.Drawing.Point(9, 344);
-            this.tboxDPconts.Name = "tboxDPconts";
-            this.tboxDPconts.ReadOnly = true;
-            this.tboxDPconts.Size = new System.Drawing.Size(42, 20);
-            this.tboxDPconts.TabIndex = 51;
-            this.tboxDPconts.TextChanged += new System.EventHandler(this.tboxDPconts_TextChanged);
-            // 
-            // lblLA12
-            // 
-            this.lblLA12.AutoSize = true;
-            this.lblLA12.Location = new System.Drawing.Point(8, 265);
-            this.lblLA12.Name = "lblLA12";
-            this.lblLA12.Size = new System.Drawing.Size(40, 13);
-            this.lblLA12.TabIndex = 46;
-            this.lblLA12.Text = "RAM 2";
-            // 
-            // tboxLA1_2
-            // 
-            this.tboxLA1_2.Location = new System.Drawing.Point(9, 282);
-            this.tboxLA1_2.Name = "tboxLA1_2";
-            this.tboxLA1_2.ReadOnly = true;
-            this.tboxLA1_2.Size = new System.Drawing.Size(42, 20);
-            this.tboxLA1_2.TabIndex = 45;
-            // 
-            // lblLA11
-            // 
-            this.lblLA11.AutoSize = true;
-            this.lblLA11.Location = new System.Drawing.Point(9, 200);
-            this.lblLA11.Name = "lblLA11";
-            this.lblLA11.Size = new System.Drawing.Size(40, 13);
-            this.lblLA11.TabIndex = 44;
-            this.lblLA11.Text = "RAM 1";
-            // 
-            // tboxLA1_1
-            // 
-            this.tboxLA1_1.Location = new System.Drawing.Point(9, 217);
-            this.tboxLA1_1.Name = "tboxLA1_1";
-            this.tboxLA1_1.ReadOnly = true;
-            this.tboxLA1_1.Size = new System.Drawing.Size(42, 20);
-            this.tboxLA1_1.TabIndex = 43;
-            // 
-            // label44
-            // 
-            this.label44.AutoSize = true;
-            this.label44.Location = new System.Drawing.Point(152, 200);
-            this.label44.Name = "label44";
-            this.label44.Size = new System.Drawing.Size(28, 13);
-            this.label44.TabIndex = 42;
-            this.label44.Text = "SSP";
-            // 
-            // tboxStackPointer
-            // 
-            this.tboxStackPointer.Location = new System.Drawing.Point(136, 217);
-            this.tboxStackPointer.Name = "tboxStackPointer";
-            this.tboxStackPointer.ReadOnly = true;
-            this.tboxStackPointer.Size = new System.Drawing.Size(65, 20);
-            this.tboxStackPointer.TabIndex = 41;
-            // 
-            // tboxStack5
-            // 
-            this.tboxStack5.Location = new System.Drawing.Point(136, 365);
-            this.tboxStack5.Name = "tboxStack5";
-            this.tboxStack5.ReadOnly = true;
-            this.tboxStack5.Size = new System.Drawing.Size(65, 20);
-            this.tboxStack5.TabIndex = 40;
-            // 
-            // tboxStack4
-            // 
-            this.tboxStack4.Location = new System.Drawing.Point(136, 339);
-            this.tboxStack4.Name = "tboxStack4";
-            this.tboxStack4.ReadOnly = true;
-            this.tboxStack4.Size = new System.Drawing.Size(65, 20);
-            this.tboxStack4.TabIndex = 39;
-            // 
-            // tboxStack3
-            // 
-            this.tboxStack3.Location = new System.Drawing.Point(136, 313);
-            this.tboxStack3.Name = "tboxStack3";
-            this.tboxStack3.ReadOnly = true;
-            this.tboxStack3.Size = new System.Drawing.Size(65, 20);
-            this.tboxStack3.TabIndex = 38;
-            // 
-            // tboxStack2
-            // 
-            this.tboxStack2.Location = new System.Drawing.Point(136, 288);
-            this.tboxStack2.Name = "tboxStack2";
-            this.tboxStack2.ReadOnly = true;
-            this.tboxStack2.Size = new System.Drawing.Size(65, 20);
-            this.tboxStack2.TabIndex = 37;
             // 
             // label41
             // 
@@ -1303,7 +1457,7 @@
             this.tboxPSWL5.Location = new System.Drawing.Point(154, 66);
             this.tboxPSWL5.Name = "tboxPSWL5";
             this.tboxPSWL5.ReadOnly = true;
-            this.tboxPSWL5.Size = new System.Drawing.Size(16, 20);
+            this.tboxPSWL5.Size = new System.Drawing.Size(23, 20);
             this.tboxPSWL5.TabIndex = 35;
             // 
             // label40
@@ -1320,47 +1474,30 @@
             this.tboxPSWL4.Location = new System.Drawing.Point(60, 66);
             this.tboxPSWL4.Name = "tboxPSWL4";
             this.tboxPSWL4.ReadOnly = true;
-            this.tboxPSWL4.Size = new System.Drawing.Size(16, 20);
+            this.tboxPSWL4.Size = new System.Drawing.Size(23, 20);
             this.tboxPSWL4.TabIndex = 33;
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(131, 243);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(80, 13);
-            this.label7.TabIndex = 32;
-            this.label7.Text = "Stack Contents";
             // 
             // label24
             // 
             this.label24.AutoSize = true;
-            this.label24.Location = new System.Drawing.Point(100, 157);
+            this.label24.Location = new System.Drawing.Point(100, 147);
             this.label24.Name = "label24";
             this.label24.Size = new System.Drawing.Size(38, 13);
             this.label24.TabIndex = 19;
             this.label24.Text = "PSWL";
             // 
-            // tboxStack1
-            // 
-            this.tboxStack1.Location = new System.Drawing.Point(136, 262);
-            this.tboxStack1.Name = "tboxStack1";
-            this.tboxStack1.ReadOnly = true;
-            this.tboxStack1.Size = new System.Drawing.Size(65, 20);
-            this.tboxStack1.TabIndex = 31;
-            // 
             // tboxPSWL
             // 
-            this.tboxPSWL.Location = new System.Drawing.Point(142, 154);
+            this.tboxPSWL.Location = new System.Drawing.Point(154, 144);
             this.tboxPSWL.Name = "tboxPSWL";
             this.tboxPSWL.ReadOnly = true;
-            this.tboxPSWL.Size = new System.Drawing.Size(28, 20);
+            this.tboxPSWL.Size = new System.Drawing.Size(23, 20);
             this.tboxPSWL.TabIndex = 18;
             // 
             // label23
             // 
             this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(6, 160);
+            this.label23.Location = new System.Drawing.Point(6, 147);
             this.label23.Name = "label23";
             this.label23.Size = new System.Drawing.Size(40, 13);
             this.label23.TabIndex = 17;
@@ -1368,16 +1505,16 @@
             // 
             // tboxPSWH
             // 
-            this.tboxPSWH.Location = new System.Drawing.Point(48, 157);
+            this.tboxPSWH.Location = new System.Drawing.Point(60, 144);
             this.tboxPSWH.Name = "tboxPSWH";
             this.tboxPSWH.ReadOnly = true;
-            this.tboxPSWH.Size = new System.Drawing.Size(28, 20);
+            this.tboxPSWH.Size = new System.Drawing.Size(23, 20);
             this.tboxPSWH.TabIndex = 16;
             // 
             // label22
             // 
             this.label22.AutoSize = true;
-            this.label22.Location = new System.Drawing.Point(100, 125);
+            this.label22.Location = new System.Drawing.Point(100, 122);
             this.label22.Name = "label22";
             this.label22.Size = new System.Drawing.Size(28, 13);
             this.label22.TabIndex = 15;
@@ -1386,7 +1523,7 @@
             // label21
             // 
             this.label21.AutoSize = true;
-            this.label21.Location = new System.Drawing.Point(6, 125);
+            this.label21.Location = new System.Drawing.Point(6, 122);
             this.label21.Name = "label21";
             this.label21.Size = new System.Drawing.Size(28, 13);
             this.label21.TabIndex = 14;
@@ -1448,10 +1585,10 @@
             // 
             // tboxSCB
             // 
-            this.tboxSCB.Location = new System.Drawing.Point(142, 122);
+            this.tboxSCB.Location = new System.Drawing.Point(154, 118);
             this.tboxSCB.Name = "tboxSCB";
             this.tboxSCB.ReadOnly = true;
-            this.tboxSCB.Size = new System.Drawing.Size(28, 20);
+            this.tboxSCB.Size = new System.Drawing.Size(23, 20);
             this.tboxSCB.TabIndex = 7;
             // 
             // tboxSF
@@ -1459,7 +1596,7 @@
             this.tboxSF.Location = new System.Drawing.Point(154, 92);
             this.tboxSF.Name = "tboxSF";
             this.tboxSF.ReadOnly = true;
-            this.tboxSF.Size = new System.Drawing.Size(16, 20);
+            this.tboxSF.Size = new System.Drawing.Size(23, 20);
             this.tboxSF.TabIndex = 6;
             // 
             // tboxMIE
@@ -1467,15 +1604,15 @@
             this.tboxMIE.Location = new System.Drawing.Point(154, 40);
             this.tboxMIE.Name = "tboxMIE";
             this.tboxMIE.ReadOnly = true;
-            this.tboxMIE.Size = new System.Drawing.Size(16, 20);
+            this.tboxMIE.Size = new System.Drawing.Size(23, 20);
             this.tboxMIE.TabIndex = 5;
             // 
             // tboxBCB
             // 
-            this.tboxBCB.Location = new System.Drawing.Point(48, 122);
+            this.tboxBCB.Location = new System.Drawing.Point(60, 118);
             this.tboxBCB.Name = "tboxBCB";
             this.tboxBCB.ReadOnly = true;
-            this.tboxBCB.Size = new System.Drawing.Size(28, 20);
+            this.tboxBCB.Size = new System.Drawing.Size(23, 20);
             this.tboxBCB.TabIndex = 4;
             // 
             // tboxHC
@@ -1483,7 +1620,7 @@
             this.tboxHC.Location = new System.Drawing.Point(60, 92);
             this.tboxHC.Name = "tboxHC";
             this.tboxHC.ReadOnly = true;
-            this.tboxHC.Size = new System.Drawing.Size(16, 20);
+            this.tboxHC.Size = new System.Drawing.Size(23, 20);
             this.tboxHC.TabIndex = 3;
             // 
             // tboxDD
@@ -1491,7 +1628,7 @@
             this.tboxDD.Location = new System.Drawing.Point(154, 14);
             this.tboxDD.Name = "tboxDD";
             this.tboxDD.ReadOnly = true;
-            this.tboxDD.Size = new System.Drawing.Size(16, 20);
+            this.tboxDD.Size = new System.Drawing.Size(23, 20);
             this.tboxDD.TabIndex = 2;
             // 
             // tboxZF
@@ -1499,7 +1636,7 @@
             this.tboxZF.Location = new System.Drawing.Point(60, 40);
             this.tboxZF.Name = "tboxZF";
             this.tboxZF.ReadOnly = true;
-            this.tboxZF.Size = new System.Drawing.Size(16, 20);
+            this.tboxZF.Size = new System.Drawing.Size(23, 20);
             this.tboxZF.TabIndex = 1;
             // 
             // tboxCF
@@ -1507,7 +1644,7 @@
             this.tboxCF.Location = new System.Drawing.Point(60, 14);
             this.tboxCF.Name = "tboxCF";
             this.tboxCF.ReadOnly = true;
-            this.tboxCF.Size = new System.Drawing.Size(16, 20);
+            this.tboxCF.Size = new System.Drawing.Size(23, 20);
             this.tboxCF.TabIndex = 0;
             // 
             // groupBox2
@@ -1525,7 +1662,7 @@
             this.groupBox2.Controls.Add(this.btnRemoveBreakPoint);
             this.groupBox2.Controls.Add(this.btnSetBreakpoint);
             this.groupBox2.Controls.Add(this.label9);
-            this.groupBox2.Location = new System.Drawing.Point(6, 424);
+            this.groupBox2.Location = new System.Drawing.Point(6, 467);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(363, 141);
             this.groupBox2.TabIndex = 31;
@@ -1555,7 +1692,7 @@
             this.nudRAMWatch.Hexadecimal = true;
             this.nudRAMWatch.Location = new System.Drawing.Point(12, 64);
             this.nudRAMWatch.Maximum = new decimal(new int[] {
-            1150,
+            32768,
             0,
             0,
             0});
@@ -1678,25 +1815,66 @@
             // 
             // groupBox8
             // 
+            this.groupBox8.Controls.Add(this.lblChangedBytes);
+            this.groupBox8.Controls.Add(this.cboxQuietCompiler);
+            this.groupBox8.Controls.Add(this.label46);
+            this.groupBox8.Controls.Add(this.cboxMonitorBin);
             this.groupBox8.Controls.Add(this.cboxSlowUpload);
             this.groupBox8.Controls.Add(this.cboxAutoUploadOnBINLoad);
-            this.groupBox8.Controls.Add(this.cboxAutoDasmBin);
             this.groupBox8.Controls.Add(this.btnLoadBinToOstrich);
-            this.groupBox8.Controls.Add(this.tboxASMSimpleName);
             this.groupBox8.Controls.Add(this.btnLoadASMFile);
-            this.groupBox8.Controls.Add(this.tboxBinSimpleName);
+            this.groupBox8.Controls.Add(this.tboxOpenFileSimpleName);
             this.groupBox8.Controls.Add(this.btnLoadBinFile);
-            this.groupBox8.Location = new System.Drawing.Point(3, 524);
+            this.groupBox8.Location = new System.Drawing.Point(3, 574);
             this.groupBox8.Name = "groupBox8";
-            this.groupBox8.Size = new System.Drawing.Size(200, 194);
+            this.groupBox8.Size = new System.Drawing.Size(200, 204);
             this.groupBox8.TabIndex = 33;
             this.groupBox8.TabStop = false;
-            this.groupBox8.Text = "Open Files";
+            this.groupBox8.Text = "Open Source";
+            // 
+            // lblChangedBytes
+            // 
+            this.lblChangedBytes.AutoSize = true;
+            this.lblChangedBytes.Location = new System.Drawing.Point(17, 182);
+            this.lblChangedBytes.Name = "lblChangedBytes";
+            this.lblChangedBytes.Size = new System.Drawing.Size(79, 13);
+            this.lblChangedBytes.TabIndex = 36;
+            this.lblChangedBytes.Text = "Bytes Changed";
+            // 
+            // cboxQuietCompiler
+            // 
+            this.cboxQuietCompiler.AutoSize = true;
+            this.cboxQuietCompiler.Location = new System.Drawing.Point(35, 162);
+            this.cboxQuietCompiler.Name = "cboxQuietCompiler";
+            this.cboxQuietCompiler.Size = new System.Drawing.Size(129, 17);
+            this.cboxQuietCompiler.TabIndex = 39;
+            this.cboxQuietCompiler.Text = "Quiet Compiler Output";
+            this.cboxQuietCompiler.UseVisualStyleBackColor = true;
+            // 
+            // label46
+            // 
+            this.label46.AutoSize = true;
+            this.label46.Location = new System.Drawing.Point(89, 25);
+            this.label46.Name = "label46";
+            this.label46.Size = new System.Drawing.Size(22, 13);
+            this.label46.TabIndex = 31;
+            this.label46.Text = "-or-";
+            // 
+            // cboxMonitorBin
+            // 
+            this.cboxMonitorBin.AutoSize = true;
+            this.cboxMonitorBin.Location = new System.Drawing.Point(20, 146);
+            this.cboxMonitorBin.Name = "cboxMonitorBin";
+            this.cboxMonitorBin.Size = new System.Drawing.Size(172, 17);
+            this.cboxMonitorBin.TabIndex = 38;
+            this.cboxMonitorBin.Text = "Monitor BIN/ASM For changes";
+            this.cboxMonitorBin.UseVisualStyleBackColor = true;
+            this.cboxMonitorBin.CheckedChanged += new System.EventHandler(this.cboxMonitorBin_CheckedChanged);
             // 
             // cboxSlowUpload
             // 
             this.cboxSlowUpload.AutoSize = true;
-            this.cboxSlowUpload.Location = new System.Drawing.Point(20, 115);
+            this.cboxSlowUpload.Location = new System.Drawing.Point(20, 127);
             this.cboxSlowUpload.Name = "cboxSlowUpload";
             this.cboxSlowUpload.Size = new System.Drawing.Size(86, 17);
             this.cboxSlowUpload.TabIndex = 37;
@@ -1706,74 +1884,58 @@
             // cboxAutoUploadOnBINLoad
             // 
             this.cboxAutoUploadOnBINLoad.AutoSize = true;
-            this.cboxAutoUploadOnBINLoad.Location = new System.Drawing.Point(20, 99);
+            this.cboxAutoUploadOnBINLoad.Location = new System.Drawing.Point(20, 109);
             this.cboxAutoUploadOnBINLoad.Name = "cboxAutoUploadOnBINLoad";
-            this.cboxAutoUploadOnBINLoad.Size = new System.Drawing.Size(144, 17);
+            this.cboxAutoUploadOnBINLoad.Size = new System.Drawing.Size(85, 17);
             this.cboxAutoUploadOnBINLoad.TabIndex = 36;
-            this.cboxAutoUploadOnBINLoad.Text = "Auto Upload on BIN load";
+            this.cboxAutoUploadOnBINLoad.Text = "Auto Upload";
             this.cboxAutoUploadOnBINLoad.UseVisualStyleBackColor = true;
-            // 
-            // cboxAutoDasmBin
-            // 
-            this.cboxAutoDasmBin.AutoSize = true;
-            this.cboxAutoDasmBin.Location = new System.Drawing.Point(20, 81);
-            this.cboxAutoDasmBin.Name = "cboxAutoDasmBin";
-            this.cboxAutoDasmBin.Size = new System.Drawing.Size(126, 17);
-            this.cboxAutoDasmBin.TabIndex = 35;
-            this.cboxAutoDasmBin.Text = "Try to auto dasm BIN";
-            this.cboxAutoDasmBin.UseVisualStyleBackColor = true;
-            this.cboxAutoDasmBin.CheckedChanged += new System.EventHandler(this.cboxAutoDasmBin_CheckedChanged);
             // 
             // btnLoadBinToOstrich
             // 
-            this.btnLoadBinToOstrich.Location = new System.Drawing.Point(108, 17);
+            this.btnLoadBinToOstrich.Location = new System.Drawing.Point(55, 75);
             this.btnLoadBinToOstrich.Name = "btnLoadBinToOstrich";
             this.btnLoadBinToOstrich.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.btnLoadBinToOstrich.Size = new System.Drawing.Size(85, 35);
+            this.btnLoadBinToOstrich.Size = new System.Drawing.Size(85, 25);
             this.btnLoadBinToOstrich.TabIndex = 34;
-            this.btnLoadBinToOstrich.Text = "Reload BIN and Upload";
+            this.btnLoadBinToOstrich.Text = "Re-Upload";
             this.btnLoadBinToOstrich.UseVisualStyleBackColor = true;
             this.btnLoadBinToOstrich.Click += new System.EventHandler(this.btnLoadBinToOstrich_Click);
             // 
-            // tboxASMSimpleName
-            // 
-            this.tboxASMSimpleName.Location = new System.Drawing.Point(18, 157);
-            this.tboxASMSimpleName.Name = "tboxASMSimpleName";
-            this.tboxASMSimpleName.Size = new System.Drawing.Size(158, 20);
-            this.tboxASMSimpleName.TabIndex = 26;
-            // 
             // btnLoadASMFile
             // 
-            this.btnLoadASMFile.Location = new System.Drawing.Point(18, 135);
+            this.btnLoadASMFile.Location = new System.Drawing.Point(118, 19);
             this.btnLoadASMFile.Name = "btnLoadASMFile";
             this.btnLoadASMFile.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.btnLoadASMFile.Size = new System.Drawing.Size(159, 20);
+            this.btnLoadASMFile.Size = new System.Drawing.Size(69, 25);
             this.btnLoadASMFile.TabIndex = 25;
-            this.btnLoadASMFile.Text = "Load ASM File";
+            this.btnLoadASMFile.Text = "Load ASM";
             this.btnLoadASMFile.UseVisualStyleBackColor = true;
             this.btnLoadASMFile.Click += new System.EventHandler(this.btnLoadASMFile_Click);
             // 
-            // tboxBinSimpleName
+            // tboxOpenFileSimpleName
             // 
-            this.tboxBinSimpleName.Location = new System.Drawing.Point(19, 59);
-            this.tboxBinSimpleName.Name = "tboxBinSimpleName";
-            this.tboxBinSimpleName.Size = new System.Drawing.Size(158, 20);
-            this.tboxBinSimpleName.TabIndex = 28;
+            this.tboxOpenFileSimpleName.Location = new System.Drawing.Point(13, 49);
+            this.tboxOpenFileSimpleName.Name = "tboxOpenFileSimpleName";
+            this.tboxOpenFileSimpleName.Size = new System.Drawing.Size(174, 20);
+            this.tboxOpenFileSimpleName.TabIndex = 28;
             // 
             // btnLoadBinFile
             // 
-            this.btnLoadBinFile.Location = new System.Drawing.Point(18, 17);
+            this.btnLoadBinFile.Location = new System.Drawing.Point(14, 19);
             this.btnLoadBinFile.Name = "btnLoadBinFile";
             this.btnLoadBinFile.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.btnLoadBinFile.Size = new System.Drawing.Size(86, 36);
+            this.btnLoadBinFile.Size = new System.Drawing.Size(69, 25);
             this.btnLoadBinFile.TabIndex = 27;
-            this.btnLoadBinFile.Text = "Load BIN File";
+            this.btnLoadBinFile.Text = "Load BIN";
             this.btnLoadBinFile.UseVisualStyleBackColor = true;
             this.btnLoadBinFile.Click += new System.EventHandler(this.btnLoadBinFile_Click);
             // 
             // groupBox7
             // 
+            this.groupBox7.Controls.Add(this.btnDumpROM);
             this.groupBox7.Controls.Add(this.btnResetOstrich);
+            this.groupBox7.Controls.Add(this.nudVIDNumber);
             this.groupBox7.Controls.Add(this.label37);
             this.groupBox7.Controls.Add(this.progressBar2);
             this.groupBox7.Controls.Add(this.tboxOstrichSerialNumber);
@@ -1781,12 +1943,22 @@
             this.groupBox7.Controls.Add(this.label36);
             this.groupBox7.Controls.Add(this.btnOpenOstrichCom);
             this.groupBox7.Controls.Add(this.cboxOstrichComPortNumber);
-            this.groupBox7.Location = new System.Drawing.Point(3, 269);
+            this.groupBox7.Location = new System.Drawing.Point(3, 252);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(200, 132);
+            this.groupBox7.Size = new System.Drawing.Size(200, 159);
             this.groupBox7.TabIndex = 32;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Ostrich";
+            // 
+            // btnDumpROM
+            // 
+            this.btnDumpROM.Location = new System.Drawing.Point(37, 124);
+            this.btnDumpROM.Name = "btnDumpROM";
+            this.btnDumpROM.Size = new System.Drawing.Size(103, 23);
+            this.btnDumpROM.TabIndex = 31;
+            this.btnDumpROM.Text = "Dump ROM";
+            this.btnDumpROM.UseVisualStyleBackColor = true;
+            this.btnDumpROM.Click += new System.EventHandler(this.btnDumpROM_Click);
             // 
             // btnResetOstrich
             // 
@@ -1797,6 +1969,19 @@
             this.btnResetOstrich.Text = "RESET";
             this.btnResetOstrich.UseVisualStyleBackColor = true;
             this.btnResetOstrich.Click += new System.EventHandler(this.btnResetOstrich_Click);
+            // 
+            // nudVIDNumber
+            // 
+            this.nudVIDNumber.Hexadecimal = true;
+            this.nudVIDNumber.Location = new System.Drawing.Point(162, 98);
+            this.nudVIDNumber.Maximum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.nudVIDNumber.Name = "nudVIDNumber";
+            this.nudVIDNumber.Size = new System.Drawing.Size(30, 20);
+            this.nudVIDNumber.TabIndex = 30;
             // 
             // label37
             // 
@@ -1877,9 +2062,10 @@
             // 
             // groupBox12
             // 
+            this.groupBox12.Controls.Add(this.cboxRenameOnChange);
             this.groupBox12.Controls.Add(this.progressBar3);
             this.groupBox12.Controls.Add(this.btnSaveRenamedASM);
-            this.groupBox12.Controls.Add(this.btnRestore);
+            this.groupBox12.Controls.Add(this.btnSwap);
             this.groupBox12.Controls.Add(this.btnOpenXMLFile);
             this.groupBox12.Controls.Add(this.btnApplyRenamingMask);
             this.groupBox12.Controls.Add(this.cboxSaveTrace);
@@ -1890,7 +2076,17 @@
             this.groupBox12.Size = new System.Drawing.Size(729, 295);
             this.groupBox12.TabIndex = 7;
             this.groupBox12.TabStop = false;
-            this.groupBox12.Text = "Trace";
+            this.groupBox12.Text = "Trace and Renaming";
+            // 
+            // cboxRenameOnChange
+            // 
+            this.cboxRenameOnChange.AutoSize = true;
+            this.cboxRenameOnChange.Location = new System.Drawing.Point(107, 29);
+            this.cboxRenameOnChange.Name = "cboxRenameOnChange";
+            this.cboxRenameOnChange.Size = new System.Drawing.Size(148, 17);
+            this.cboxRenameOnChange.TabIndex = 33;
+            this.cboxRenameOnChange.Text = "Rename on dasm change";
+            this.cboxRenameOnChange.UseVisualStyleBackColor = true;
             // 
             // progressBar3
             // 
@@ -1909,15 +2105,15 @@
             this.btnSaveRenamedASM.UseVisualStyleBackColor = true;
             this.btnSaveRenamedASM.Click += new System.EventHandler(this.btnSaveRenamedASM_Click);
             // 
-            // btnRestore
+            // btnSwap
             // 
-            this.btnRestore.Location = new System.Drawing.Point(497, 10);
-            this.btnRestore.Name = "btnRestore";
-            this.btnRestore.Size = new System.Drawing.Size(85, 23);
-            this.btnRestore.TabIndex = 30;
-            this.btnRestore.Text = "Restore";
-            this.btnRestore.UseVisualStyleBackColor = true;
-            this.btnRestore.Click += new System.EventHandler(this.btnRestore_Click);
+            this.btnSwap.Location = new System.Drawing.Point(497, 10);
+            this.btnSwap.Name = "btnSwap";
+            this.btnSwap.Size = new System.Drawing.Size(85, 23);
+            this.btnSwap.TabIndex = 30;
+            this.btnSwap.Text = "Swap";
+            this.btnSwap.UseVisualStyleBackColor = true;
+            this.btnSwap.Click += new System.EventHandler(this.btnRestore_Click);
             // 
             // btnOpenXMLFile
             // 
@@ -1942,7 +2138,7 @@
             // cboxSaveTrace
             // 
             this.cboxSaveTrace.AutoSize = true;
-            this.cboxSaveTrace.Location = new System.Drawing.Point(107, 20);
+            this.cboxSaveTrace.Location = new System.Drawing.Point(107, 14);
             this.cboxSaveTrace.Name = "cboxSaveTrace";
             this.cboxSaveTrace.Size = new System.Drawing.Size(161, 17);
             this.cboxSaveTrace.TabIndex = 25;
@@ -1967,19 +2163,13 @@
             this.btnClearText.Name = "btnClearText";
             this.btnClearText.Size = new System.Drawing.Size(93, 29);
             this.btnClearText.TabIndex = 25;
-            this.btnClearText.Text = "Clear Text";
+            this.btnClearText.Text = "Clear Trace";
             this.btnClearText.UseVisualStyleBackColor = true;
             this.btnClearText.Click += new System.EventHandler(this.btnClearText_Click);
             // 
             // timer1
             // 
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
-            // 
-            // serialPort2
-            // 
-            this.serialPort2.BaudRate = 921600;
-            this.serialPort2.ReadTimeout = 250;
-            this.serialPort2.DataReceived += new System.IO.Ports.SerialDataReceivedEventHandler(this.serialport2_DataReceived);
             // 
             // toolTip1
             // 
@@ -1988,33 +2178,20 @@
             this.toolTip1.InitialDelay = 1;
             this.toolTip1.ReshowDelay = 0;
             // 
-            // toolTip2
+            // binMonitorTimer
             // 
-            this.toolTip2.AutomaticDelay = 1;
-            this.toolTip2.AutoPopDelay = 5000;
-            this.toolTip2.InitialDelay = 1;
-            this.toolTip2.ReshowDelay = 0;
+            this.binMonitorTimer.Interval = 1000;
+            this.binMonitorTimer.Tick += new System.EventHandler(this.binMonitorTimer_Tick);
             // 
-            // toolTip3
+            // cbox_QuietTimeOuts
             // 
-            this.toolTip3.AutomaticDelay = 1;
-            this.toolTip3.AutoPopDelay = 5000;
-            this.toolTip3.InitialDelay = 1;
-            this.toolTip3.ReshowDelay = 0;
-            // 
-            // toolTip4
-            // 
-            this.toolTip4.AutomaticDelay = 1;
-            this.toolTip4.AutoPopDelay = 5000;
-            this.toolTip4.InitialDelay = 1;
-            this.toolTip4.ReshowDelay = 0;
-            // 
-            // toolTip5
-            // 
-            this.toolTip5.AutomaticDelay = 1;
-            this.toolTip5.AutoPopDelay = 5000;
-            this.toolTip5.InitialDelay = 1;
-            this.toolTip5.ReshowDelay = 0;
+            this.cbox_QuietTimeOuts.AutoSize = true;
+            this.cbox_QuietTimeOuts.Location = new System.Drawing.Point(12, 221);
+            this.cbox_QuietTimeOuts.Name = "cbox_QuietTimeOuts";
+            this.cbox_QuietTimeOuts.Size = new System.Drawing.Size(99, 17);
+            this.cbox_QuietTimeOuts.TabIndex = 41;
+            this.cbox_QuietTimeOuts.Text = "Quiet TimeOuts";
+            this.cbox_QuietTimeOuts.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
@@ -2022,15 +2199,15 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.AutoScrollMinSize = new System.Drawing.Size(1150, 650);
-            this.ClientSize = new System.Drawing.Size(1334, 811);
+            this.ClientSize = new System.Drawing.Size(1334, 861);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
-            this.MaximumSize = new System.Drawing.Size(1350, 850);
+            this.MaximumSize = new System.Drawing.Size(1350, 950);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Honda ECU Debugger v3.0";
+            this.Text = "Honda ECU Debugger v3.4.0.2";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.Resize += new System.EventHandler(this.Form1_Resize);
@@ -2041,11 +2218,14 @@
             this.panel1.ResumeLayout(false);
             this.groupBox11.ResumeLayout(false);
             this.groupBox11.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.nudVIDNumber)).EndInit();
             this.groupBox9.ResumeLayout(false);
             this.groupBox9.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudROMCodeAddress)).EndInit();
             this.groupBox6.ResumeLayout(false);
+            this.groupBox14.ResumeLayout(false);
+            this.groupBox14.PerformLayout();
+            this.groupBox13.ResumeLayout(false);
+            this.groupBox13.PerformLayout();
             this.groupBox10.ResumeLayout(false);
             this.groupBox10.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudDebuggerLRB)).EndInit();
@@ -2065,6 +2245,7 @@
             this.groupBox8.PerformLayout();
             this.groupBox7.ResumeLayout(false);
             this.groupBox7.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudVIDNumber)).EndInit();
             this.groupBox12.ResumeLayout(false);
             this.groupBox12.PerformLayout();
             this.ResumeLayout(false);
@@ -2098,11 +2279,10 @@
         private System.Windows.Forms.Button btnRemoveBreakPoint;
         private System.Windows.Forms.Button btnStepFwd;
         private System.Windows.Forms.Button btnLoadASMFile;
-        private System.Windows.Forms.TextBox tboxBinSimpleName;
+        private System.Windows.Forms.TextBox tboxOpenFileSimpleName;
         private System.Windows.Forms.Button btnLoadBinFile;
-        private System.Windows.Forms.TextBox tboxASMSimpleName;
         private System.Windows.Forms.GroupBox groupBox3;
-        private System.Windows.Forms.TextBox tboxECUReturnAddress;
+        private System.Windows.Forms.TextBox tboxBreakPoint;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.Label label24;
@@ -2151,7 +2331,6 @@
         private System.Windows.Forms.TextBox tboxR5;
         private System.Windows.Forms.TextBox tboxR4;
         private System.Windows.Forms.RichTextBox rtboxASMFile;
-        private System.Windows.Forms.CheckBox chboxChecksum;
         private System.Windows.Forms.Button btnCloseCOMPort;
         private System.Windows.Forms.Button btnOpenCOMPort;
         private System.Windows.Forms.GroupBox groupBox2;
@@ -2179,9 +2358,7 @@
         private System.Windows.Forms.GroupBox groupBox9;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.NumericUpDown nudROMCodeAddress;
-        private System.Windows.Forms.CheckBox cboxAddCodeToRom;
         private System.Windows.Forms.ComboBox cmboxRomType;
-        private System.Windows.Forms.CheckBox cboxAutoDasmBin;
         private System.Windows.Forms.GroupBox groupBox10;
         private System.Windows.Forms.CheckBox cboxDebuggerLRB;
         private System.Windows.Forms.CheckBox cboxDebuggerIE;
@@ -2204,11 +2381,9 @@
         private System.Windows.Forms.Button btnClearText;
         private System.Windows.Forms.Button btnOpenXMLFile;
         private System.Windows.Forms.Button btnApplyRenamingMask;
-        private System.Windows.Forms.Button btnRestore;
+        private System.Windows.Forms.Button btnSwap;
         private System.Windows.Forms.Button btnSaveRenamedASM;
         private System.Windows.Forms.ToolTip toolTip1;
-        private System.Windows.Forms.ToolTip toolTip2;
-        private System.Windows.Forms.ToolTip toolTip3;
         private System.Windows.Forms.Label label39;
         private System.Windows.Forms.Label label35;
         private System.Windows.Forms.Label label34;
@@ -2219,15 +2394,15 @@
         private System.Windows.Forms.Label label40;
         private System.Windows.Forms.TextBox tboxPSWL4;
         private System.Windows.Forms.TextBox tboxDasmArgIgnore;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnRefreshDasm;
         private System.Windows.Forms.Label label43;
         private System.Windows.Forms.TextBox tboxDasmArgForce;
         private System.Windows.Forms.Label label42;
         private System.Windows.Forms.GroupBox groupBox11;
-        private System.Windows.Forms.Label lblLA12;
-        private System.Windows.Forms.TextBox tboxLA1_2;
-        private System.Windows.Forms.Label lblLA11;
-        private System.Windows.Forms.TextBox tboxLA1_1;
+        private System.Windows.Forms.Label lblXRAMbox2;
+        private System.Windows.Forms.TextBox tboxXRAM2;
+        private System.Windows.Forms.Label lblXRAMbox1;
+        private System.Windows.Forms.TextBox tboxXRAM1;
         private System.Windows.Forms.Label label44;
         private System.Windows.Forms.TextBox tboxStackPointer;
         private System.Windows.Forms.TextBox tboxStack5;
@@ -2236,11 +2411,9 @@
         private System.Windows.Forms.TextBox tboxStack2;
         private System.Windows.Forms.Label lblDPContents;
         private System.Windows.Forms.TextBox tboxDPconts;
-        private System.Windows.Forms.Label lblRomRam;
         private System.Windows.Forms.Label lblDPContsBinary;
         private System.Windows.Forms.Label lblXram2Binary;
         private System.Windows.Forms.Label lblXram1Binary;
-        private System.Windows.Forms.ToolTip toolTip4;
         private System.Windows.Forms.ProgressBar progressBar3;
         private System.Windows.Forms.Button btnFindAddress;
         private System.Windows.Forms.CheckBox cboxLockRamWatch;
@@ -2249,7 +2422,30 @@
         private System.Windows.Forms.Label lblRamWatchBinary;
         private System.Windows.Forms.Label lblRamWatch;
         private System.Windows.Forms.TextBox tboxRamWatch;
-        private System.Windows.Forms.ToolTip toolTip5;
+        private System.Windows.Forms.CheckBox cboxMonitorBin;
+        private System.Windows.Forms.Timer binMonitorTimer;
+        private System.Windows.Forms.GroupBox groupBox14;
+        private System.Windows.Forms.GroupBox groupBox13;
+        private System.Windows.Forms.Label label46;
+        private System.Windows.Forms.CheckBox cboxQuietCompiler;
+        private System.Windows.Forms.Label lblChangedBytes;
+        private System.Windows.Forms.CheckBox cboxRenameOnChange;
+        private System.Windows.Forms.Label label49;
+        private System.Windows.Forms.Label label48;
+        private System.Windows.Forms.TextBox tboxDPConts_ROM;
+        private System.Windows.Forms.Label label47;
+        private System.Windows.Forms.Label lblDebuggerCodeSize;
+        private System.Windows.Forms.Label label50;
+        private System.Windows.Forms.CheckBox cboxVCALReRoute;
+        private System.Windows.Forms.Label lblVCALbyteSize;
+        private System.Windows.Forms.Label lblSizeWithVCAL;
+        private System.Windows.Forms.Label lblVCALnumber;
+        private System.Windows.Forms.Label lblDebuggerPointerRam;
+        private System.Windows.Forms.Label lblDebuggerExtRegRam;
+        private System.Windows.Forms.Label label52;
+        private System.Windows.Forms.Label label51;
+        private System.Windows.Forms.Button btnDumpROM;
+        private System.Windows.Forms.CheckBox cbox_QuietTimeOuts;
     }
 }
 

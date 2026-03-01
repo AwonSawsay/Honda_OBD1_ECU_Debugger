@@ -19,7 +19,7 @@ namespace ECU_Debugger.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -57,6 +57,156 @@ namespace ECU_Debugger.Properties {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] CustomDebuggerCode {
+            get {
+                object obj = ResourceManager.GetObject("CustomDebuggerCode", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] CustomDebuggerCode_VCAL {
+            get {
+                object obj = ResourceManager.GetObject("CustomDebuggerCode_VCAL", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ;##################################################################################
+        ///;#############    ECU Debugger ROM Code                               #############
+        ///;#############                                                        #############
+        ///;#############    Uncomment the setup section for the target ECU      #############
+        ///;#############    Uncomment the target patch section as well          #############
+        ///;#############    use asm662 to compile this file                     #############
+        ///;# [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string Debugger_ROM_Code {
+            get {
+                return ResourceManager.GetString("Debugger_ROM_Code", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ;##################################################################################
+        ///;#############    ECU Debugger ROM Code                               #############
+        ///;#############                                                        #############
+        ///;#############    Uncomment the setup section for the target ECU      #############
+        ///;#############    Uncomment the target patch section as well          #############
+        ///;#############    use asm662 to compile this file                     #############
+        ///;# [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string Debugger_ROM_Code_VCAL {
+            get {
+                return ResourceManager.GetString("Debugger_ROM_Code_VCAL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] HTSDebuggerCode {
+            get {
+                object obj = ResourceManager.GetObject("HTSDebuggerCode", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] HTSDebuggerCode_VCAL {
+            get {
+                object obj = ResourceManager.GetObject("HTSDebuggerCode_VCAL", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] P13DebuggerCode {
+            get {
+                object obj = ResourceManager.GetObject("P13DebuggerCode", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] P13DebuggerCode_VCAL {
+            get {
+                object obj = ResourceManager.GetObject("P13DebuggerCode_VCAL", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] P13HTSDebuggerCode {
+            get {
+                object obj = ResourceManager.GetObject("P13HTSDebuggerCode", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] P13HTSDebuggerCode_VCAL {
+            get {
+                object obj = ResourceManager.GetObject("P13HTSDebuggerCode_VCAL", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] P30DebuggerCode {
+            get {
+                object obj = ResourceManager.GetObject("P30DebuggerCode", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] P30DebuggerCode_VCAL {
+            get {
+                object obj = ResourceManager.GetObject("P30DebuggerCode_VCAL", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] P72DebuggerCode {
+            get {
+                object obj = ResourceManager.GetObject("P72DebuggerCode", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] P72DebuggerCode_VCAL {
+            get {
+                object obj = ResourceManager.GetObject("P72DebuggerCode_VCAL", resourceCulture);
+                return ((byte[])(obj));
             }
         }
     }
